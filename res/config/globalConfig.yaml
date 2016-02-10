@@ -1,0 +1,13 @@
+format on next load: false
+logging:
+  level: 0
+  format: HH:mm:ss
+display:
+  size:
+    width: 800
+    height: 600
+  fullscreen: false
+font:
+  list:
+  - Courier-New
+  size: 512

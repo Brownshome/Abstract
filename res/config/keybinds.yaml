@@ -1,0 +1,14 @@
+format on next load: false
+game:
+  vsync: V
+  exit: ESCAPE
+  free mouse: F
+free camera:
+  up: SPACE
+  down: LSHIFT
+  forward: W
+  backward: S
+  left: A
+  right: D
+  slow: LMENU
+  stop: X
