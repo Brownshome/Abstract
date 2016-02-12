@@ -1,9 +1,11 @@
 package abstractgame.render;
 
+import javax.vecmath.Vector3f;
+
 import abstractgame.world.entity.Entity;
 
 public interface CameraHost extends Entity {
-	public default void setIsCamera(boolean isCamera) {
+	default void setIsCamera(boolean isCamera) {
 		if(isCamera != (Camera.host == this)) {
 			if(isCamera) {
 				Camera.setCameraHost(this);
@@ -11,6 +13,10 @@ public interface CameraHost extends Entity {
 				Camera.setCameraHost(null);
 			}
 		}
+	}
+	
+	default Vector3f getOffest() {
+		return new Vector3f();
 	}
 	
 	void onCameraUnset();

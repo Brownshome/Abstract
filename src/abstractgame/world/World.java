@@ -21,6 +21,6 @@ public class World extends TickableImpl {
 	public void tick() {
 		super.tick();
 		
-		physicsWorld.stepSimulation(Game.GAME_CLOCK.getDelta(), 6);
+		//physicsWorld.stepSimulation(Game.GAME_CLOCK.getDelta(), 6);
 	}
 }

@@ -13,7 +13,7 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.BufferUtils;
 
 public class Util {
-	private static final FloatBuffer MAT4_BUFFER = BufferUtils.createFloatBuffer(16);
+	private static final FloatBuffer MAT_BUFFER = BufferUtils.createFloatBuffer(16);
 	
 	public static String collect(List<String> list) {
 		if(list.isEmpty())
@@ -28,36 +28,34 @@ public class Util {
 		builder.deleteCharAt(builder.length() - 1);
 		return builder.toString();
 	}
-	
-	public static void rotate(Quat4f quat, Vector3f vec) {
-		Quat4f tmp = toQuat(vec);
-		tmp.mul(quat, tmp);
-		tmp.mulInverse(quat);
-		vec.set(tmp.x, tmp.y, tmp.z);
-	}
-	
-	public static Quat4f toQuat(Vector3f v) {
-		Quat4f q = new Quat4f();
-		//not using the constructor to avoid normalization
-		q.x = v.x;
-		q.y = v.y;
-		q.z = v.z;
-		return q;
-	}
 
 	/** Note that this method re-uses the buffer returned, so use the buffer
 	 * before the next call to this method */
 	public static FloatBuffer toFloatBuffer(Matrix4f m) {
-		MAT4_BUFFER.clear();
+		MAT_BUFFER.clear();
 		
-		MAT4_BUFFER.put(m.m00).put(m.m01).put(m.m02).put(m.m03);
-		MAT4_BUFFER.put(m.m10).put(m.m11).put(m.m12).put(m.m13);
-		MAT4_BUFFER.put(m.m20).put(m.m21).put(m.m22).put(m.m23);
-		MAT4_BUFFER.put(m.m30).put(m.m31).put(m.m32).put(m.m33);
+		MAT_BUFFER.put(m.m00).put(m.m01).put(m.m02).put(m.m03);
+		MAT_BUFFER.put(m.m10).put(m.m11).put(m.m12).put(m.m13);
+		MAT_BUFFER.put(m.m20).put(m.m21).put(m.m22).put(m.m23);
+		MAT_BUFFER.put(m.m30).put(m.m31).put(m.m32).put(m.m33);
 		
-		MAT4_BUFFER.flip();
+		MAT_BUFFER.flip();
 		
-		return MAT4_BUFFER;
+		return MAT_BUFFER;
+	}
+
+	/** Note that this method re-uses the buffer returned, so use the buffer
+	 * before the next call to this method */
+	public static FloatBuffer toFloatBuffer(Matrix3f m) {
+		MAT_BUFFER.clear();
+		
+		MAT_BUFFER.put(m.m00).put(m.m01).put(m.m02);
+		MAT_BUFFER.put(m.m10).put(m.m11).put(m.m12);
+		MAT_BUFFER.put(m.m20).put(m.m21).put(m.m22);
+		
+		MAT_BUFFER.flip();
+		
+		return MAT_BUFFER;
 	}
 
 	/** Makes a quat the transforms (0, 1, 0) to up and (0, 0, 1) to forward.

@@ -11,6 +11,8 @@ import static org.lwjgl.util.glu.GLU.gluErrorString;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -31,7 +33,7 @@ import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.KeyIO;
 import abstractgame.util.ApplicationException;
 
-public class Renderer {
+public abstract class Renderer {
 	public static final boolean CHECK_GL = true;
 	public static final int ID_CASHE_AMOUNT = 32;
 	public static final String SHADER_PATH = "res/shaders/";
@@ -41,12 +43,26 @@ public class Renderer {
 	private static IntBuffer buffers = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
 	private static IntBuffer vertArrays = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
 	private static IntBuffer textures = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
+	private static final List<Renderer> RENDERERS = new ArrayList<>();
+	
+	public abstract void initialize();
+	public abstract void render();
+	public abstract float getPass();
+	
+	public static void addRenderer(Renderer renderer) {
+		RENDERERS.add(renderer);
+		RENDERERS.sort((a, b) -> Float.compare(a.getPass(), b.getPass()));
+		renderer.initialize();
+	}
 	
 	public static void initializeRenderer() {
 		buffers.flip();
 		vertArrays.flip();
 		textures.flip();
-		TextRenderer.initialize();
+		
+		addRenderer(new TextRenderer());
+		addRenderer(new ModelRenderer());
+		
 		Camera.createProjectionMatrix();
 		
 		GL11.glClearColor(1, 1, 1, 1f);
@@ -66,10 +82,10 @@ public class Renderer {
 		if(Display.wasResized())
 			onResize();
 		
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		TextRenderer.render();
+		RENDERERS.forEach(r -> {
+			r.render();
+			checkGL("In " + r.getClass());
+		});
 	}
 	
 	static void onResize() {

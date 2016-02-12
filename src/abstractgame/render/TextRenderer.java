@@ -28,7 +28,7 @@ import abstractgame.io.image.Texture;
 import abstractgame.util.ApplicationException;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
-public class TextRenderer {
+public class TextRenderer extends Renderer {
 	static final int GRID_ROWS = 8;
 	static final int GRID_COLUMNS = 16;
 	static final String FONT_PATH = "path/";
@@ -55,7 +55,8 @@ public class TextRenderer {
 		GL20.glUniform1f(2, correctionScalar);
 	}
 	
-	public static void initialize() {
+	@Override
+	public void initialize() {
 		List<String> textureNames = Game.GLOBAL_CONFIG.getProperty("font.list", Arrays.asList("Courier-New"), List.class);
 		int textureSize = Game.GLOBAL_CONFIG.getProperty("font.size", 512);
 		//int mipmaps = 32 - Integer.numberOfLeadingZeros(textureSize);
@@ -176,7 +177,8 @@ public class TextRenderer {
 		length += data.remaining();
 	}
 
-	public static void render() {
+	@Override
+	public void render() {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
 		
 		if(buffer.size() == 0)
@@ -201,5 +203,10 @@ public class TextRenderer {
 
 		length = 0;
 		buffer.clear();
+	}
+
+	@Override
+	public float getPass() {
+		return 1;
 	}
 }

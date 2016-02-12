@@ -1,5 +1,8 @@
 package abstractgame;
 
+import java.util.concurrent.ExecutionException;
+
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
@@ -7,19 +10,30 @@ import javax.vecmath.Vector4f;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
+import com.bulletphysics.linearmath.QuaternionUtil;
+
 import abstractgame.io.FileIO;
 import abstractgame.io.config.ConfigFile;
+import abstractgame.io.model.Model;
+import abstractgame.io.model.ModelLoader;
 import abstractgame.io.user.Console;
 import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.KeyIO;
 import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
+import abstractgame.render.ModelRenderer;
+import abstractgame.render.RenderEntity;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.time.Clock;
+import abstractgame.util.ApplicationException;
 import abstractgame.world.World;
 
 public class Game {
+	/*  The final game will most probably have an IO thread, a phyiscs thread and a render thread
+	 *  atm the physics thread and render thread are the same
+	 */
+	
 	public static boolean close = false;
 	public static ConfigFile GLOBAL_CONFIG;
 	public static final Clock GAME_CLOCK = new Clock();
@@ -56,6 +70,7 @@ public class Game {
 
 	static void loop() {
 		TextRenderer.addString("public void main(String[] args) {\n\tthrow new ApplicationException(\"This code is not code\", \"TEST\");\n}", new Vector2f(-0.8f, 0.8f), 0.06f, new Vector4f(0, 0, 0, 1), 0);
+		TextRenderer.addString(Integer.toString(GAME_CLOCK.getTPS()), new Vector2f(-1f, 0.94f), 0.06f, new Vector4f(0, 0, 0, 1), 0);
 		
 		Renderer.tick();
 		KeyIO.tick();
@@ -75,8 +90,32 @@ public class Game {
 		KeyBinds.add(Game::close, Keyboard.KEY_ESCAPE, KeyIO.KEY_PRESSED, "game.exit");
 		
 		FreeCamera c = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
-		new World();
+		
+		World.currentWorld = new World();
 		World.currentWorld.onTick(c);
+		
+		Model corridor = null;
+		Model box = null;
+		try {
+			corridor = ModelLoader.loadModel("CorridorWithBarricade").get();
+			box = ModelLoader.loadModel("box").get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new ApplicationException(e, "DEBUG");
+		}
+		
+		Quat4f startingPosition = new Quat4f(0, 0, 0, 1);
+		Quat4f delta = new Quat4f();
+		QuaternionUtil.setRotation(delta, new Vector3f(0, 1, 0), 0.01f);
+		
+		RenderEntity entity = new RenderEntity(corridor, new Vector3f(0, 0, 5), startingPosition);
+		RenderEntity boxEntity = new RenderEntity(box, new Vector3f(), new Quat4f(0, 0, 0, 1));
+		
+		ModelRenderer.addDynamicModel(entity);
+		ModelRenderer.addDynamicModel(boxEntity);
+		
+		World.currentWorld.onTick(() -> {
+			startingPosition.mul(delta, startingPosition);
+		});
 		
 		KeyBinds.add(c::up, Keyboard.KEY_SPACE, KeyIO.KEY_DOWN, "free camera.up");
 		KeyBinds.add(c::down, Keyboard.KEY_LSHIFT, KeyIO.KEY_DOWN, "free camera.down");

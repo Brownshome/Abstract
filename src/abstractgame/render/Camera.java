@@ -6,8 +6,9 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.opengl.Display;
 
-import abstractgame.util.Util;
 import abstractgame.world.entity.Entity;
+
+import com.bulletphysics.linearmath.QuaternionUtil;
 
 public class Camera implements Entity {
 	public static final Camera INSTANCE = new Camera();
@@ -59,7 +60,7 @@ public class Camera implements Entity {
 		Quat4f quat = new Quat4f(host.getOrientation());
 		quat.inverse();
 		
-		Util.rotate(quat, vec);
+		QuaternionUtil.quatRotate(quat, vec, vec);
 		Matrix4f tmp = new Matrix4f(quat, vec, 1);
 		
 		viewMatrix.set(tmp);
@@ -106,7 +107,7 @@ public class Camera implements Entity {
 		Quat4f q = new Quat4f(host.getOrientation());
 		q.inverse();
 		
-		Util.rotate(q, v);
+		QuaternionUtil.quatRotate(q, v, v);
 	}
 	
 	/** To be used for changes in fov and initial creation */
