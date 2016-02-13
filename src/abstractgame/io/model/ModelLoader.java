@@ -5,10 +5,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 
+import abstractgame.Game;
 import abstractgame.io.FileIO;
 import abstractgame.util.ApplicationException;
 
@@ -85,5 +87,11 @@ public class ModelLoader {
 
 	private static Vector3f decodeVec3(String[] elements) {
 		return new Vector3f(Float.parseFloat(elements[1]), Float.parseFloat(elements[2]), Float.parseFloat(elements[3]));
+	}
+
+	public static Supplier<Float> preLoadAll() {
+		long start = Game.GAME_CLOCK.getFrame();
+		
+		return () -> Math.min((Game.GAME_CLOCK.getFrame() - start) / 1000f, 1);
 	}
 }

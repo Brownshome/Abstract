@@ -45,6 +45,8 @@ public abstract class Renderer {
 	private static IntBuffer textures = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
 	private static final List<Renderer> RENDERERS = new ArrayList<>();
 	
+	public static float corr;
+	
 	public abstract void initialize();
 	public abstract void render();
 	public abstract float getPass();
@@ -62,6 +64,7 @@ public abstract class Renderer {
 		
 		addRenderer(new TextRenderer());
 		addRenderer(new ModelRenderer());
+		addRenderer(new UIRenderer());
 		
 		Camera.createProjectionMatrix();
 		
@@ -84,7 +87,7 @@ public abstract class Renderer {
 		
 		RENDERERS.forEach(r -> {
 			r.render();
-			checkGL("In " + r.getClass());
+			checkGL("OpenGL error in " + r.getClass() + ": ");
 		});
 	}
 	

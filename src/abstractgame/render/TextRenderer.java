@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
-import javax.vecmath.Vector4f;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
@@ -37,8 +37,6 @@ public class TextRenderer extends Renderer {
 	static final int OFFSET = 32;
 	static final float MIN_SIZE = 0.04f;
 
-	static float correctionScalar;
-	
 	static int VAO;
 	static int VBO;
 	static int PROGRAM;
@@ -50,9 +48,9 @@ public class TextRenderer extends Renderer {
 	static int length;
 	
 	public static void updateCorrectionFactor() {
-		correctionScalar = (float) Display.getHeight() / Display.getWidth();
+		corr = (float) Display.getHeight() / Display.getWidth();
 		GL20.glUseProgram(PROGRAM);
-		GL20.glUniform1f(2, correctionScalar);
+		GL20.glUniform1f(2, corr);
 	}
 	
 	@Override
@@ -121,21 +119,21 @@ public class TextRenderer extends Renderer {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
-		correctionScalar = (float) Display.getHeight() / Display.getWidth();
+		corr = (float) Display.getHeight() / Display.getWidth();
 		
 		GL20.glUseProgram(PROGRAM);
 		GL20.glUniform1i(0, GRID_ROWS);
 		GL20.glUniform1i(1, GRID_COLUMNS);
-		GL20.glUniform1f(2, correctionScalar);
+		GL20.glUniform1f(2, corr);
 		
 		Renderer.checkGL();
 	}
 	
-	public static void addString(String text, Vector2f position, float size, Vector4f colour, int font) {
+	public static void addString(String text, Vector2f position, float size, Color4f colour, int font) {
 		addText(encode(text, position, size, colour, font));
 	}
 	
-	public static ByteBuffer encode(String text, Vector2f position, float size, Vector4f colour, int font) {
+	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font) {
 		ByteBuffer data = ByteBuffer.wrap(new byte[text.length() * BYTES_PER_LETTER]).order(ByteOrder.nativeOrder());
 
 		float x = (float) position.x;
@@ -164,7 +162,7 @@ public class TextRenderer extends Renderer {
 					data.putFloat(colour.w);
 					data.putFloat(size);
 				case ' ':
-					x += size * 0.75f * correctionScalar;
+					x += size * 0.75f * corr;
 			}
 		}
 		
@@ -208,5 +206,15 @@ public class TextRenderer extends Renderer {
 	@Override
 	public float getPass() {
 		return 1;
+	}
+
+	/** Returns the width of the text if it was at 1 size */
+	public static float getWidth(String text) {
+		return (text.length() * 2.75f - text.replace("\t", "").length() * 2) * corr;
+	}
+	
+	/** Returns the height of the text as if it was at 1 size */
+	public static float getHeight(String text) {
+		return text.length() - text.replace("\n", "").length() + 1;
 	}
 }
