@@ -8,8 +8,8 @@ layout(location = 0) in vec3 tex;
 layout(location = 1) in vec4 in_colour;
 layout(location = 2) in float inv_size;
 
-const float cutoff = 0.42;
-const float blur = 0.015;
+const float cutoff = 0.525;
+const float blur = 0.005;
 
 void main() {
 	float blur_calc = blur * inv_size;

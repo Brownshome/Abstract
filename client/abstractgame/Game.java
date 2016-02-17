@@ -1,8 +1,6 @@
 package abstractgame;
 
-import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
-import javax.vecmath.Vector4f;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -15,7 +13,6 @@ import abstractgame.io.user.KeyIO;
 import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
 import abstractgame.render.Renderer;
-import abstractgame.render.TextRenderer;
 import abstractgame.time.Clock;
 import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;

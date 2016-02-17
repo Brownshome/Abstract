@@ -18,8 +18,12 @@ public class ModelLoader {
 	static final String MODEL_DIR = "res/model/";
 	static final String OBJ_EXT = ".obj";
 	static final String MTL_EXT = ".mtl";
+	static boolean hasPreloaded = false;
 	
 	public static Future<Model> loadModel(String name) {
+		if(!hasPreloaded)
+			return null;
+		
 		return FileIO.IO_THREAD.submit(() -> {
 			List<String> lines = Files.readAllLines(Paths.get(MODEL_DIR + name + OBJ_EXT));
 			return decodeOBJ(lines);
@@ -87,11 +91,5 @@ public class ModelLoader {
 
 	private static Vector3f decodeVec3(String[] elements) {
 		return new Vector3f(Float.parseFloat(elements[1]), Float.parseFloat(elements[2]), Float.parseFloat(elements[3]));
-	}
-
-	public static Supplier<Float> preLoadAll() {
-		long start = Game.GAME_CLOCK.getFrame();
-		
-		return () -> Math.min((Game.GAME_CLOCK.getFrame() - start) / 1000f, 1);
 	}
 }
