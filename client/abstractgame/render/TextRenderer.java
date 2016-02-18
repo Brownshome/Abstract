@@ -13,7 +13,6 @@ import javax.vecmath.Vector2f;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
@@ -21,6 +20,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL42;
 
 import abstractgame.Game;
 import abstractgame.io.image.ImageIO;
@@ -32,7 +32,7 @@ public class TextRenderer extends Renderer {
 	static final int GRID_ROWS = 8;
 	static final int GRID_COLUMNS = 16;
 	static final String FONT_PATH = "path/";
-	
+
 	static final int BYTES_PER_LETTER = 1 + 1 + 8 + 16 + 4;
 	static final int OFFSET = 32;
 	static final float MIN_SIZE = 0.04f;
@@ -43,27 +43,26 @@ public class TextRenderer extends Renderer {
 	static int TEXTURE;
 
 	static ByteBuffer mapping;
-	
+
 	static ArrayList<ByteBuffer> buffer = new ArrayList<>();
 	static int length;
-	
+
 	public static void updateCorrectionFactor() {
 		corr = (float) Display.getHeight() / Display.getWidth();
 		GL20.glUseProgram(PROGRAM);
 		GL20.glUniform1f(2, corr);
 	}
-	
+
 	@Override
 	public void initialize() {
 		List<String> textureNames = Game.GLOBAL_CONFIG.getProperty("font.list", Arrays.asList("Courier-New"), List.class);
 		int textureSize = Game.GLOBAL_CONFIG.getProperty("font.size", 512);
-		//int mipmaps = 32 - Integer.numberOfLeadingZeros(textureSize);
-		
+
 		Future<Texture>[] textureFutures = (Future<Texture>[]) new Future<?>[textureNames.size()];
-		
+
 		for(int i = 0; i < textureFutures.length; i++)
 			textureFutures[i] = ImageIO.loadPNG(textureNames.get(i), Format.BGRA);
-		
+
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -79,60 +78,65 @@ public class TextRenderer extends Renderer {
 		GL20.glEnableVertexAttribArray(2); //position
 		GL20.glEnableVertexAttribArray(3); //colour
 		GL20.glEnableVertexAttribArray(4); //size
-		
+
 		final byte b = 1 + 1 + 4 * 7;
 		GL30.glVertexAttribIPointer(0, 1, GL11.GL_UNSIGNED_BYTE, b, 0);
 		GL30.glVertexAttribIPointer(1, 1, GL11.GL_UNSIGNED_BYTE, b, 1);
 		GL20.glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, b, 2);
 		GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, b, 10);
 		GL20.glVertexAttribPointer(4, 1, GL11.GL_FLOAT, false, b, 26);
-		
+
 		//create the program
 		int vertex = Renderer.createShader("text-vertex", GL20.GL_VERTEX_SHADER);
-		int fragment = Renderer.createShader("text-fragment", GL20.GL_FRAGMENT_SHADER);
 		int geometry = Renderer.createShader("text-geometry", GL32.GL_GEOMETRY_SHADER);
-		
-		PROGRAM = Renderer.createProgram(vertex, geometry, fragment);
 
+		PROGRAM = Renderer.createProgram(vertex, geometry, alphaTestShader);
+
+		Renderer.checkGL();
+		
 		//load the texture file
 		TEXTURE = Renderer.getTextureID();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TEXTURE);
+		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
 		
-		if(textureFutures.length == 0)
-			throw new ApplicationException("No fonts were specified", "RENDERER");
+		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(textureSize), GL30.GL_R8, textureSize, textureSize, textureNames.size());
 		
-		Texture texture;
-		try {
-			texture = ImageIO.loadPNG("Courier-New", Format.BGRA).get();
-		} catch (InterruptedException | ExecutionException e) {
-			throw new ApplicationException(e, "IMAGEIO");
+		int layer = 0;
+		for(String textureName : textureNames) {
+			Texture texture;
+			try {
+				texture = ImageIO.loadPNG(textureName, Format.BGRA).get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new ApplicationException(e, "IMAGEIO");
+			}
+
+			if(texture.height != textureSize || texture.width != textureSize)
+				throw new ApplicationException("Image file " + textureName + " is the wrong resolution.", "IMAGEIO");
+				
+			GL12.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer++, textureSize, textureSize, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, texture.data);
 		}
+
+		Renderer.checkGL();
 		
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RED, textureSize, textureSize, 0, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, texture.data);
-		GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
-		
-		float aniso = GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D_ARRAY);
 
 		corr = (float) Display.getHeight() / Display.getWidth();
-		
+
 		GL20.glUseProgram(PROGRAM);
 		GL20.glUniform1i(0, GRID_ROWS);
 		GL20.glUniform1i(1, GRID_COLUMNS);
 		GL20.glUniform1f(2, corr);
-		
+
 		Renderer.checkGL();
 	}
-	
+
 	public static void addString(String text, Vector2f position, float size, Color4f colour, int font) {
 		addText(encode(text, position, size, colour, font));
 	}
-	
+
 	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font) {
 		ByteBuffer data = ByteBuffer.wrap(new byte[text.length() * BYTES_PER_LETTER]).order(ByteOrder.nativeOrder());
 
@@ -142,30 +146,30 @@ public class TextRenderer extends Renderer {
 
 		for(int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
-			
+
 			switch(c) {
-				case '\n':
-					x = start;
-					y -= size;
-					break;
-				case '\t':
-					x += size * 2f;
-					break;
-				default:
-					data.put((byte) font);
-					data.put((byte) (c - OFFSET));
-					data.putFloat(x);
-					data.putFloat(y);
-					data.putFloat(colour.x);
-					data.putFloat(colour.y);
-					data.putFloat(colour.z);
-					data.putFloat(colour.w);
-					data.putFloat(size);
-				case ' ':
-					x += size * 0.75f * corr;
+			case '\n':
+				x = start;
+				y -= size;
+				break;
+			case '\t':
+				x += size * 2f;
+				break;
+			default:
+				data.put((byte) font);
+				data.put((byte) (c - OFFSET));
+				data.putFloat(x);
+				data.putFloat(y);
+				data.putFloat(colour.x);
+				data.putFloat(colour.y);
+				data.putFloat(colour.z);
+				data.putFloat(colour.w);
+				data.putFloat(size);
+			case ' ':
+				x += size * 0.75f * corr;
 			}
 		}
-		
+
 		data.flip();
 		return data;
 	}
@@ -177,26 +181,27 @@ public class TextRenderer extends Renderer {
 
 	@Override
 	public void render() {
+		GL30.glBindVertexArray(VAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
-		
+
 		if(buffer.size() == 0)
 			return;
 
 		ByteBuffer b = BufferUtils.createByteBuffer(length);
-		
+
 		for(ByteBuffer data : buffer)
 			b.put(data);
-		
+
 		b.flip();
-		
+
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, b, GL15.GL_STATIC_DRAW);
 
 		GL20.glUseProgram(PROGRAM);
-		GL30.glBindVertexArray(VAO);
-		
+
+		//TODO don't call this every frame
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TEXTURE);
-		
+		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
+
 		GL11.glDrawArrays(GL11.GL_POINTS, 0, length / BYTES_PER_LETTER);
 
 		length = 0;
@@ -212,7 +217,7 @@ public class TextRenderer extends Renderer {
 	public static float getWidth(String text) {
 		return (text.length() * 2.75f - text.replace("\t", "").length() * 2) * corr;
 	}
-	
+
 	/** Returns the height of the text as if it was at 1 size */
 	public static float getHeight(String text) {
 		return text.length() - text.replace("\n", "").length() + 1;

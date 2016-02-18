@@ -1,7 +1,7 @@
 package abstractgame.util;
 
 public class ApplicationException extends RuntimeException {
-	public String section;
+	public String section = "UNKNOWN";
 	
 	public ApplicationException(String message, Throwable throwable, String section) {
 		super(message, throwable);

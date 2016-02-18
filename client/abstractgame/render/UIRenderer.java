@@ -19,8 +19,8 @@ public class UIRenderer extends Renderer {
 	public static final int FLOATS_PER_VERTEX = 7;
 	
 	static int flatProgram;
-	static int VBO;
-	static int VAO;
+	static int flatVBO;
+	static int flatVAO;
 	
 	public static void addElement(UIElement element) {
 		uiElements.add(element);
@@ -36,11 +36,11 @@ public class UIRenderer extends Renderer {
 		int fragment = Renderer.createShader("ui-fragment", GL20.GL_FRAGMENT_SHADER);
 		flatProgram = Renderer.createProgram(vertex, fragment);
 		
-		VAO = Renderer.getVertexArrayID();
-		VBO = Renderer.getVertexArrayID();
+		flatVAO = Renderer.getVertexArrayID();
+		flatVBO = Renderer.getVertexArrayID();
 		
-		GL30.glBindVertexArray(VAO);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
+		GL30.glBindVertexArray(flatVAO);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, flatVBO);
 		
 		GL20.glEnableVertexAttribArray(0); //position
 		GL20.glEnableVertexAttribArray(1); //colour
@@ -72,11 +72,11 @@ public class UIRenderer extends Renderer {
 		trianglesLength /= FLOATS_PER_VERTEX;
 		
 		buffer.flip();
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, flatVBO);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
 		
 		GL20.glUseProgram(flatProgram);
-		GL30.glBindVertexArray(VAO);
+		GL30.glBindVertexArray(flatVAO);
 		
 		//lines
 		GL11.glDrawArrays(GL11.GL_LINES, 0, linesLength);

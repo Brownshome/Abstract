@@ -10,4 +10,9 @@ display:
 font:
   list:
   - Courier-New
+  - Fixedsys
   size: 512
+icon:
+  list:
+  - Settings
+  size: 128

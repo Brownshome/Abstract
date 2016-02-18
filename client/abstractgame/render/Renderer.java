@@ -46,6 +46,7 @@ public abstract class Renderer {
 	private static final List<Renderer> RENDERERS = new ArrayList<>();
 	
 	public static float corr;
+	public static int alphaTestShader;
 	
 	public abstract void initialize();
 	public abstract void render();
@@ -62,9 +63,12 @@ public abstract class Renderer {
 		vertArrays.flip();
 		textures.flip();
 		
+		alphaTestShader = Renderer.createShader("alphatest-fragment", GL20.GL_FRAGMENT_SHADER);
+		
 		addRenderer(new TextRenderer());
 		addRenderer(new ModelRenderer());
 		addRenderer(new UIRenderer());
+		addRenderer(new IconRenderer());
 		
 		Camera.createProjectionMatrix();
 		
@@ -197,5 +201,9 @@ public abstract class Renderer {
 		}
 
 		return vertArrays.get();
+	}
+	
+	public static int getNumberOfMipmaps(int res) {
+		return 32 - Integer.numberOfLeadingZeros(res);
 	}
 }

@@ -6,9 +6,11 @@ import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
 import abstractgame.Game;
+import abstractgame.render.IconRenderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
 import abstractgame.ui.elements.ProgressBar;
+import abstractgame.ui.elements.QuadIcon;
 
 public class TitleScreen extends Screen {
 	public static final TitleScreen INSTANCE = new TitleScreen();
@@ -16,6 +18,7 @@ public class TitleScreen extends Screen {
 	static boolean done = false;
 	
 	ProgressBar bar;
+	QuadIcon icon;
 	
 	public void initialize() {
 		bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar());
@@ -41,7 +44,7 @@ public class TitleScreen extends Screen {
 		long start = Game.GAME_CLOCK.getFrame();
 		
 		return () -> {
-			float v = Math.min((Game.GAME_CLOCK.getFrame() - start) / 1200f, 1);
+			float v = Math.min((Game.GAME_CLOCK.getFrame() - start) / 120f, 1);
 			if(v == 1)
 				done = true;
 			return v;
