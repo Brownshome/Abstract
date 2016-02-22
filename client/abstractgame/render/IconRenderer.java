@@ -48,8 +48,8 @@ public class IconRenderer extends Renderer {
 		for(int i = 0; i < textureFutures.length; i++)
 			textureFutures[i] = ImageIO.loadPNG(icons.get(i), Format.BGRA);
 
-		VBO = Renderer.getBufferID();
-		VAO = Renderer.getVertexArrayID();
+		VBO = GL15.glGenBuffers();
+		VAO = GL30.glGenVertexArrays();
 		
 		GL30.glBindVertexArray(VAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
@@ -67,7 +67,7 @@ public class IconRenderer extends Renderer {
 		int vertexShader = Renderer.createShader("icon-vertex", GL20.GL_VERTEX_SHADER);
 		ICON_PROGRAM = Renderer.createProgram(vertexShader, Renderer.alphaTestShader);
 		
-		TEXTURE = Renderer.getTextureID();
+		TEXTURE = GL11.glGenTextures();
 		
 		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
 		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(iconRes), GL30.GL_R8, iconRes, iconRes, icons.size());

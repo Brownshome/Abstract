@@ -141,9 +141,9 @@ public class Model {
 	}
 
 	void uploadBuffers() {
-		VBO = Renderer.getBufferID();
-		VAO = Renderer.getVertexArrayID();
-		indexs = Renderer.getBufferID();
+		VBO = GL15.glGenBuffers();
+		VAO = GL30.glGenVertexArrays();
+		indexs = GL15.glGenBuffers();
 
 		GL30.glBindVertexArray(VAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);

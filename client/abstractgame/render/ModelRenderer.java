@@ -55,9 +55,9 @@ public class ModelRenderer extends Renderer {
 		int fragmentShader = Renderer.createShader("model-fragment", GL20.GL_FRAGMENT_SHADER);
 		modelProgram = Renderer.createProgram(vertexShader, fragmentShader);
 		
-		staticMeshVAO = Renderer.getVertexArrayID();
-		staticMeshVBO = Renderer.getBufferID();
-		staticIndexBuffer = Renderer.getBufferID();
+		staticMeshVAO = GL30.glGenVertexArrays();
+		staticMeshVBO = GL15.glGenBuffers();
+		staticIndexBuffer = GL15.glGenBuffers();
 		
 		GL30.glBindVertexArray(staticMeshVAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, staticMeshVBO);

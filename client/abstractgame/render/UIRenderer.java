@@ -36,8 +36,8 @@ public class UIRenderer extends Renderer {
 		int fragment = Renderer.createShader("ui-fragment", GL20.GL_FRAGMENT_SHADER);
 		flatProgram = Renderer.createProgram(vertex, fragment);
 		
-		flatVAO = Renderer.getVertexArrayID();
-		flatVBO = Renderer.getVertexArrayID();
+		flatVAO = GL30.glGenVertexArrays();
+		flatVBO = GL30.glGenVertexArrays();
 		
 		GL30.glBindVertexArray(flatVAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, flatVBO);

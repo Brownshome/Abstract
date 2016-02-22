@@ -34,7 +34,7 @@ public class TextRenderer extends Renderer {
 	static final int GRID_COLUMNS = 16;
 	static final String FONT_PATH = "path/";
 
-	static final int BYTES_PER_LETTER = 1 + 1 + 8 + 16 + 4;
+	static final int BYTES_PER_LETTER = 1 + 1 + 8 + 16 + 4 + 4;
 	static final int OFFSET = 32;
 	static final float MIN_SIZE = 0.04f;
 
@@ -68,10 +68,10 @@ public class TextRenderer extends Renderer {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 		//create the buffers
-		VAO = Renderer.getVertexArrayID();
+		VAO = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(VAO);
 
-		VBO = Renderer.getBufferID();
+		VBO = GL15.glGenBuffers();
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
 
 		GL20.glEnableVertexAttribArray(0); //image number
@@ -79,13 +79,15 @@ public class TextRenderer extends Renderer {
 		GL20.glEnableVertexAttribArray(2); //position
 		GL20.glEnableVertexAttribArray(3); //colour
 		GL20.glEnableVertexAttribArray(4); //size
+		GL20.glEnableVertexAttribArray(5);
 
-		final byte b = 1 + 1 + 4 * 7;
+		final byte b = 1 + 1 + 4 * 8;
 		GL30.glVertexAttribIPointer(0, 1, GL11.GL_UNSIGNED_BYTE, b, 0);
 		GL30.glVertexAttribIPointer(1, 1, GL11.GL_UNSIGNED_BYTE, b, 1);
 		GL20.glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, b, 2);
 		GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, b, 10);
 		GL20.glVertexAttribPointer(4, 1, GL11.GL_FLOAT, false, b, 26);
+		GL30.glVertexAttribIPointer(5, 1, GL11.GL_UNSIGNED_INT, b, 30);
 
 		//create the program
 		int vertex = Renderer.createShader("text-vertex", GL20.GL_VERTEX_SHADER);
@@ -96,7 +98,7 @@ public class TextRenderer extends Renderer {
 		Renderer.checkGL();
 		
 		//load the texture file
-		TEXTURE = Renderer.getTextureID();
+		TEXTURE = GL11.glGenTextures();
 		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
 		
 		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(textureSize), GL30.GL_R8, textureSize, textureSize, textureNames.size());
@@ -134,11 +136,15 @@ public class TextRenderer extends Renderer {
 		Renderer.checkGL();
 	}
 
-	public static void addString(String text, Vector2f position, float size, Color4f colour, int font) {
-		addText(encode(text, position, size, colour, font));
+	public static void addString(String text, Vector2f position, float size, Color4f colour, int font, int ID) {
+		addText(encode(text, position, size, colour, font, ID));
 	}
 
-	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font) {
+	public static void addString(String text, Vector2f position, float size, Color4f colour, int font) {
+		addString(text, position, size, colour, font, 256); //256 maps to -1 as IDs are stored internally as bytes
+	}
+	
+	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font, int ID) {
 		ByteBuffer data = ByteBuffer.wrap(new byte[text.length() * BYTES_PER_LETTER]).order(ByteOrder.nativeOrder());
 
 		float x = (float) position.x;
@@ -171,6 +177,7 @@ public class TextRenderer extends Renderer {
 				data.putFloat(colour.z);
 				data.putFloat(colour.w);
 				data.putFloat(size);
+				data.putFloat(Renderer.encodeIDAsFloat(ID));
 			case ' ':
 				x += size * 0.75f * corr;
 			}

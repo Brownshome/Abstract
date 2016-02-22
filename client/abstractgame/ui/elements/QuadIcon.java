@@ -5,6 +5,8 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.Renderer;
+
 public class QuadIcon extends Icon {
 	public int icon;
 	public Vector2f from;
@@ -22,35 +24,37 @@ public class QuadIcon extends Icon {
 	
 	@Override
 	public void fillBuffer(FloatBuffer buffer) {
+		float encodedID = Renderer.encodeIDAsFloat(ID);
+		
 		buffer.put(from.x).put(from.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
 		buffer.put(0).put(1).put(icon);
-		buffer.put(Float.intBitsToFloat(ID));
+		buffer.put(encodedID);
 		
 		buffer.put(from.x).put(to.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
 		buffer.put(0).put(0).put(icon);
-		buffer.put(Float.intBitsToFloat(ID));
+		buffer.put(encodedID);
 		
 		buffer.put(to.x).put(to.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
 		buffer.put(1).put(0).put(icon);
-		buffer.put(Float.intBitsToFloat(ID));
+		buffer.put(encodedID);
 		
 		buffer.put(from.x).put(from.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
 		buffer.put(0).put(1).put(icon);
-		buffer.put(Float.intBitsToFloat(ID));
+		buffer.put(encodedID);
 		
 		buffer.put(to.x).put(to.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
 		buffer.put(1).put(0).put(icon);
-		buffer.put(Float.intBitsToFloat(ID));
+		buffer.put(encodedID);
 		
 		buffer.put(to.x).put(from.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
 		buffer.put(1).put(1).put(icon);
-		buffer.put(Float.intBitsToFloat(ID));
+		buffer.put(encodedID);
 	}
 
 	@Override
