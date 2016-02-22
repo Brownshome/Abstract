@@ -25,6 +25,7 @@ import org.lwjgl.opengl.GL42;
 import abstractgame.Game;
 import abstractgame.io.image.ImageIO;
 import abstractgame.io.image.Texture;
+import abstractgame.io.user.Console;
 import abstractgame.util.ApplicationException;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
@@ -146,7 +147,12 @@ public class TextRenderer extends Renderer {
 
 		for(int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
-
+			
+			if(c > 128 + OFFSET) {
+				Console.warn(c + " is not within the character range displayable.", "TEXT RENDERER");
+				c = ' ';
+			}
+				
 			switch(c) {
 			case '\n':
 				x = start;

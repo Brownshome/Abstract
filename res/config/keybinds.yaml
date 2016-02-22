@@ -12,3 +12,5 @@ free camera:
   right: D
   slow: LMENU
   stop: X
+debug:
+  toggle debug display: F3

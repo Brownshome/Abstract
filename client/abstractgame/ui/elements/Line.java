@@ -11,17 +11,19 @@ public class Line extends UIElement {
 	Vector2f from;
 	Vector2f to;
 	Color4f colour;
+	int ID;
 	float layer;
 	
-	public Line(Vector2f from, Vector2f to, float layer, Color4f colour) {
+	public Line(Vector2f from, Vector2f to, float layer, Color4f colour, int ID) {
 		this.from = from;
 		this.to = to;
 		this.layer = layer;
 		this.colour = colour;
+		this.ID = ID;
 	}
 	
 	public Line(Vector2f from, Vector2f to, Color4f colour) {
-		this(from, to, 0, colour);
+		this(from, to, 0, colour, 0);
 	}
 
 	@Override
@@ -38,6 +40,7 @@ public class Line extends UIElement {
 		buffer.put(colour.y);
 		buffer.put(colour.z);
 		buffer.put(colour.w);
+		buffer.put(Float.intBitsToFloat(ID));
 
 		buffer.put(to.x);
 		buffer.put(to.y);
@@ -46,5 +49,11 @@ public class Line extends UIElement {
 		buffer.put(colour.y);
 		buffer.put(colour.z);
 		buffer.put(colour.w);
+		buffer.put(Float.intBitsToFloat(ID));
+	}
+
+	@Override
+	public void setID(int ID) {
+		this.ID = ID;
 	}
 }

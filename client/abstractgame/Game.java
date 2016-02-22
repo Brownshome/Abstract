@@ -14,6 +14,7 @@ import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
 import abstractgame.render.Renderer;
 import abstractgame.time.Clock;
+import abstractgame.ui.DebugScreen;
 import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;
 import abstractgame.world.World;
@@ -91,7 +92,8 @@ public class Game {
 		KeyBinds.add(() -> c.slow = false, Keyboard.KEY_LMENU, KeyIO.KEY_UP, "free camera.slow");
 		KeyBinds.add(c::stop, Keyboard.KEY_X, KeyIO.KEY_PRESSED, "free camera.stop");
 		KeyBinds.add(() -> KeyIO.holdMouse(!KeyIO.holdMouse), Keyboard.KEY_F, KeyIO.KEY_PRESSED, "game.free mouse");
-
+		KeyBinds.add(DebugScreen::toggle, Keyboard.KEY_F3, KeyIO.KEY_PRESSED, "debug.toggle debug display");
+		
 		Camera.setCameraHost(c);
 		
 		Screen.setScreen(TitleScreen.INSTANCE);

@@ -8,10 +8,12 @@ layout(location = 1) in int character;
 layout(location = 2) in vec2 position;
 layout(location = 3) in vec4 colour;
 layout(location = 4) in float size;
+layout(location = 5) in uint in_id;
 
 layout(location = 0) out vec3 texturePos;
 layout(location = 1) out vec4 out_colour;
 layout(location = 2) out float out_size;
+layout(location = 3) out uint out_id;
 
 void main() {
 	gl_Position = vec4(position, 0, 1);
@@ -20,4 +22,5 @@ void main() {
 	texturePos.y /= rows;
 	out_colour = colour;
 	out_size = size;
+	out_id = in_id;
 }

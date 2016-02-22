@@ -1,14 +1,13 @@
 package abstractgame.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import abstractgame.world.Tickable;
 import abstractgame.world.TickableImpl;
 
 public abstract class Screen extends TickableImpl {
 	static Screen baseScreen;
-	static List<Screen> overlays = new ArrayList<>();
+	static Set<Screen> overlays = new HashSet<>();
 	
 	public void initialize() {}
 	public void destroy() {}
@@ -29,5 +28,17 @@ public abstract class Screen extends TickableImpl {
 	
 	public static void tickScreen() {
 		baseScreen.tick();
+		
+		overlays.forEach(Screen::tick);
+	}
+	
+	public static void addOverlay(Screen overlay) {
+		overlays.add(overlay);
+		overlay.initialize();
+	}
+	
+	public static void removeOverlay(Screen overlay) {
+		overlays.remove(overlay);
+		overlay.destroy();
 	}
 }

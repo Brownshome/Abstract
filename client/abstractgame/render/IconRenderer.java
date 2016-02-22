@@ -57,10 +57,12 @@ public class IconRenderer extends Renderer {
 		GL20.glEnableVertexAttribArray(0); //position
 		GL20.glEnableVertexAttribArray(1); //colour
 		GL20.glEnableVertexAttribArray(2); //texture coord (3D)
+		GL20.glEnableVertexAttribArray(3); //ID
 		
-		GL20.glVertexAttribPointer(0, 2, GL11.GL_FLOAT, false, 36, 0);
-		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 36, 8);
-		GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 36, 24);
+		GL20.glVertexAttribPointer(0, 2, GL11.GL_FLOAT, false, 40, 0);
+		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 40, 8);
+		GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 40, 24);
+		GL30.glVertexAttribIPointer(3, 1, GL11.GL_UNSIGNED_INT, 40, 36);
 		
 		int vertexShader = Renderer.createShader("icon-vertex", GL20.GL_VERTEX_SHADER);
 		ICON_PROGRAM = Renderer.createProgram(vertexShader, Renderer.alphaTestShader);

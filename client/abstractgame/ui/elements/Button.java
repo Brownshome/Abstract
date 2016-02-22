@@ -21,21 +21,23 @@ public class Button extends UIElement {
 	Vector2f to;
 	String text;
 	float size;
+	int ID;
 	Emphasis emphasis;
 	
 	Box box;
 	Quad shadowQuad;
 	Quad filledQuad;
 	
-	public Button(Vector2f from, Vector2f to, String text, float size, Emphasis emphasis) {
+	public Button(Vector2f from, Vector2f to, String text, float size, Emphasis emphasis, int ID) {
 		this.from  = from;
 		this.to = to;
 		this.text = text;
 		this.emphasis = emphasis;
+		this.ID = ID;
 		this.size = size;
-		box = new Box(from, to, 0f, new Color4f(.5f, .5f, .5f, 1));
-		shadowQuad = new Quad(new Vector2f(from.x + 0.01f * Renderer.corr, from.y - 0.01f), new Vector2f(to.x + 0.01f * Renderer.corr, to.y - 0.01f), 0.3f, new Color4f(0f, 0f, 0f, 1));
-		filledQuad = new Quad(from, to, 0.1f, new Color4f(1, 1, 1, 1));
+		box = new Box(from, to, 0f, new Color4f(.5f, .5f, .5f, 1), ID);
+		shadowQuad = new Quad(new Vector2f(from.x + 0.01f * Renderer.corr, from.y - 0.01f), new Vector2f(to.x + 0.01f * Renderer.corr, to.y - 0.01f), 0.3f, new Color4f(0f, 0f, 0f, 1), ID);
+		filledQuad = new Quad(from, to, 0.1f, new Color4f(1, 1, 1, 1), ID);
 	}
 	
 	public int getLinesLength() {  
@@ -73,10 +75,18 @@ public class Button extends UIElement {
 		position.y -= textHeight * finalSize * 1.15f;
 		position.scale(0.5f);
 		
-		TextRenderer.addString(text, position, finalSize, getColour(), 0);
+		TextRenderer.addString(text, position, finalSize, getColour(), ID);
 	}
 
 	private Color4f getColour() {
 		return new Color4f(0, 0, 0, 1);
+	}
+
+	@Override
+	public void setID(int ID) {
+		this.ID = ID;
+		box.setID(ID);
+		shadowQuad.setID(ID);
+		filledQuad.setID(ID);
 	}
 }

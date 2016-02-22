@@ -50,7 +50,7 @@ public class Clock {
 
 	/** averaged over 1 seconds (in seconds) */
 	public double getAverageDelta() {
-		return RES / tps;
+		return 1.0 / tps;
 	}
 
 	public int getTPS() {

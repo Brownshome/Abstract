@@ -16,7 +16,7 @@ import abstractgame.ui.elements.UIElement;
 public class UIRenderer extends Renderer {
 	static Collection<UIElement> uiElements = new HashSet<>();
 	
-	public static final int FLOATS_PER_VERTEX = 7;
+	public static final int FLOATS_PER_VERTEX = 8;
 	
 	static int flatProgram;
 	static int flatVBO;
@@ -44,9 +44,11 @@ public class UIRenderer extends Renderer {
 		
 		GL20.glEnableVertexAttribArray(0); //position
 		GL20.glEnableVertexAttribArray(1); //colour
+		GL20.glEnableVertexAttribArray(2); //ID
 		
-		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 28, 0);
-		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 28, 12);
+		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 32, 0);
+		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 32, 12);
+		GL30.glVertexAttribIPointer(2, 1, GL11.GL_UNSIGNED_INT, 32, 28);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ public class TitleScreen extends Screen {
 	QuadIcon icon;
 	
 	public void initialize() {
-		bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar());
+		bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar(), 0);
 		UIRenderer.addElement(bar);
 	}
 	

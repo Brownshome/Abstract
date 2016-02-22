@@ -14,16 +14,25 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Color4f;
+import javax.vecmath.Vector2f;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.ARBDebugOutput;
+import org.lwjgl.opengl.ARBDebugOutputCallback;
+import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL42;
+import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.PixelFormat;
 
 import abstractgame.Game;
@@ -43,7 +52,13 @@ public abstract class Renderer {
 	private static IntBuffer buffers = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
 	private static IntBuffer vertArrays = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
 	private static IntBuffer textures = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
+	private static IntBuffer framebuffers = BufferUtils.createIntBuffer(ID_CASHE_AMOUNT);
+	
 	private static final List<Renderer> RENDERERS = new ArrayList<>();
+	
+	/** Don't edit this unless you know what you are doing */
+	public static int MAIN_FRAMEBUFFER;
+	public static int hoveredID = -1;
 	
 	public static float corr;
 	public static int alphaTestShader;
@@ -62,6 +77,7 @@ public abstract class Renderer {
 		buffers.flip();
 		vertArrays.flip();
 		textures.flip();
+		framebuffers.flip();
 		
 		alphaTestShader = Renderer.createShader("alphatest-fragment", GL20.GL_FRAGMENT_SHADER);
 		
@@ -80,19 +96,70 @@ public abstract class Renderer {
 		GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
+		createFramebuffer();
+		
 		KeyBinds.add(Renderer::toggleVsync, Keyboard.KEY_V, KeyIO.KEY_PRESSED, "game.vsync");
+		checkGL();
 	}
-
+	
+	private static void createFramebuffer() {
+		MAIN_FRAMEBUFFER = getFramebufferID();
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, MAIN_FRAMEBUFFER);
+		
+		int mainTexture = Renderer.getTextureID();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, mainTexture);
+		GL42.glTexStorage2D(GL11.GL_TEXTURE_2D, 1, GL11.GL_RGBA16, Display.getWidth(), Display.getHeight());
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, mainTexture, 0);
+		
+		int IDTexture = Renderer.getTextureID();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, IDTexture);
+		GL42.glTexStorage2D(GL11.GL_TEXTURE_2D, 1, GL30.GL_R8UI, Display.getWidth(), Display.getHeight());
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, GL11.GL_TEXTURE_2D, IDTexture, 0);
+		
+		//set this up for ID reading
+		GL20.glDrawBuffers((IntBuffer) BufferUtils.createIntBuffer(2).put(GL30.GL_COLOR_ATTACHMENT0).put(GL30.GL_COLOR_ATTACHMENT1).flip());
+		int status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER);
+		if(status != GL30.GL_FRAMEBUFFER_COMPLETE) {
+			throw new ApplicationException("Framebuffer is not completely: " + status ,"RENDERER");
+		}
+		
+		checkGL();
+	}
+	
 	public static void tick() {
 		Display.update();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
 		if(Display.wasResized())
 			onResize();
 		
+		checkGL();
 		RENDERERS.forEach(r -> {
 			r.render();
 			checkGL("OpenGL error in " + r.getClass() + ": ");
 		});
+		Renderer.checkGL();
+		
+		//read the hovered over object from the framebuffer
+		if(!KeyIO.holdMouse) {
+			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, MAIN_FRAMEBUFFER);
+			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT1);
+			checkGL();
+			IntBuffer id = BufferUtils.createIntBuffer(1);
+			GL11.glReadPixels(Mouse.getX(), Mouse.getY(), 1, 1, GL11.GL_RED, GL11.GL_UNSIGNED_INT, id);
+			checkGL();
+			hoveredID = id.get();
+			
+			TextRenderer.addString("" + hoveredID, new Vector2f(-0.7f, -0.7f), 0.1f, new Color4f(0, 0, 0, 1), 0);
+			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT0);
+		}
+		
+		Renderer.checkGL();
+		
+		//post processing goes here, atm just a blit
+		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, 0);
+		GL30.glBlitFramebuffer(0, 0, Display.getWidth(), Display.getHeight(), 0, 0, Display.getWidth(), Display.getHeight(), GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
+		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, MAIN_FRAMEBUFFER);
+		Renderer.checkGL();
 	}
 	
 	static void onResize() {
@@ -132,6 +199,9 @@ public abstract class Renderer {
 
 		GL20.glLinkProgram(id);
 		
+		for(int shader : shaders)
+			GL20.glDetachShader(id, shader);
+		
 		if(CHECK_GL && GL11.GL_FALSE == GL20.glGetProgrami(id, GL20.GL_LINK_STATUS)) {
 			int length = GL20.glGetProgrami(id, GL20.GL_INFO_LOG_LENGTH);
 			throw new ApplicationException(GL20.glGetProgramInfoLog(id, length), "RENDER");
@@ -149,6 +219,15 @@ public abstract class Renderer {
 		return textures.get();
 	}
 
+	public static int getFramebufferID() {
+		if(!framebuffers.hasRemaining()) {
+			framebuffers.clear();
+			GL30.glGenFramebuffers(framebuffers);
+		}
+
+		return framebuffers.get();
+	}
+	
 	public static void createDisplay() {
 		try {
 			if(Game.GLOBAL_CONFIG.getProperty("display.fullscreen", false)) {
@@ -160,7 +239,9 @@ public abstract class Renderer {
 			}
 			
 			Display.setVSyncEnabled(true);
-			Display.create(new PixelFormat(8, 8, 0, 4));
+			Display.create(new PixelFormat().withDepthBits(24).withBitsPerPixel(24), new ContextAttribs(4, 4, 0, ContextAttribs.CONTEXT_DEBUG_BIT_ARB));
+			ARBDebugOutput.glDebugMessageCallbackARB(new ARBDebugOutputCallback());
+			
 			Mouse.setGrabbed(KeyIO.holdMouse);
 
 			glClearColor(0, 0, 0, 0);

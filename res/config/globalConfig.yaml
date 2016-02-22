@@ -6,7 +6,7 @@ display:
   size:
     width: 800
     height: 600
-  fullscreen: true
+  fullscreen: false
 font:
   list:
   - Courier-New
