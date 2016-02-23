@@ -37,7 +37,7 @@ public class Button extends UIElement {
 		this.size = size;
 		box = new Box(from, to, 0f, new Color4f(.5f, .5f, .5f, 1), ID);
 		shadowQuad = new Quad(new Vector2f(from.x + 0.01f * Renderer.corr, from.y - 0.01f), new Vector2f(to.x + 0.01f * Renderer.corr, to.y - 0.01f), 0.3f, new Color4f(0f, 0f, 0f, 1), ID);
-		filledQuad = new Quad(from, to, 0.1f, new Color4f(1, 1, 1, 1), ID);
+		filledQuad = new Quad(from, to, 0.1f, new Color4f(.9f, .9f, .9f, 1), ID);
 	}
 	
 	public int getLinesLength() {  
@@ -75,7 +75,7 @@ public class Button extends UIElement {
 		position.y -= textHeight * finalSize * 1.15f;
 		position.scale(0.5f);
 		
-		TextRenderer.addString(text, position, finalSize, getColour(), ID);
+		TextRenderer.addString(text, position, finalSize, getColour(), 0, ID);
 	}
 
 	private Color4f getColour() {

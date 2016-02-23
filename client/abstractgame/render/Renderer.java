@@ -134,27 +134,20 @@ public abstract class Renderer {
 			r.render();
 			checkGL("OpenGL error in " + r.getClass() + ": ");
 		});
-		Renderer.checkGL();
 		
 		//read the hovered over object from the framebuffer
 		if(!KeyIO.holdMouse) {
 			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT1);
 			ByteBuffer id = BufferUtils.createByteBuffer(1);
-			checkGL();
 			GL11.glReadPixels(Mouse.getX(), Mouse.getY(), 1, 1, GL11.GL_RED, GL11.GL_UNSIGNED_BYTE, id);
-			checkGL();
 			hoveredID = id.get();
-			TextRenderer.addString("" + hoveredID, new Vector2f(-0.7f, -0.7f), 0.1f, new Color4f(0, 0, 0, 1), 0);
 			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT0);
 		}
-		
-		Renderer.checkGL();
 		
 		//post processing goes here, atm just a blit
 		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, 0);
 		GL30.glBlitFramebuffer(0, 0, Display.getWidth(), Display.getHeight(), 0, 0, Display.getWidth(), Display.getHeight(), GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
 		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, MAIN_FRAMEBUFFER);
-		Renderer.checkGL();
 	}
 	
 	static void onResize() {
