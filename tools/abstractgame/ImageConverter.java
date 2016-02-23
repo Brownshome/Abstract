@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -33,17 +36,30 @@ public class ImageConverter {
 		int height = decoder.getHeight();
 		int width = decoder.getWidth();
 
-		BiFunction<Integer, Integer, Integer> I = (x, y) -> x * 3 + y * width * 3;
+		BiFunction<Integer, Integer, Integer> I = (x, y) -> x * format.getNumComponents() + y * width * format.getNumComponents();
 
-		byte[] in = new byte[width * height * 3];
+		byte[] in = new byte[width * height * format.getNumComponents()];
 		ByteBuffer buffer = ByteBuffer.wrap(in);
-		decoder.decode(buffer, decoder.getWidth() * 3, format);
+		decoder.decode(buffer, decoder.getWidth() * format.getNumComponents(), format);
 
 		int pppx = width / destResX;
 		int pppy = height / destResY;
 
-		for(int x = 0; x < destResX; x++) {
+		class Counter {
+			int count = 0;
+			int lastPerc = 0;
+			
+			synchronized void done() {
+				if(lastPerc != (lastPerc = ++count * 100 / destResX))
+					System.out.println(lastPerc + "%");
+			}
+		}
+		
+		Counter c = new Counter();
+		
+		IntStream.range(0, destResX).parallel().forEach(x -> {
 			for(int y = 0; y < destResY; y++) {
+				int tmp = 100 * (x * destResY + y) / (destResX * destResY);		
 				//decide whether the sample is inside or outside
 
 				//x & 0x80 != 0  ==  x > 127 in unsigned
@@ -92,7 +108,9 @@ public class ImageConverter {
 				value = 0xff000000 | value | value << 8 | value << 16;
 				image.setRGB(x, y, value);
 			}
-		}
+			
+			c.done();
+		});
 
 		ImageIO.write(image, "png", Paths.get(destination).toFile());
 	}
