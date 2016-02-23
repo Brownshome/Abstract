@@ -10,9 +10,10 @@ display:
 font:
   list:
   - Courier-New
-  - Fixedsys
-  size: 512
+  size: 1024
 icon:
   list:
   - Settings
   size: 128
+opengl:
+  debug: true
