@@ -24,6 +24,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.ARBDebugOutput;
 import org.lwjgl.opengl.ARBDebugOutputCallback;
+import org.lwjgl.opengl.ARBTextureMultisample;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -34,6 +35,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL41;
 import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GL45;
@@ -47,7 +49,7 @@ import abstractgame.io.user.KeyIO;
 import abstractgame.util.ApplicationException;
 
 public abstract class Renderer {
-	public static final boolean CHECK_GL = true;
+	public static final boolean CHECK_GL = Game.GLOBAL_CONFIG.getProperty("opengl.debug", false);
 	public static final String SHADER_PATH = "res/shaders/";
 	public static final String SHADER_EXT = ".glsl";
 	public static boolean vSync = false;
@@ -58,6 +60,7 @@ public abstract class Renderer {
 	
 	/** Don't edit this unless you know what you are doing */
 	public static int MAIN_FRAMEBUFFER;
+	public static int ID_DOWNSAMPLE_FRAMEBUFFER;
 	public static int hoveredID = -1;
 	
 	public static float corr;
@@ -94,30 +97,43 @@ public abstract class Renderer {
 		createFramebuffer();
 		
 		KeyBinds.add(Renderer::toggleVsync, Keyboard.KEY_V, KeyIO.KEY_PRESSED, "game.vsync");
+		
 		checkGL();
 	}
 	
 	private static void createFramebuffer() {
+		ID_DOWNSAMPLE_FRAMEBUFFER = GL30.glGenFramebuffers();
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, ID_DOWNSAMPLE_FRAMEBUFFER);
+		int retrivalTexture = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, retrivalTexture);
+		GL42.glTexStorage2D(GL11.GL_TEXTURE_2D, 1, GL30.GL_R8, 1, 1);
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, retrivalTexture, 0);
+		
+		int status;
+		if(CHECK_GL && (status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER)) != GL30.GL_FRAMEBUFFER_COMPLETE) {
+			throw new ApplicationException("Framebuffer is not complete: " + status ,"RENDERER");
+		}
+		
 		MAIN_FRAMEBUFFER = GL30.glGenFramebuffers();
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, MAIN_FRAMEBUFFER);
 		
 		int mainTexture = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, mainTexture);
-		GL42.glTexStorage2D(GL11.GL_TEXTURE_2D, 1, GL11.GL_RGBA16, Display.getWidth(), Display.getHeight());
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, mainTexture, 0);
+		GL11.glBindTexture(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, mainTexture);
+		GL43.glTexStorage2DMultisample(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, 8, GL11.GL_RGBA8, Display.getWidth(), Display.getHeight(), false);
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, mainTexture, 0);
 		
 		int IDTexture = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, IDTexture);
-		GL42.glTexStorage2D(GL11.GL_TEXTURE_2D, 1, GL30.GL_R8 /* WHY THE HELL DOES GL_R8UI NOT WORK */, Display.getWidth(), Display.getHeight());
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, GL11.GL_TEXTURE_2D, IDTexture, 0);
+		GL11.glBindTexture(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, IDTexture);
+		GL43.glTexStorage2DMultisample(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, 8, GL30.GL_R8 /* WHY THE HELL DOES GL_R8UI NOT WORK */, Display.getWidth(), Display.getHeight(), false);
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, IDTexture, 0);
 		
 		//set this up for ID reading
 		GL20.glDrawBuffers((IntBuffer) BufferUtils.createIntBuffer(2).put(GL30.GL_COLOR_ATTACHMENT0).put(GL30.GL_COLOR_ATTACHMENT1).flip());
 		GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT0);
 		
-		int status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER);
-		if(status != GL30.GL_FRAMEBUFFER_COMPLETE) {
-			throw new ApplicationException("Framebuffer is not completely: " + status ,"RENDERER");
+		GL20.glDrawBuffers((IntBuffer) BufferUtils.createIntBuffer(2).put(GL30.GL_COLOR_ATTACHMENT0).put(GL30.GL_COLOR_ATTACHMENT1).flip());
+		if(CHECK_GL && (status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER)) != GL30.GL_FRAMEBUFFER_COMPLETE) {
+			throw new ApplicationException("Framebuffer is not complete: " + status ,"RENDERER");
 		}
 		
 		checkGL();
@@ -135,17 +151,34 @@ public abstract class Renderer {
 			checkGL("OpenGL error in " + r.getClass() + ": ");
 		});
 		
+		//read -> MAIN
+		
 		//read the hovered over object from the framebuffer
+		
+		//TODO sort out multisampling of the ID buffer causing issues
 		if(!KeyIO.holdMouse) {
 			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT1);
-			ByteBuffer id = BufferUtils.createByteBuffer(1);
-			GL11.glReadPixels(Mouse.getX(), Mouse.getY(), 1, 1, GL11.GL_RED, GL11.GL_UNSIGNED_BYTE, id);
-			hoveredID = id.get();
+			
+			GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, ID_DOWNSAMPLE_FRAMEBUFFER);
+			//MAIN -> DOWN
+			GL30.glBlitFramebuffer(Mouse.getX(), Mouse.getY(), Mouse.getX() + 1, Mouse.getY() + 1, 0, 0, 1, 1, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
+			
 			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT0);
+			
+			GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ID_DOWNSAMPLE_FRAMEBUFFER);
+			
+			ByteBuffer id = BufferUtils.createByteBuffer(1);
+			GL11.glReadPixels(0, 0, 1, 1, GL11.GL_RED, GL11.GL_UNSIGNED_BYTE, id);
+			hoveredID = id.get();
+			
+			//TextRenderer.addString(hoveredID + "", new Vector2f(-1, -1), .1f, UIRenderer.BASE_STRONG, 0);
+			
+			GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, MAIN_FRAMEBUFFER);
 		}
 		
 		//post processing goes here, atm just a blit
 		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, 0);
+		//MAIN -> DRAWBUFFER
 		GL30.glBlitFramebuffer(0, 0, Display.getWidth(), Display.getHeight(), 0, 0, Display.getWidth(), Display.getHeight(), GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
 		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, MAIN_FRAMEBUFFER);
 	}
@@ -242,6 +275,9 @@ public abstract class Renderer {
 	}
 	
 	public static float encodeIDAsFloat(int ID) {
+		if(ID == -1)
+			return 1;
+		
 		return ID * 1f / 255;
 	}
 }

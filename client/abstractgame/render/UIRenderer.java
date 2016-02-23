@@ -4,6 +4,8 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.vecmath.Color4f;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -14,6 +16,19 @@ import abstractgame.ui.elements.UIElement;
 
 /** The UI renderer renders buttons, taskbars and window frames */
 public class UIRenderer extends Renderer {
+	//modders can change any of these
+	
+	/** The base color for basic UI elements */
+	public static final Color4f BASE_STRONG = new Color4f(0, 0, 0, 1);
+	/** A more sudtle base color */
+	public static final Color4f BASE = new Color4f(.5f, .5f, .5f, 1);
+	/** An attention grabbing strong color */
+	public static final Color4f HIGHLIGHT_STRONG = new Color4f(1, .3f, 0, 1);
+	/** An attention grabbing weaker color */
+	public static final Color4f HIGHLIGHT = new Color4f(1, .64f, .41f, 1);
+	/** The background color */
+	public static final Color4f BACKGROUND = new Color4f(1, 1, 1, 1);
+	
 	static Collection<UIElement> uiElements = new HashSet<>();
 	
 	public static final int FLOATS_PER_VERTEX = 8;

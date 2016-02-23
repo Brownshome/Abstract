@@ -5,14 +5,50 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.io.user.KeyBinds;
+import abstractgame.io.user.KeyIO;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
+import abstractgame.render.UIRenderer;
 
-public class Button extends UIElement {
-	public enum Emphasis {
-		STRONG,
-		WEAK,
-		NORMAL
+public abstract class Button extends UIElement {
+	public static class Strong extends Button {
+		ButtonFill fill;
+		
+		public Strong(Vector2f from, Vector2f to, String text, float layer, float size, int ID) {
+			super(new Vector2f(from), new Vector2f(to), text, layer, size, ID);
+			fill = new ButtonFill(from, to, layer, UIRenderer.BASE_STRONG, ID);
+			
+			super.from.x += ButtonFill.TAPER_MULT * (to.y - from.y);
+			super.to.x -= ButtonFill.TAPER_MULT * (to.y - from.y);
+		}
+
+		@Override
+		Color4f getTextColour() {
+			return UIRenderer.BACKGROUND;
+		}
+		
+		@Override
+		public void setID(int ID) {
+			fill.ID = ID;
+		}
+		
+		@Override
+		public void tick() {
+			super.tick();
+			
+			fill.colour = Renderer.hoveredID == ID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG;
+		}
+		
+		@Override
+		public int getTrianglesLength() {
+			return fill.getTrianglesLength();
+		}
+		
+		@Override
+		public void fillTriangles(FloatBuffer buffer) {
+			fill.fillTriangles(buffer);
+		}
 	}
 	
 	final static float BORDER = 0.1f;
@@ -20,41 +56,17 @@ public class Button extends UIElement {
 	Vector2f from;
 	Vector2f to;
 	String text;
+	float layer;
 	float size;
 	int ID;
-	Emphasis emphasis;
 	
-	Box box;
-	Quad shadowQuad;
-	Quad filledQuad;
-	
-	public Button(Vector2f from, Vector2f to, String text, float size, Emphasis emphasis, int ID) {
+	public Button(Vector2f from, Vector2f to, String text, float layer, float size, int ID) {
 		this.from  = from;
 		this.to = to;
 		this.text = text;
-		this.emphasis = emphasis;
+		this.layer = layer;
 		this.ID = ID;
 		this.size = size;
-		box = new Box(from, to, 0f, new Color4f(.5f, .5f, .5f, 1), ID);
-		shadowQuad = new Quad(new Vector2f(from.x + 0.01f * Renderer.corr, from.y - 0.01f), new Vector2f(to.x + 0.01f * Renderer.corr, to.y - 0.01f), 0.3f, new Color4f(0f, 0f, 0f, 1), ID);
-		filledQuad = new Quad(from, to, 0.1f, new Color4f(.9f, .9f, .9f, 1), ID);
-	}
-	
-	public int getLinesLength() {  
-		return box.getLinesLength();
-	}
-	
-	public void fillLines(FloatBuffer buffer) {
-		box.fillLines(buffer);
-	}
-	
-	public int getTrianglesLength() {
-		return filledQuad.getTrianglesLength() * 2;
-	}
-	
-	public void fillTriangles(FloatBuffer buffer) {
-		shadowQuad.fillTriangles(buffer);
-		filledQuad.fillTriangles(buffer);
 	}
 	
 	public void tick() {
@@ -72,21 +84,23 @@ public class Button extends UIElement {
 		Vector2f position = dim;
 		position.add(from, to);
 		position.x -= textWidth * finalSize;
-		position.y -= textHeight * finalSize * 1.15f;
-		position.scale(0.5f);
+		position.y -= textHeight * finalSize * 1.2f;
+		position.scale(.5f);
 		
-		TextRenderer.addString(text, position, finalSize, getColour(), 0, ID);
+		TextRenderer.addString(text, position, finalSize, getTextColour(), 0, ID);
 	}
 
-	private Color4f getColour() {
-		return new Color4f(0, 0, 0, 1);
+	abstract Color4f getTextColour();
+
+	int clickListenerID = 0;
+	public void addOnClick(Runnable task) {
+		clickListenerID = KeyIO.addAction(() -> {
+			if(Renderer.hoveredID == ID)
+				task.run();
+		}, 0, KeyIO.MOUSE_BUTTON_PRESSED);
 	}
 
-	@Override
-	public void setID(int ID) {
-		this.ID = ID;
-		box.setID(ID);
-		shadowQuad.setID(ID);
-		filledQuad.setID(ID);
+	public void removeOnClick() {
+		KeyIO.removeAction(clickListenerID);
 	}
 }
