@@ -28,6 +28,7 @@ import abstractgame.util.Util;
 public class FileIO {
 	public static final ExecutorService IO_THREAD = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, 
 			new LinkedBlockingQueue<Runnable>(), runnable -> new Thread(runnable, "IO-THREAD")) {
+				@Override
 				protected void afterExecute(Runnable r, Throwable t) {
 					if(t == null && r instanceof FutureTask<?>) {
 						try {

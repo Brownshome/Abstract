@@ -49,9 +49,9 @@ public class TextRenderer extends Renderer {
 	static int length;
 
 	public static void updateCorrectionFactor() {
-		corr = (float) Display.getHeight() / Display.getWidth();
+		xCorrectionScalar = (float) Display.getHeight() / Display.getWidth();
 		GL20.glUseProgram(PROGRAM);
-		GL20.glUniform1f(2, corr);
+		GL20.glUniform1f(2, xCorrectionScalar);
 	}
 
 	@Override
@@ -126,12 +126,12 @@ public class TextRenderer extends Renderer {
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 		GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D_ARRAY);
 
-		corr = (float) Display.getHeight() / Display.getWidth();
+		xCorrectionScalar = (float) Display.getHeight() / Display.getWidth();
 
 		GL20.glUseProgram(PROGRAM);
 		GL20.glUniform1i(0, GRID_ROWS);
 		GL20.glUniform1i(1, GRID_COLUMNS);
-		GL20.glUniform1f(2, corr);
+		GL20.glUniform1f(2, xCorrectionScalar);
 
 		Renderer.checkGL();
 	}
@@ -179,7 +179,7 @@ public class TextRenderer extends Renderer {
 				data.putFloat(size);
 				data.putFloat(Renderer.encodeIDAsFloat(ID));
 			case ' ':
-				x += size * 0.75f * corr;
+				x += size * 0.75f * xCorrectionScalar;
 			}
 		}
 
@@ -228,7 +228,7 @@ public class TextRenderer extends Renderer {
 
 	/** Returns the width of the text if it was at 1 size */
 	public static float getWidth(String text) {
-		return (text.length() * 2.75f - text.replace("\t", "").length() * 2) * corr;
+		return (text.length() * 2.75f - text.replace("\t", "").length() * 2) * xCorrectionScalar;
 	}
 
 	/** Returns the height of the text as if it was at 1 size */

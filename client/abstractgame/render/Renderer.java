@@ -31,6 +31,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL21;
@@ -63,7 +64,7 @@ public abstract class Renderer {
 	public static int ID_DOWNSAMPLE_FRAMEBUFFER;
 	public static int hoveredID = -1;
 	
-	public static float corr;
+	public static float xCorrectionScalar;
 	public static int alphaTestShader;
 	
 	public abstract void initialize();
@@ -91,7 +92,6 @@ public abstract class Renderer {
 		//enable alpha blending
 		GL11.glEnable(GL11.GL_BLEND);
 		
-		//GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
 		createFramebuffer();
@@ -104,10 +104,11 @@ public abstract class Renderer {
 	private static void createFramebuffer() {
 		ID_DOWNSAMPLE_FRAMEBUFFER = GL30.glGenFramebuffers();
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, ID_DOWNSAMPLE_FRAMEBUFFER);
-		int retrivalTexture = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, retrivalTexture);
-		GL42.glTexStorage2D(GL11.GL_TEXTURE_2D, 1, GL30.GL_R8, 1, 1);
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, retrivalTexture, 0);
+		
+		int downsampler = GL30.glGenRenderbuffers();
+		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, downsampler);
+		GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL30.GL_R8, 1, 1);
+		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_RENDERBUFFER, downsampler);
 		
 		int status;
 		if(CHECK_GL && (status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER)) != GL30.GL_FRAMEBUFFER_COMPLETE) {
@@ -119,13 +120,23 @@ public abstract class Renderer {
 		
 		int mainTexture = GL11.glGenTextures();
 		GL11.glBindTexture(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, mainTexture);
-		GL43.glTexStorage2DMultisample(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, 8, GL11.GL_RGBA8, Display.getWidth(), Display.getHeight(), false);
+		GL43.glTexStorage2DMultisample(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, 8, GL11.GL_RGBA8, Display.getWidth(), Display.getHeight(), true);
 		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, mainTexture, 0);
+		checkGL();
 		
-		int IDTexture = GL11.glGenTextures();
-		GL11.glBindTexture(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, IDTexture);
-		GL43.glTexStorage2DMultisample(ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, 8, GL30.GL_R8 /* WHY THE HELL DOES GL_R8UI NOT WORK */, Display.getWidth(), Display.getHeight(), false);
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, ARBTextureMultisample.GL_TEXTURE_2D_MULTISAMPLE, IDTexture, 0);
+		int IDRenderbuffer = GL30.glGenRenderbuffers();
+		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, IDRenderbuffer);
+		checkGL();
+		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, 8, GL30.GL_R8 /* WHY THE HELL DOES GL_R8UI NOT WORK */, Display.getWidth(), Display.getHeight());
+		checkGL();
+		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_RENDERBUFFER, IDRenderbuffer);
+		checkGL();
+		
+		int depthBuffer = GL30.glGenRenderbuffers();
+		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depthBuffer);
+		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, 8, GL14.GL_DEPTH_COMPONENT32, Display.getWidth(), Display.getHeight());
+		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER, depthBuffer);
+		checkGL();
 		
 		//set this up for ID reading
 		GL20.glDrawBuffers((IntBuffer) BufferUtils.createIntBuffer(2).put(GL30.GL_COLOR_ATTACHMENT0).put(GL30.GL_COLOR_ATTACHMENT1).flip());

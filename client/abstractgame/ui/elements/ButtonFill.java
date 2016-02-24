@@ -23,14 +23,16 @@ public class ButtonFill extends UIElement {
 		this.from = from;
 		this.colour = colour;
 		this.layer = layer;
-		taperDist = (to.y - from.y) * TAPER_MULT;
+		taperDist = (to.y - from.y) * TAPER_MULT * Renderer.xCorrectionScalar;
 		this.ID = ID;
 	}
 	
+	@Override
 	public void setID(int id) {
 		ID = id;
 	}
 	
+	@Override
 	public int getTrianglesLength() {
 		return UIRenderer.FLOATS_PER_VERTEX * 12;
 	}
@@ -41,6 +43,7 @@ public class ButtonFill extends UIElement {
 		buffer.put(Renderer.encodeIDAsFloat(ID));
 	}
 	
+	@Override
 	public void fillTriangles(FloatBuffer buffer) {
 		putVertex(from.x + taperDist, from.y, buffer);
 		putVertex(from.x, (to.y + from.y) * .5f, buffer);

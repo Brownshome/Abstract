@@ -23,7 +23,7 @@ public class UIRenderer extends Renderer {
 	/** A more sudtle base color */
 	public static final Color4f BASE = new Color4f(.5f, .5f, .5f, 1);
 	/** An attention grabbing strong color */
-	public static final Color4f HIGHLIGHT_STRONG = new Color4f(1, .3f, 0, 1);
+	public static final Color4f HIGHLIGHT_STRONG = new Color4f(1, .2f, 0, 1);
 	/** An attention grabbing weaker color */
 	public static final Color4f HIGHLIGHT = new Color4f(1, .64f, .41f, 1);
 	/** The background color */
@@ -56,6 +56,7 @@ public class UIRenderer extends Renderer {
 		
 		GL30.glBindVertexArray(flatVAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, flatVBO);
+		GL11.glLineWidth(2);
 		
 		GL20.glEnableVertexAttribArray(0); //position
 		GL20.glEnableVertexAttribArray(1); //colour
@@ -95,6 +96,7 @@ public class UIRenderer extends Renderer {
 		GL20.glUseProgram(flatProgram);
 		GL30.glBindVertexArray(flatVAO);
 		
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		//lines
 		GL11.glDrawArrays(GL11.GL_LINES, 0, linesLength);
 		//triangles

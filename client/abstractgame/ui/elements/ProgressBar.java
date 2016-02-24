@@ -25,28 +25,34 @@ public class ProgressBar extends UIElement {
 		line = new Line(position, new Vector2f(position.x + dim.x, position.y), .1f, new Color4f(0, 0, 0, 1), ID);
 	}
 	
+	@Override
 	public void setID(int id) {
 		ID = id;
 		quad.setID(id);
 		line.setID(id);
 	}
 	
+	@Override
 	public void tick() {
 		quad.to.x = xStart + length * value.get();
 	}
 	
+	@Override
 	public int getLinesLength() {
 		return line.getLinesLength();
 	}
 	
+	@Override
 	public void fillLines(FloatBuffer buffer) {
 		line.fillLines(buffer);
 	}
 	
+	@Override
 	public int getTrianglesLength() {
 		return quad.getTrianglesLength();
 	}
 	
+	@Override
 	public void fillTriangles(FloatBuffer buffer) {
 		quad.fillTriangles(buffer);
 	}

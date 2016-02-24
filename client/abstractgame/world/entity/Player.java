@@ -16,6 +16,7 @@ public class Player extends DynamicEntity {
 		super(0, null, null, null);
 	}
 	
+	@Override
 	public void tick() {
 		super.tick();
 	}

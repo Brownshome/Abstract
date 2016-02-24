@@ -12,13 +12,17 @@ public abstract class Screen extends TickableImpl {
 	public void initialize() {}
 	public void destroy() {}
 	
+	/** Setting to null means there is no screen */
 	public static Screen setScreen(Screen screen) {
 		if(baseScreen != null)
 			baseScreen.destroy();
 		
 		Screen tmp = baseScreen;
 		baseScreen = screen;
-		baseScreen.initialize();
+		
+		if(baseScreen != null)
+			baseScreen.initialize();
+		
 		return tmp;
 	}
 	
@@ -27,7 +31,8 @@ public abstract class Screen extends TickableImpl {
 	}
 	
 	public static void tickScreen() {
-		baseScreen.tick();
+		if(baseScreen != null)
+			baseScreen.tick();
 		
 		overlays.forEach(Screen::tick);
 	}

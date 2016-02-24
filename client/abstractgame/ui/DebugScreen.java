@@ -15,10 +15,12 @@ public class DebugScreen extends Screen {
 		TextRenderer.addString(String.valueOf(Game.GAME_CLOCK.getTPS()), new Vector2f(-1, .95f), .05f, new Color4f(0, 0, 0, 1), 0);
 	}
 
+	@Override
 	public void initialize() {
 		isActive = true;
 	}
 	
+	@Override
 	public void destroy() {
 		isActive = false;
 	}

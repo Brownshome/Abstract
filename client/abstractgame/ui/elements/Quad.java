@@ -23,14 +23,17 @@ public class Quad extends UIElement {
 		this.ID = ID;
 	}
 	
+	@Override
 	public void setID(int id) {
 		ID = id;
 	}
 	
+	@Override
 	public int getTrianglesLength() {
 		return UIRenderer.FLOATS_PER_VERTEX * 6;
 	}
 	
+	@Override
 	public void fillTriangles(FloatBuffer buffer) {
 		buffer.put(from.x).put(from.y).put(layer);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);

@@ -20,11 +20,13 @@ public class TitleScreen extends Screen {
 	ProgressBar bar;
 	QuadIcon icon;
 	
+	@Override
 	public void initialize() {
 		bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar(), 0);
 		UIRenderer.addElement(bar);
 	}
 	
+	@Override
 	public void destroy() {
 		UIRenderer.removeElement(bar);
 	}

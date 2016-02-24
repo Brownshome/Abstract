@@ -18,6 +18,7 @@ public class Box extends UIElement {
 		bottom = new Line(new Vector2f(from.x, from.y), new Vector2f(to.x, from.y), layer, colour, ID);
 	}
 	
+	@Override
 	public void setID(int id) {
 		top.setID(id);
 		left.setID(id);
@@ -25,10 +26,12 @@ public class Box extends UIElement {
 		bottom.setID(id);
 	}
 	
+	@Override
 	public int getLinesLength() {
 		return top.getLinesLength() * 4;
 	}
 	
+	@Override
 	public void fillLines(FloatBuffer buffer) {
 		top.fillLines(buffer);
 		left.fillLines(buffer);
