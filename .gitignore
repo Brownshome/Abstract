@@ -7,3 +7,4 @@ build/
 natives
 *.db
 res/config/globalConfig.yaml
+*.log
