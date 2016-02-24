@@ -10,7 +10,7 @@ layout(location = 1) in vec4 in_colour;
 layout(location = 2) flat in uint in_id;
 
 const float cutoff = 0.5;
-const float blur = 12;
+const float blur = 10;
 
 void main() {
 	vec2 deltaX = dFdx(tex.xy);

@@ -15,8 +15,8 @@ public abstract class Button extends UIElement {
 		HexFill fill;
 		HexLine line;
 
-		public Strong(Vector2f from, Vector2f to, String text, float layer, float size, int ID) {
-			super(new Vector2f(from), new Vector2f(to), text, layer, size, ID);
+		public Strong(Vector2f from, Vector2f to, String text, float layer, int ID) {
+			super(new Vector2f(from), new Vector2f(to), text, layer, ID);
 			fill = new HexFill(from, to, layer + .1f, UIRenderer.BASE_STRONG, ID);
 
 			float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * Renderer.xCorrectionScalar;
@@ -24,10 +24,7 @@ public abstract class Button extends UIElement {
 			super.from.x += taperDist;
 			super.to.x -= taperDist;
 
-			final float DIST = .015f;
-			final float DIST_X = (float) (DIST * 2 / Math.sqrt(3)) * Renderer.xCorrectionScalar;
-			
-			line = new HexLine(new Vector2f(from.x + DIST_X, from.y + DIST), new Vector2f(to.x - DIST_X, to.y - DIST), layer, UIRenderer.BACKGROUND, ID);
+			line = new HexLine(new Vector2f(from.x, from.y), new Vector2f(to.x, to.y), layer, UIRenderer.HIGHLIGHT_STRONG, ID);
 		}
 
 		@Override
@@ -69,25 +66,19 @@ public abstract class Button extends UIElement {
 	}
 
 	public static class Weak extends Button {
-		HexLine outer;
-		HexLine inner;
+		HexLine outline;
 		HexFill fill;
 
-		public Weak(Vector2f from, Vector2f to, String text, float layer, float size, int ID) {
-			super(new Vector2f(from), new Vector2f(to), text, layer, size, ID);
+		public Weak(Vector2f from, Vector2f to, String text, float layer, int ID) {
+			super(new Vector2f(from), new Vector2f(to), text, layer, ID);
 
 			float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * Renderer.xCorrectionScalar;
 
 			super.from.x += taperDist;
 			super.to.x -= taperDist;
 
-			//inners
-			final float DIST = .015f;
-			final float DIST_X = (float) (DIST * 2 / Math.sqrt(3)) * Renderer.xCorrectionScalar;
-
-			outer = new HexLine(from, to, layer, UIRenderer.BASE_STRONG, ID);
-			inner = new HexLine(new Vector2f(from.x + DIST_X, from.y + DIST), new Vector2f(to.x - DIST_X, to.y - DIST), layer, UIRenderer.BASE_STRONG, ID);
-			fill = new HexFill(from, to, layer + .2f, UIRenderer.BACKGROUND, ID);
+			outline = new HexLine(from, to, layer, new Color4f(UIRenderer.BASE_STRONG), ID);
+			fill = new HexFill(from, to, layer + .1f, UIRenderer.BACKGROUND, ID);
 		}
 
 		@Override
@@ -106,17 +97,20 @@ public abstract class Button extends UIElement {
 		}
 
 		@Override
+		public void tick() {
+			super.tick();
+			
+			outline.colour.set(ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
+		}
+		
+		@Override
 		public int getLinesLength() {
-			return outer.getLinesLength() + ((ID == Renderer.hoveredID) ? inner.getLinesLength() : 0);
+			return outline.getLinesLength();
 		}
 
 		@Override
 		public void fillLines(FloatBuffer buffer) {
-			outer.fillLines(buffer);
-
-			if(ID == Renderer.hoveredID) {
-				inner.fillLines(buffer);
-			}
+			outline.fillLines(buffer);
 		}
 
 		@Override
@@ -131,16 +125,14 @@ public abstract class Button extends UIElement {
 	Vector2f to;
 	String text;
 	float layer;
-	float size;
 	int ID;
 
-	public Button(Vector2f from, Vector2f to, String text, float layer, float size, int ID) {
+	public Button(Vector2f from, Vector2f to, String text, float layer, int ID) {
 		this.from  = from;
 		this.to = to;
 		this.text = text;
 		this.layer = layer;
 		this.ID = ID;
-		this.size = size;
 	}
 
 	@Override
@@ -154,7 +146,7 @@ public abstract class Button extends UIElement {
 		float maxSizeX = dim.x / textWidth * (1 - BORDER);
 		float maxSizeY = dim.y / textHeight * (1 - BORDER);
 
-		float finalSize = Math.min(Math.min(maxSizeX, maxSizeY), size);
+		float finalSize = Math.min(maxSizeX, maxSizeY);
 
 		Vector2f position = dim;
 		position.add(from, to);

@@ -17,7 +17,8 @@ public class HexLine extends UIElement {
 	Line rightTop;
 	Line rightBottom;
 
-	Color4f colour;
+	/** Any changes to this will be updated in the children */
+	final Color4f colour;
 	
 	public HexLine(Vector2f from, Vector2f to, float layer, Color4f colour, int ID) {
 		this.colour = colour;

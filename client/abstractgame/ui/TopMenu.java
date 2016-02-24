@@ -20,9 +20,9 @@ public class TopMenu extends Screen {
 	
 	@Override
 	public void initialize() {
-		strongButton = new Button.Strong(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Y", 0, 10f, 2);
+		strongButton = new Button.Strong(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Close", 0, 2);
 		strongButton.addOnClick(Game::close);
-		weakButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "N", 0, 10f, 3);
+		weakButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "Clear screen with long text", 0, 3);
 		weakButton.addOnClick(() -> Screen.setScreen(null));
 		checkBox = new CheckBox(new Vector2f(0, 0), .1f, 0, 4);
 		checkBox.enable();

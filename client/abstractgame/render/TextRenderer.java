@@ -35,6 +35,7 @@ public class TextRenderer extends Renderer {
 	static final String FONT_PATH = "path/";
 
 	static final int BYTES_PER_LETTER = 1 + 1 + 8 + 16 + 4 + 4;
+	static final float TEXT_WIDTH_MOD = 0.65f;
 	static final int OFFSET = 32;
 	static final float MIN_SIZE = 0.04f;
 
@@ -179,7 +180,7 @@ public class TextRenderer extends Renderer {
 				data.putFloat(size);
 				data.putFloat(Renderer.encodeIDAsFloat(ID));
 			case ' ':
-				x += size * 0.75f * xCorrectionScalar;
+				x += size * TEXT_WIDTH_MOD * xCorrectionScalar;
 			}
 		}
 
@@ -228,7 +229,7 @@ public class TextRenderer extends Renderer {
 
 	/** Returns the width of the text if it was at 1 size */
 	public static float getWidth(String text) {
-		return (text.length() * 2.75f - text.replace("\t", "").length() * 2) * xCorrectionScalar;
+		return (text.length() * (2 + TEXT_WIDTH_MOD) - text.replace("\t", "").length() * 2) * xCorrectionScalar;
 	}
 
 	/** Returns the height of the text as if it was at 1 size */

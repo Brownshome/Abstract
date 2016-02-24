@@ -14,7 +14,7 @@ public class ProgressBar extends UIElement {
 	Supplier<Float> value;
 	int ID;
 	
-	/** if initialValue is -1 to -2 the bar will show an indeterminate level, the bar will -1 to -2 */
+	/** if initialValue is -1 to -2 the bar will show an indeterminate level, the bar will -1 to -2 (TODO) */
 	public ProgressBar(Vector2f position, Vector2f dim, Supplier<Float> value, int ID) {
 		this.value = value;
 		xStart = position.x;

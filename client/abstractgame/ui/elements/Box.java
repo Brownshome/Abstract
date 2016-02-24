@@ -11,7 +11,11 @@ public class Box extends UIElement {
 	Line right;
 	Line bottom;
 	
+	/** Any changes to this will be updated in the children */
+	final Color4f colour;
+	
 	public Box(Vector2f from, Vector2f to, float layer, Color4f colour, int ID) {
+		this.colour = colour;
 		top = new Line(new Vector2f(from.x, to.y), new Vector2f(to.x, to.y), layer, colour, ID);
 		left = new Line(new Vector2f(from.x, from.y), new Vector2f(from.x, to.y), layer, colour, ID);
 		right = new Line(new Vector2f(to.x, from.y), new Vector2f(to.x, to.y), layer, colour, ID);
