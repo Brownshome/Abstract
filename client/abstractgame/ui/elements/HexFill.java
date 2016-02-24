@@ -8,17 +8,17 @@ import javax.vecmath.Vector2f;
 import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
-public class ButtonFill extends UIElement {
+public class HexFill extends UIElement {
 	static final float TAPER_MULT = (float) (.5f / Math.sqrt(3));
 	
 	Vector2f to;
 	Vector2f from;
 	float layer;
-	float taperDist;
+	final float taperDist;
 	Color4f colour;
 	int ID;
 	
-	public ButtonFill(Vector2f from, Vector2f to, float layer, Color4f colour, int ID) {
+	public HexFill(Vector2f from, Vector2f to, float layer, Color4f colour, int ID) {
 		this.to = to;
 		this.from = from;
 		this.colour = colour;
