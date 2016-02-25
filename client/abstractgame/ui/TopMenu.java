@@ -38,8 +38,10 @@ public class TopMenu extends Screen {
 	public void destroy() {
 		UIRenderer.removeElement(strongButton);
 		UIRenderer.removeElement(weakButton);
-		UIRenderer.addElement(checkBox);
+		UIRenderer.removeElement(checkBox);
 		
 		strongButton.removeOnClick();
+		weakButton.removeOnClick();
+		checkBox.disable();
 	}
 }

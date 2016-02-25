@@ -1,6 +1,8 @@
 package abstractgame.io.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -26,6 +28,9 @@ public class KeyIO {
 	public static float dz;
 
 	public static boolean holdMouse = true;
+	
+	static boolean isPolling = false;
+	static List<Runnable> afterPoll = new ArrayList<>();
 
 	public static final int KEY_DOWN = 16;
 	public static final int KEY_PRESSED = 64;
@@ -85,12 +90,22 @@ public class KeyIO {
 	
 	/** remove action */
 	public static void removeAction(int id) {
+		if(isPolling) {
+			afterPoll.add(() -> removeAction(id));
+			return;
+		}
+		
 		mouseClickListeners.remove(id);
 		keyListeners.remove(id);
 	}
 	
 	/** returns an index to be used to remove it */
 	public static int addAction(Runnable action, int code, int flags) {
+		if(isPolling) {
+			afterPoll.add(() -> addAction(action, code, flags));
+			return id;
+		}
+			
 		if ((flags & (MOUSE_BUTTON_UP | MOUSE_BUTTON_DOWN | MOUSE_BUTTON_RELEASED | MOUSE_BUTTON_PRESSED)) != 0)
 			mouseClickListeners.put(id, new KeyCombo(action, code, flags & (MOUSE_BUTTON_UP | MOUSE_BUTTON_DOWN | MOUSE_BUTTON_RELEASED | MOUSE_BUTTON_PRESSED)));
 
@@ -101,6 +116,7 @@ public class KeyIO {
 	}
 
 	public static void tick() {
+		isPolling = true;
 		if(request == null || !request.blockInput) {
 			dx = Mouse.getDX();
 			dy = Mouse.getDY();
@@ -190,6 +206,10 @@ public class KeyIO {
 					}
 				}
 			}
+		isPolling = false;
+		
+		afterPoll.forEach(Runnable::run);
+		afterPoll.clear();
 	}
 
 	public static boolean isCtrlDown() {
