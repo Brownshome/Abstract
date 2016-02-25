@@ -1,30 +1,28 @@
 package abstractgame.ui;
 
-import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
 import abstractgame.Game;
 import abstractgame.io.user.KeyIO;
-import abstractgame.render.IconRenderer;
 import abstractgame.render.UIRenderer;
 import abstractgame.ui.elements.Button;
 import abstractgame.ui.elements.CheckBox;
-import abstractgame.ui.elements.QuadIcon;
+import abstractgame.ui.elements.NamedCheckBox;
 
 public class TopMenu extends Screen {
 	public static final TopMenu INSTANCE = new TopMenu();
 
 	Button strongButton;
 	Button weakButton;
-	CheckBox checkBox;
+	NamedCheckBox checkBox;
 	
 	@Override
 	public void initialize() {
 		strongButton = new Button.Strong(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Close", 0, 2);
 		strongButton.addOnClick(Game::close);
-		weakButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "Clear screen with long text", 0, 3);
+		weakButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "Clear screen", 0, 3);
 		weakButton.addOnClick(() -> Screen.setScreen(null));
-		checkBox = new CheckBox(new Vector2f(0, 0), .1f, 0, 4);
+		checkBox = new NamedCheckBox(new Vector2f(-.5f, 0), new Vector2f(0, .1f), "Toggle Vsync", 0, 4);
 		checkBox.enable();
 		
 		UIRenderer.addElement(strongButton);

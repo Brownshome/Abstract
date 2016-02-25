@@ -65,6 +65,8 @@ public class UIRenderer extends Renderer {
 		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 32, 0);
 		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 32, 12);
 		GL30.glVertexAttribIPointer(2, 1, GL11.GL_UNSIGNED_INT, 32, 28);
+		
+		UIElement.populateValues();
 	}
 
 	@Override

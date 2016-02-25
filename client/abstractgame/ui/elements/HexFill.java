@@ -9,8 +9,6 @@ import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
 public class HexFill extends UIElement {
-	static final float TAPER_MULT = (float) (.5f / Math.sqrt(3));
-	
 	Vector2f to;
 	Vector2f from;
 	float layer;
@@ -23,7 +21,7 @@ public class HexFill extends UIElement {
 		this.from = from;
 		this.colour = colour;
 		this.layer = layer;
-		taperDist = (to.y - from.y) * TAPER_MULT * Renderer.xCorrectionScalar;
+		taperDist = (to.y - from.y) * TAPER_MULT;
 		this.ID = ID;
 	}
 	

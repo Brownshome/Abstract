@@ -22,7 +22,7 @@ public class HexLine extends UIElement {
 	
 	public HexLine(Vector2f from, Vector2f to, float layer, Color4f colour, int ID) {
 		this.colour = colour;
-		final float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * Renderer.xCorrectionScalar;
+		final float taperDist = TAPER_MULT * (to.y - from.y);
 		
 		top = new Line(new Vector2f(from.x + taperDist, to.y), new Vector2f(to.x - taperDist, to.y), layer, colour, ID);
 		bottom = new Line(new Vector2f(from.x + taperDist, from.y), new Vector2f(to.x - taperDist, from.y), layer, colour, ID);

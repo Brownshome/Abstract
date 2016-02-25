@@ -10,8 +10,6 @@ import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
 public class CheckBox extends UIElement {
-	static final float BORDER = .015f;
-	
 	boolean checked = false;
 	boolean enabled = false;
 	
@@ -20,18 +18,15 @@ public class CheckBox extends UIElement {
 	HexLine line;
 	int ID;
 	
+	/** Size is the height of the checkbox in screen space. pos is the center of the checkbox */
 	public CheckBox(Vector2f pos, float size, float layer, int ID) {
-		float xMult = 2 / (float) Math.sqrt(3) * Renderer.xCorrectionScalar;
-		size *= .5f;
 		this.ID = ID;
 		
-		line = new HexLine(new Vector2f(pos.x - size * xMult, pos.y - size), new Vector2f(pos.x + size * xMult, pos.y + size), layer + .1f, new Color4f(UIRenderer.BASE_STRONG), ID);
-		baseFill = new HexFill(new Vector2f(pos.x - size * xMult, pos.y - size), new Vector2f(pos.x + size * xMult, pos.y + size), layer + .1f, UIRenderer.BACKGROUND, ID);
+		size *= .5f; //r = d / 2;
 		
-		final float DIST = .02f;
-		final float DIST_X = (float) (DIST * 2 / Math.sqrt(3)) * Renderer.xCorrectionScalar;
-		
-		fill = new HexFill(new Vector2f(pos.x - size * xMult + DIST_X, pos.y - size + DIST), new Vector2f(pos.x + size * xMult - DIST_X, pos.y + size - DIST), layer, UIRenderer.BASE_STRONG, ID);
+		line = new HexLine(new Vector2f(pos.x - size * HEX_ASPECT, pos.y - size), new Vector2f(pos.x + size * HEX_ASPECT, pos.y + size), layer + .1f, new Color4f(UIRenderer.BASE_STRONG), ID);
+		baseFill = new HexFill(new Vector2f(pos.x - size * HEX_ASPECT, pos.y - size), new Vector2f(pos.x + size * HEX_ASPECT, pos.y + size), layer + .1f, UIRenderer.BACKGROUND, ID);
+		fill = new HexFill(new Vector2f(pos.x - size * HEX_ASPECT + INSET_DIST_X, pos.y - size + INSET_DIST_Y), new Vector2f(pos.x + size * HEX_ASPECT - INSET_DIST_X, pos.y + size - INSET_DIST_Y), layer, UIRenderer.BASE_STRONG, ID);
 	}
 	
 	int clickID = 0;

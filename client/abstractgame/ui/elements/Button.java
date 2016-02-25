@@ -19,7 +19,7 @@ public abstract class Button extends UIElement {
 			super(new Vector2f(from), new Vector2f(to), text, layer, ID);
 			fill = new HexFill(from, to, layer + .1f, UIRenderer.BASE_STRONG, ID);
 
-			float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * Renderer.xCorrectionScalar;
+			float taperDist = (to.y - from.y) * TAPER_MULT;
 
 			super.from.x += taperDist;
 			super.to.x -= taperDist;
@@ -119,8 +119,6 @@ public abstract class Button extends UIElement {
 		}
 	}
 
-	final static float BORDER = 0.15f;
-
 	Vector2f from;
 	Vector2f to;
 	String text;
@@ -137,24 +135,7 @@ public abstract class Button extends UIElement {
 
 	@Override
 	public void tick() {
-		float textWidth = TextRenderer.getWidth(text);
-		float textHeight = TextRenderer.getHeight(text);
-
-		Vector2f dim = new Vector2f();
-		dim.sub(to, from);
-
-		float maxSizeX = dim.x / textWidth * (1 - BORDER);
-		float maxSizeY = dim.y / textHeight * (1 - BORDER);
-
-		float finalSize = Math.min(maxSizeX, maxSizeY);
-
-		Vector2f position = dim;
-		position.add(from, to);
-		position.x -= textWidth * finalSize;
-		position.y -= textHeight * finalSize * 1.25f;
-		position.scale(.5f);
-
-		TextRenderer.addString(text, position, finalSize, getTextColour(), 0, ID);
+		UIElement.renderTextWithinBounds(from, to, text, getTextColour(), ID, true);
 	}
 
 	abstract Color4f getTextColour();
