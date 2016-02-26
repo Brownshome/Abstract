@@ -11,26 +11,26 @@ import abstractgame.io.config.ConfigFile;
 public class KeyBinds {
 	static class Action {
 		Runnable action;
-		int keyFlags = KeyIO.KEY_PRESSED;
+		int keyFlags = KeyIO.BUTTON_PRESSED;
 		int current;
 		int id;
 		
 		Action(Runnable a, int key) {
 			action = a;
 			current = key;
-			id = KeyIO.addAction(action, current, keyFlags);
+			id = KeyIO.addKeyListener(action, current, keyFlags);
 		}
 		
 		Action(Runnable a, int keyFlag, int key) {
 			action = a;
 			current = key;
 			keyFlags = keyFlag;
-			id = KeyIO.addAction(action, current, keyFlags);
+			id = KeyIO.addKeyListener(action, current, keyFlags);
 		}
 		
 		public void rebind() {
-			KeyIO.removeAction(id);
-			KeyIO.addAction(action, current, keyFlags);
+			KeyIO.removeKeyListener(id);
+			KeyIO.addKeyListener(action, current, keyFlags);
 		}
 	}
 	

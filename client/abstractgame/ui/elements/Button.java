@@ -144,14 +144,14 @@ public abstract class Button extends UIElement {
 	int clickListenerID;
 	@Override
 	public void onAdd() {
-		clickListenerID = KeyIO.addAction(() -> {
+		clickListenerID = KeyIO.addMouseListener(() -> {
 			if(Renderer.hoveredID == ID)
 				task.run();
-		}, 0, KeyIO.MOUSE_BUTTON_PRESSED);
+		}, 0, KeyIO.BUTTON_PRESSED);
 	}
 
 	@Override
 	public void onRemove() {
-		KeyIO.removeAction(clickListenerID);
+		KeyIO.removeMouseListener(clickListenerID);
 	}
 }

@@ -35,6 +35,8 @@ public class TopMenu extends Screen {
 	static Quad serverClick = new Quad(new Vector2f(-.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(.5f * Renderer.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_SERVER);
 	static Quad createClick = new Quad(new Vector2f(.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(1.5f * Renderer.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_CREATE);
 
+	static int clickHandler;
+	
 	@Override
 	public void initialize() {
 		UIRenderer.addElement(exitButton);
@@ -43,7 +45,7 @@ public class TopMenu extends Screen {
 		UIRenderer.addElement(serverClick);
 		UIRenderer.addElement(createClick);
 
-		KeyIO.addAction(TopMenu::handleClick, 0, KeyIO.MOUSE_BUTTON_PRESSED);
+		clickHandler = KeyIO.addMouseListener(TopMenu::handleClick, 0, KeyIO.BUTTON_PRESSED);
 		KeyIO.holdMouse(false);
 	}
 
@@ -91,5 +93,7 @@ public class TopMenu extends Screen {
 		UIRenderer.removeElement(settingsClick);
 		UIRenderer.removeElement(serverClick);
 		UIRenderer.removeElement(createClick);
+		
+		KeyIO.removeMouseListener(clickHandler);
 	}
 }

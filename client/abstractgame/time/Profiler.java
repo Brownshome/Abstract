@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.lwjgl.input.Keyboard;
 
+import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.KeyIO;
 
 public class Profiler {
@@ -16,7 +17,7 @@ public class Profiler {
 	static long start = Clock.getABSTime(RES);
 
 	static {
-		KeyIO.addAction(Profiler::reset, Keyboard.KEY_R, KeyIO.KEY_PRESSED);
+		KeyBinds.add(Profiler::reset, Keyboard.KEY_R, KeyIO.BUTTON_PRESSED, "profiler.reset");
 		times.put("", 0l);
 	}
 

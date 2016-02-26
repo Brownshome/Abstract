@@ -97,7 +97,7 @@ public abstract class Renderer {
 		
 		createFramebuffer();
 		
-		KeyBinds.add(Renderer::toggleVsync, Keyboard.KEY_V, KeyIO.KEY_PRESSED, "game.vsync");
+		KeyBinds.add(Renderer::toggleVsync, Keyboard.KEY_V, KeyIO.BUTTON_PRESSED, "game.vsync");
 		
 		checkGL();
 	}

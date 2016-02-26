@@ -31,15 +31,15 @@ public class CheckBox extends UIElement {
 	int clickID = 0;
 	@Override
 	public void onAdd() {
-		clickID = KeyIO.addAction(() -> {
+		clickID = KeyIO.addMouseListener(() -> {
 			if(ID == Renderer.hoveredID) 
 				setState(!checked);
-		}, 0, KeyIO.MOUSE_BUTTON_PRESSED);
+		}, 0, KeyIO.BUTTON_PRESSED);
 	}
 	
 	@Override
 	public void onRemove() {
-		KeyIO.removeAction(clickID);
+		KeyIO.removeMouseListener(clickID);
 	}
 	
 	public void setState(boolean state) {

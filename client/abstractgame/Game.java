@@ -76,24 +76,24 @@ public class Game {
 		setupErrorHandlingAndLogging();
 		Renderer.createDisplay();
 		Renderer.initializeRenderer();
-		KeyBinds.add(Game::close, Keyboard.KEY_ESCAPE, KeyIO.KEY_PRESSED, "game.exit");
+		KeyBinds.add(Game::close, Keyboard.KEY_ESCAPE, KeyIO.BUTTON_PRESSED, "game.exit");
 		
 		FreeCamera c = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
 		
 		World.currentWorld = new World();
 		World.currentWorld.onTick(c);
 		
-		KeyBinds.add(c::up, Keyboard.KEY_SPACE, KeyIO.KEY_DOWN, "free camera.up");
-		KeyBinds.add(c::down, Keyboard.KEY_LSHIFT, KeyIO.KEY_DOWN, "free camera.down");
-		KeyBinds.add(c::forward, Keyboard.KEY_W, KeyIO.KEY_DOWN, "free camera.forward");
-		KeyBinds.add(c::backward, Keyboard.KEY_S, KeyIO.KEY_DOWN, "free camera.backward");
-		KeyBinds.add(c::left, Keyboard.KEY_A, KeyIO.KEY_DOWN, "free camera.left");
-		KeyBinds.add(c::right, Keyboard.KEY_D, KeyIO.KEY_DOWN, "free camera.right");
-		KeyBinds.add(() -> c.slow = true, Keyboard.KEY_LMENU, KeyIO.KEY_DOWN, "free camera.slow");
-		KeyBinds.add(() -> c.slow = false, Keyboard.KEY_LMENU, KeyIO.KEY_UP, "free camera.slow");
-		KeyBinds.add(c::stop, Keyboard.KEY_X, KeyIO.KEY_PRESSED, "free camera.stop");
-		KeyBinds.add(() -> KeyIO.holdMouse(!KeyIO.holdMouse), Keyboard.KEY_F, KeyIO.KEY_PRESSED, "game.free mouse");
-		KeyBinds.add(DebugScreen::toggle, Keyboard.KEY_F3, KeyIO.KEY_PRESSED, "debug.toggle debug display");
+		KeyBinds.add(c::up, Keyboard.KEY_SPACE, KeyIO.BUTTON_DOWN, "free camera.up");
+		KeyBinds.add(c::down, Keyboard.KEY_LSHIFT, KeyIO.BUTTON_DOWN, "free camera.down");
+		KeyBinds.add(c::forward, Keyboard.KEY_W, KeyIO.BUTTON_DOWN, "free camera.forward");
+		KeyBinds.add(c::backward, Keyboard.KEY_S, KeyIO.BUTTON_DOWN, "free camera.backward");
+		KeyBinds.add(c::left, Keyboard.KEY_A, KeyIO.BUTTON_DOWN, "free camera.left");
+		KeyBinds.add(c::right, Keyboard.KEY_D, KeyIO.BUTTON_DOWN, "free camera.right");
+		KeyBinds.add(() -> c.slow = true, Keyboard.KEY_LMENU, KeyIO.BUTTON_DOWN, "free camera.slow");
+		KeyBinds.add(() -> c.slow = false, Keyboard.KEY_LMENU, KeyIO.BUTTON_UP, "free camera.slow");
+		KeyBinds.add(c::stop, Keyboard.KEY_X, KeyIO.BUTTON_PRESSED, "free camera.stop");
+		KeyBinds.add(() -> KeyIO.holdMouse(!KeyIO.holdMouse), Keyboard.KEY_F, KeyIO.BUTTON_PRESSED, "game.free mouse");
+		KeyBinds.add(DebugScreen::toggle, Keyboard.KEY_F3, KeyIO.BUTTON_PRESSED, "debug.toggle debug display");
 		
 		Camera.setCameraHost(c);
 		
