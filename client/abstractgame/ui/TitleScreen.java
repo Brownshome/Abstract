@@ -17,12 +17,11 @@ public class TitleScreen extends Screen {
 	static final int PAUSE_COUNT = 100;
 	static boolean done = false;
 	
-	ProgressBar bar;
+	ProgressBar bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar());
 	QuadIcon icon;
 	
 	@Override
 	public void initialize() {
-		bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar(), 0);
 		UIRenderer.addElement(bar);
 	}
 	
@@ -35,7 +34,7 @@ public class TitleScreen extends Screen {
 	public void tick() {
 		super.tick();
 		
-		TextRenderer.addString("ABSTRACT", new Vector2f(-0.85f, -0.25f), 0.5f, new Color4f(0, 0, 0, 1), 0);
+		TextRenderer.addString(Game.NAME, new Vector2f(-0.85f, -0.25f), 0.5f, new Color4f(0, 0, 0, 1), 0);
 		TextRenderer.addString("Loading...", new Vector2f(-.4f, -.35f), 0.12f, new Color4f(0, 0, 0, 1), 0);
 		
 		if(done)
@@ -46,7 +45,7 @@ public class TitleScreen extends Screen {
 		long start = Game.GAME_CLOCK.getFrame();
 		
 		return () -> {
-			float v = Math.min((Game.GAME_CLOCK.getFrame() - start) / 120f, 1);
+			float v = Math.min((Game.GAME_CLOCK.getFrame() - start) / 60f, 1);
 			if(v == 1)
 				done = true;
 			return v;

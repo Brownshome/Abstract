@@ -3,7 +3,9 @@ package abstractgame.render;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -25,29 +27,45 @@ import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 /** Renderers alpha tested images */
 public class IconRenderer extends Renderer {
+	static final int ICON_RES = 128;
+	
 	static int VBO;
 	static int VAO;
 	static int TEXTURE;
 	static int ICON_PROGRAM;
 	
+	static List<String> iconNames = new ArrayList<>();
+	static Map<String, Integer> idLookup = new HashMap<>(); 
+	
 	static List<Icon> icons = new ArrayList<>();
 	static int length = 0;
+
+	static {
+		regesterIcon("settings");
+		regesterIcon("server");
+		regesterIcon("new");
+	}
 	
 	public static void addIcon(Icon icon) {
 		icons.add(icon);
 		length += icon.getLength();
 	}
 	
+	/** This must be called before IconRenderer.initialize() */
+	public static void regesterIcon(String name) {
+		int i = iconNames.size();
+		iconNames.add(name);
+		idLookup.put(name, i);
+	}
+	
 	@Override
 	public void initialize() {
-		int iconRes = Game.GLOBAL_CONFIG.getProperty("icon.size", 64);
-		List<String> icons = Game.GLOBAL_CONFIG.getProperty("icon.list", Arrays.asList("Settings"), List.class);
-		
-		Future<Texture>[] textureFutures = (Future<Texture>[]) new Future<?>[icons.size()];
+		Future<Texture>[] textureFutures = (Future<Texture>[]) new Future<?>[iconNames.size()];
 
-		for(int i = 0; i < textureFutures.length; i++)
-			textureFutures[i] = ImageIO.loadPNG(icons.get(i), Format.BGRA);
-
+		for(int i = 0; i < textureFutures.length; i++) {
+			textureFutures[i] = ImageIO.loadPNG(iconNames.get(i), Format.BGRA);
+		}
+			
 		VBO = GL15.glGenBuffers();
 		VAO = GL30.glGenVertexArrays();
 		
@@ -70,7 +88,7 @@ public class IconRenderer extends Renderer {
 		TEXTURE = GL11.glGenTextures();
 		
 		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
-		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(iconRes), GL30.GL_R8, iconRes, iconRes, icons.size());
+		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(ICON_RES), GL30.GL_R8, ICON_RES, ICON_RES, iconNames.size());
 		
 		int layer = 0;
 		for(Future<Texture> t : textureFutures) {
@@ -81,7 +99,7 @@ public class IconRenderer extends Renderer {
 				throw new ApplicationException(e, "IMAGEIO");
 			}
 			
-			GL12.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer++, iconRes, iconRes, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, texture.data);
+			GL12.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer++, ICON_RES, ICON_RES, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, texture.data);
 		}
 		
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
@@ -116,5 +134,18 @@ public class IconRenderer extends Renderer {
 	@Override
 	public float getPass() {
 		return 0;
+	}
+
+	public static boolean isIconLoaded(String icon) {
+		return getIcon(icon) != null;
+	}
+	
+	/** Will return null if the icon does not exist */
+	public static Integer getIcon(String icon) {
+		return idLookup.get(icon);
+	}
+	
+	public static String getIcon(int icon) {
+		return iconNames.get(icon);
 	}
 }

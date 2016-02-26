@@ -11,7 +11,6 @@ import abstractgame.render.UIRenderer;
 
 public class CheckBox extends UIElement {
 	boolean checked = false;
-	boolean enabled = false;
 	
 	HexFill fill;
 	HexFill baseFill;
@@ -30,18 +29,17 @@ public class CheckBox extends UIElement {
 	}
 	
 	int clickID = 0;
-	public void enable() {
+	@Override
+	public void onAdd() {
 		clickID = KeyIO.addAction(() -> {
 			if(ID == Renderer.hoveredID) 
 				setState(!checked);
 		}, 0, KeyIO.MOUSE_BUTTON_PRESSED);
-		
-		enabled = true;
 	}
 	
-	public void disable() {
+	@Override
+	public void onRemove() {
 		KeyIO.removeAction(clickID);
-		enabled = true;
 	}
 	
 	public void setState(boolean state) {
@@ -62,7 +60,7 @@ public class CheckBox extends UIElement {
 	
 	@Override
 	public void tick() {
-		line.colour.set(ID == Renderer.hoveredID && enabled ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
+		line.colour.set(ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
 	}
 	
 	@Override

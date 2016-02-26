@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.IconRenderer;
 import abstractgame.render.Renderer;
 
 public class QuadIcon extends Icon {
@@ -14,10 +15,10 @@ public class QuadIcon extends Icon {
 	public Color4f colour;
 	public int ID;
 	
-	public QuadIcon(Color4f colour, Vector2f from, Vector2f to, int icon, int ID) {
+	public QuadIcon(Color4f colour, Vector2f from, Vector2f to, String icon, int ID) {
 		this.from = from;
 		this.to = to;
-		this.icon = icon;
+		this.icon = IconRenderer.getIcon(icon);
 		this.colour = colour;
 		this.ID = ID;
 	}

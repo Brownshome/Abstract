@@ -58,7 +58,7 @@ public class TextRenderer extends Renderer {
 	@Override
 	public void initialize() {
 		List<String> textureNames = Game.GLOBAL_CONFIG.getProperty("font.list", Arrays.asList("Courier-New"), List.class);
-		int textureSize = Game.GLOBAL_CONFIG.getProperty("font.size", 512);
+		int textureSize = Game.GLOBAL_CONFIG.getProperty("font.size", 1024);
 
 		Future<Texture>[] textureFutures = (Future<Texture>[]) new Future<?>[textureNames.size()];
 
@@ -136,13 +136,13 @@ public class TextRenderer extends Renderer {
 
 		Renderer.checkGL();
 	}
-
+	
 	public static void addString(String text, Vector2f position, float size, Color4f colour, int font, int ID) {
 		addText(encode(text, position, size, colour, font, ID));
 	}
 
 	public static void addString(String text, Vector2f position, float size, Color4f colour, int font) {
-		addString(text, position, size, colour, font, 256); //256 maps to -1 as IDs are stored internally as bytes
+		addString(text, position, size, colour, font, -1);
 	}
 	
 	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font, int ID) {

@@ -15,8 +15,8 @@ public abstract class Button extends UIElement {
 		HexFill fill;
 		HexLine line;
 
-		public Strong(Vector2f from, Vector2f to, String text, float layer, int ID) {
-			super(new Vector2f(from), new Vector2f(to), text, layer, ID);
+		public Strong(Vector2f from, Vector2f to, String text, Runnable task, float layer, int ID) {
+			super(new Vector2f(from), new Vector2f(to), text, task, layer, ID);
 			fill = new HexFill(from, to, layer + .1f, UIRenderer.BASE_STRONG, ID);
 
 			float taperDist = (to.y - from.y) * TAPER_MULT;
@@ -69,8 +69,8 @@ public abstract class Button extends UIElement {
 		HexLine outline;
 		HexFill fill;
 
-		public Weak(Vector2f from, Vector2f to, String text, float layer, int ID) {
-			super(new Vector2f(from), new Vector2f(to), text, layer, ID);
+		public Weak(Vector2f from, Vector2f to, String text, Runnable task, float layer, int ID) {
+			super(new Vector2f(from), new Vector2f(to), text, task, layer, ID);
 
 			float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * Renderer.xCorrectionScalar;
 
@@ -122,10 +122,11 @@ public abstract class Button extends UIElement {
 	Vector2f from;
 	Vector2f to;
 	String text;
+	Runnable task;
 	float layer;
 	int ID;
 
-	public Button(Vector2f from, Vector2f to, String text, float layer, int ID) {
+	public Button(Vector2f from, Vector2f to, String text, Runnable task, float layer, int ID) {
 		this.from  = from;
 		this.to = to;
 		this.text = text;
@@ -140,15 +141,17 @@ public abstract class Button extends UIElement {
 
 	abstract Color4f getTextColour();
 
-	int clickListenerID = 0;
-	public void addOnClick(Runnable task) {
+	int clickListenerID;
+	@Override
+	public void onAdd() {
 		clickListenerID = KeyIO.addAction(() -> {
 			if(Renderer.hoveredID == ID)
 				task.run();
 		}, 0, KeyIO.MOUSE_BUTTON_PRESSED);
 	}
 
-	public void removeOnClick() {
+	@Override
+	public void onRemove() {
 		KeyIO.removeAction(clickListenerID);
 	}
 }

@@ -73,7 +73,6 @@ public abstract class Renderer {
 	
 	public static void addRenderer(Renderer renderer) {
 		RENDERERS.add(renderer);
-		RENDERERS.sort((a, b) -> Float.compare(a.getPass(), b.getPass()));
 		renderer.initialize();
 	}
 	
@@ -84,6 +83,8 @@ public abstract class Renderer {
 		addRenderer(new ModelRenderer());
 		addRenderer(new UIRenderer());
 		addRenderer(new IconRenderer());
+		
+		RENDERERS.sort((a, b) -> Float.compare(a.getPass(), b.getPass()));
 		
 		Camera.createProjectionMatrix();
 		

@@ -25,6 +25,10 @@ public class ProgressBar extends UIElement {
 		line = new Line(position, new Vector2f(position.x + dim.x, position.y), .1f, new Color4f(0, 0, 0, 1), ID);
 	}
 	
+	public ProgressBar(Vector2f position, Vector2f dim, Supplier<Float> value) {
+		this(position, dim, value, -1);
+	}
+
 	@Override
 	public void setID(int id) {
 		ID = id;

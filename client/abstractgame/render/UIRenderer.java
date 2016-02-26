@@ -39,10 +39,12 @@ public class UIRenderer extends Renderer {
 	
 	public static void addElement(UIElement element) {
 		uiElements.add(element);
+		element.onAdd();
 	}
 	
 	public static void removeElement(UIElement element) {
 		uiElements.remove(element);
+		element.onRemove();
 	}
 	
 	@Override

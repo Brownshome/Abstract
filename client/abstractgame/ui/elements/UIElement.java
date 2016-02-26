@@ -22,6 +22,11 @@ public abstract class UIElement {
 		HEX_ASPECT = 2 / (float) Math.sqrt(3) * Renderer.xCorrectionScalar;
 	}
 	
+	static int ID = 0;
+	public static int getNewID() {
+		return ID++;
+	}
+	
 	public static void renderTextWithinBounds(Vector2f from, Vector2f to, String text, Color4f colour, int ID, boolean withBorder) {
 		float textWidth = TextRenderer.getWidth(text);
 		float textHeight = TextRenderer.getHeight(text);
@@ -43,9 +48,12 @@ public abstract class UIElement {
 		TextRenderer.addString(text, position, finalSize, colour, 0, ID);
 	}
 	
-	/** Sets the ID for click / hover detection, 0 removes the item from click detection but will still
+	/** Sets the ID for click / hover detection, -1 removes the item from click detection but will still
 	 * overright items */
 	public abstract void setID(int ID);
+	
+	public void onAdd() {}
+	public void onRemove() {}
 	
 	public void fillLines(FloatBuffer buffer) {}
 	public int getLinesLength() { return 0; }

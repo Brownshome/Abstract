@@ -27,6 +27,7 @@ public class Game {
 	public static boolean close = false;
 	public static ConfigFile GLOBAL_CONFIG;
 	public static final Clock GAME_CLOCK = new Clock();
+	public static final String NAME = "ABSTRACT";
 	
 	public static void main(String[] args) {
 		try {
