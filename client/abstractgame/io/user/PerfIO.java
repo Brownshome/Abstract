@@ -15,7 +15,7 @@ import org.lwjgl.opengl.Display;
 
 import abstractgame.util.ApplicationException;
 
-public class KeyIO {
+public class PerfIO {
 	private static class KeyListener {
 		int code;
 		int flags;
@@ -75,6 +75,11 @@ public class KeyIO {
 		}
 	}
 
+	public static void setRequest(TypingRequest request) {
+		if(PerfIO.request != null) PerfIO.request.finish();
+		PerfIO.request = request;
+	}
+	
 	public static TypingRequest getText(Consumer<TypingRequest> l) {
 		return getText(l, Keyboard.KEY_RETURN, true);
 	}
@@ -96,6 +101,7 @@ public class KeyIO {
 	}
 
 	public static TypingRequest getText(Consumer<TypingRequest> l, int terminator, boolean block) {
+		if(request != null) request.finish();
 		return request = new TypingRequest(terminator, l, block);
 	}
 

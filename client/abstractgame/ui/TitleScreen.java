@@ -17,8 +17,8 @@ public class TitleScreen extends Screen {
 	static final int PAUSE_COUNT = 100;
 	static boolean done = false;
 	
-	ProgressBar bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar());
-	QuadIcon icon;
+	static ProgressBar bar = new ProgressBar(new Vector2f(-.4f, -.2f), new Vector2f(.8f, .01f), nothingBar());
+	static QuadIcon icon;
 	
 	@Override
 	public void initialize() {
@@ -41,7 +41,7 @@ public class TitleScreen extends Screen {
 			Screen.setScreen(TopMenu.INSTANCE);
 	}
 	
-	Supplier<Float> nothingBar() {
+	static Supplier<Float> nothingBar() {
 		long start = Game.GAME_CLOCK.getFrame();
 		
 		return () -> {

@@ -3,7 +3,7 @@ package abstractgame.ui;
 import javax.vecmath.Vector2f;
 
 import abstractgame.Game;
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.render.IconRenderer;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
@@ -45,8 +45,8 @@ public class TopMenu extends Screen {
 		UIRenderer.addElement(serverClick);
 		UIRenderer.addElement(createClick);
 
-		clickHandler = KeyIO.addMouseListener(TopMenu::handleClick, 0, KeyIO.BUTTON_PRESSED);
-		KeyIO.holdMouse(false);
+		clickHandler = PerfIO.addMouseListener(TopMenu::handleClick, 0, PerfIO.BUTTON_PRESSED);
+		PerfIO.holdMouse(false);
 	}
 
 	static void handleClick() {
@@ -94,6 +94,6 @@ public class TopMenu extends Screen {
 		UIRenderer.removeElement(serverClick);
 		UIRenderer.removeElement(createClick);
 		
-		KeyIO.removeMouseListener(clickHandler);
+		PerfIO.removeMouseListener(clickHandler);
 	}
 }

@@ -9,7 +9,7 @@ import abstractgame.io.FileIO;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.user.Console;
 import abstractgame.io.user.KeyBinds;
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
 import abstractgame.render.Renderer;
@@ -62,7 +62,7 @@ public class Game {
 	static void loop() {
 		Screen.tickScreen();
 		Renderer.tick();
-		KeyIO.tick();
+		PerfIO.tick();
 		Renderer.checkGL();
 		
 		if(World.currentWorld != null)
@@ -76,24 +76,24 @@ public class Game {
 		setupErrorHandlingAndLogging();
 		Renderer.createDisplay();
 		Renderer.initializeRenderer();
-		KeyBinds.add(Game::close, Keyboard.KEY_ESCAPE, KeyIO.BUTTON_PRESSED, "game.exit");
+		KeyBinds.add(Game::close, Keyboard.KEY_ESCAPE, PerfIO.BUTTON_PRESSED, "game.exit");
 		
 		FreeCamera c = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
 		
 		World.currentWorld = new World();
 		World.currentWorld.onTick(c);
 		
-		KeyBinds.add(c::up, Keyboard.KEY_SPACE, KeyIO.BUTTON_DOWN, "free camera.up");
-		KeyBinds.add(c::down, Keyboard.KEY_LSHIFT, KeyIO.BUTTON_DOWN, "free camera.down");
-		KeyBinds.add(c::forward, Keyboard.KEY_W, KeyIO.BUTTON_DOWN, "free camera.forward");
-		KeyBinds.add(c::backward, Keyboard.KEY_S, KeyIO.BUTTON_DOWN, "free camera.backward");
-		KeyBinds.add(c::left, Keyboard.KEY_A, KeyIO.BUTTON_DOWN, "free camera.left");
-		KeyBinds.add(c::right, Keyboard.KEY_D, KeyIO.BUTTON_DOWN, "free camera.right");
-		KeyBinds.add(() -> c.slow = true, Keyboard.KEY_LMENU, KeyIO.BUTTON_DOWN, "free camera.slow");
-		KeyBinds.add(() -> c.slow = false, Keyboard.KEY_LMENU, KeyIO.BUTTON_UP, "free camera.slow");
-		KeyBinds.add(c::stop, Keyboard.KEY_X, KeyIO.BUTTON_PRESSED, "free camera.stop");
-		KeyBinds.add(() -> KeyIO.holdMouse(!KeyIO.holdMouse), Keyboard.KEY_F, KeyIO.BUTTON_PRESSED, "game.free mouse");
-		KeyBinds.add(DebugScreen::toggle, Keyboard.KEY_F3, KeyIO.BUTTON_PRESSED, "debug.toggle debug display");
+		KeyBinds.add(c::up, Keyboard.KEY_SPACE, PerfIO.BUTTON_DOWN, "free camera.up");
+		KeyBinds.add(c::down, Keyboard.KEY_LSHIFT, PerfIO.BUTTON_DOWN, "free camera.down");
+		KeyBinds.add(c::forward, Keyboard.KEY_W, PerfIO.BUTTON_DOWN, "free camera.forward");
+		KeyBinds.add(c::backward, Keyboard.KEY_S, PerfIO.BUTTON_DOWN, "free camera.backward");
+		KeyBinds.add(c::left, Keyboard.KEY_A, PerfIO.BUTTON_DOWN, "free camera.left");
+		KeyBinds.add(c::right, Keyboard.KEY_D, PerfIO.BUTTON_DOWN, "free camera.right");
+		KeyBinds.add(() -> c.slow = true, Keyboard.KEY_LMENU, PerfIO.BUTTON_DOWN, "free camera.slow");
+		KeyBinds.add(() -> c.slow = false, Keyboard.KEY_LMENU, PerfIO.BUTTON_UP, "free camera.slow");
+		KeyBinds.add(c::stop, Keyboard.KEY_X, PerfIO.BUTTON_PRESSED, "free camera.stop");
+		KeyBinds.add(() -> PerfIO.holdMouse(!PerfIO.holdMouse), Keyboard.KEY_F, PerfIO.BUTTON_PRESSED, "game.free mouse");
+		KeyBinds.add(DebugScreen::toggle, Keyboard.KEY_F3, PerfIO.BUTTON_PRESSED, "debug.toggle debug display");
 		
 		Camera.setCameraHost(c);
 		

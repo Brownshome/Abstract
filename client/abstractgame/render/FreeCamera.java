@@ -4,7 +4,7 @@ import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.util.Util;
 import abstractgame.world.TickableImpl;
 
@@ -56,17 +56,17 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 	}
 	
 	private void moveOrientation() {
-		if(!KeyIO.holdMouse)
+		if(!PerfIO.holdMouse)
 			return;
 		
-		AxisAngle4f tmp = new AxisAngle4f(Camera.right, -KeyIO.dy * 0.001f);
+		AxisAngle4f tmp = new AxisAngle4f(Camera.right, -PerfIO.dy * 0.001f);
 		
 		Quat4f rot = new Quat4f();
 		rot.set(tmp);
 		orientation.mul(rot, orientation);
 		orientation.normalize();
 		
-		tmp.set(0, Camera.up.y > 0 ? 1 : -1, 0, KeyIO.dx * 0.001f);
+		tmp.set(0, Camera.up.y > 0 ? 1 : -1, 0, PerfIO.dx * 0.001f);
 		rot.set(tmp);
 		orientation.mul(rot, orientation);
 	}

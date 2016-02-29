@@ -65,9 +65,7 @@ public class TypingRequest {
 		}
 
 		if(key == terminator) {
-			if(l != null) l.accept(this);
-			KeyIO.request = null;
-			done = true;
+			finish();
 			return;
 		}
 
@@ -125,7 +123,7 @@ public class TypingRequest {
 
 				return;
 			case Keyboard.KEY_V:
-				if(!KeyIO.isCtrlDown()) break;
+				if(!PerfIO.isCtrlDown()) break;
 
 				String clipText = ClipboardWrapper.getClipboardContents();
 				if(selection != -1) {
@@ -147,7 +145,7 @@ public class TypingRequest {
 				}
 				return;
 			case Keyboard.KEY_C:
-				if(!KeyIO.isCtrlDown() || selection == -1) break;
+				if(!PerfIO.isCtrlDown() || selection == -1) break;
 
 				int start, end;
 				if(position > selection) {
@@ -161,7 +159,7 @@ public class TypingRequest {
 				ClipboardWrapper.setClipboardContents(text.substring(start, end));
 				return;
 			case Keyboard.KEY_X:
-				if(!KeyIO.isCtrlDown() || selection == -1) break;
+				if(!PerfIO.isCtrlDown() || selection == -1) break;
 
 				if(position > selection) {
 					start = selection;
@@ -178,13 +176,13 @@ public class TypingRequest {
 				selection = -1;
 				return;
 			case Keyboard.KEY_A:
-				if(!KeyIO.isCtrlDown()) break;
+				if(!PerfIO.isCtrlDown()) break;
 
 				selection = 0;
 				position = text.length();
 				return;
 			case Keyboard.KEY_LEFT:
-				if(KeyIO.isShiftDown()) {
+				if(PerfIO.isShiftDown()) {
 					if(selection == -1 && position != 0) 
 						selection = position;
 					
@@ -204,7 +202,7 @@ public class TypingRequest {
 				return;
 
 			case Keyboard.KEY_RIGHT:
-				if(KeyIO.isShiftDown()) {
+				if(PerfIO.isShiftDown()) {
 					if(selection == -1 && position != text.length()) 
 						selection = position;
 					
@@ -256,5 +254,11 @@ public class TypingRequest {
 
 	public void setSelectionIndex(int index) {
 		selection = index;
+	}
+
+	public void finish() {
+		if(l != null) l.accept(this);
+		if(PerfIO.request == this) PerfIO.request = null;
+		done = true;
 	}
 }

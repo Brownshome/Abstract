@@ -5,7 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
@@ -25,6 +25,10 @@ public abstract class Button extends UIElement {
 			super.to.x -= taperDist;
 
 			line = new HexLine(new Vector2f(from.x, from.y), new Vector2f(to.x, to.y), layer, UIRenderer.HIGHLIGHT_STRONG, ID);
+		}
+
+		public Strong(Vector2f from, Vector2f to, String text, Runnable task) {
+			this(from, to, text, task, 0, UIElement.getNewID());
 		}
 
 		@Override
@@ -81,6 +85,10 @@ public abstract class Button extends UIElement {
 			fill = new HexFill(from, to, layer + .1f, UIRenderer.BACKGROUND, ID);
 		}
 
+		public Weak(Vector2f from, Vector2f to, String text, Runnable task) {
+			this(from, to, text, task, 0, UIElement.getNewID());
+		}
+
 		@Override
 		Color4f getTextColour() {
 			return UIRenderer.BASE_STRONG;
@@ -127,6 +135,7 @@ public abstract class Button extends UIElement {
 	int ID;
 
 	public Button(Vector2f from, Vector2f to, String text, Runnable task, float layer, int ID) {
+		this.task = task;
 		this.from  = from;
 		this.to = to;
 		this.text = text;
@@ -144,14 +153,14 @@ public abstract class Button extends UIElement {
 	int clickListenerID;
 	@Override
 	public void onAdd() {
-		clickListenerID = KeyIO.addMouseListener(() -> {
+		clickListenerID = PerfIO.addMouseListener(() -> {
 			if(Renderer.hoveredID == ID)
 				task.run();
-		}, 0, KeyIO.BUTTON_PRESSED);
+		}, 0, PerfIO.BUTTON_PRESSED);
 	}
 
 	@Override
 	public void onRemove() {
-		KeyIO.removeMouseListener(clickListenerID);
+		PerfIO.removeMouseListener(clickListenerID);
 	}
 }

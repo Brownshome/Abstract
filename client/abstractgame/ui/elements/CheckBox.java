@@ -5,7 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
@@ -31,15 +31,15 @@ public class CheckBox extends UIElement {
 	int clickID = 0;
 	@Override
 	public void onAdd() {
-		clickID = KeyIO.addMouseListener(() -> {
+		clickID = PerfIO.addMouseListener(() -> {
 			if(ID == Renderer.hoveredID) 
 				setState(!checked);
-		}, 0, KeyIO.BUTTON_PRESSED);
+		}, 0, PerfIO.BUTTON_PRESSED);
 	}
 	
 	@Override
 	public void onRemove() {
-		KeyIO.removeMouseListener(clickID);
+		PerfIO.removeMouseListener(clickID);
 	}
 	
 	public void setState(boolean state) {

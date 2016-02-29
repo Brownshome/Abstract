@@ -46,7 +46,7 @@ import abstractgame.Game;
 import abstractgame.io.FileIO;
 import abstractgame.io.user.Console;
 import abstractgame.io.user.KeyBinds;
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.util.ApplicationException;
 
 public abstract class Renderer {
@@ -97,7 +97,7 @@ public abstract class Renderer {
 		
 		createFramebuffer();
 		
-		KeyBinds.add(Renderer::toggleVsync, Keyboard.KEY_V, KeyIO.BUTTON_PRESSED, "game.vsync");
+		KeyBinds.add(Renderer::toggleVsync, Keyboard.KEY_V, PerfIO.BUTTON_PRESSED, "game.vsync");
 		
 		checkGL();
 	}
@@ -168,7 +168,7 @@ public abstract class Renderer {
 		//read the hovered over object from the framebuffer
 		
 		//TODO sort out multisampling of the ID buffer causing issues
-		if(!KeyIO.holdMouse) {
+		if(!PerfIO.holdMouse) {
 			GL11.glReadBuffer(GL30.GL_COLOR_ATTACHMENT1);
 			
 			GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, ID_DOWNSAMPLE_FRAMEBUFFER);
@@ -258,7 +258,7 @@ public abstract class Renderer {
 			Display.create(new PixelFormat().withDepthBits(24).withBitsPerPixel(24)/*, new ContextAttribs(4, 5, 0, ContextAttribs.CONTEXT_CORE_PROFILE_BIT_ARB)*/);
 			//ARBDebugOutput.glDebugMessageCallbackARB(new ARBDebugOutputCallback());
 			
-			Mouse.setGrabbed(KeyIO.holdMouse);
+			Mouse.setGrabbed(PerfIO.holdMouse);
 
 			glClearColor(0, 0, 0, 0);
 

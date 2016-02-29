@@ -10,7 +10,7 @@ import javax.vecmath.Vector2f;
 import org.lwjgl.input.Mouse;
 
 import abstractgame.Game;
-import abstractgame.io.user.KeyIO;
+import abstractgame.io.user.PerfIO;
 import abstractgame.io.user.TypingRequest;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
@@ -36,7 +36,7 @@ public class SingleLineTextEntry extends UIElement {
 	
 	int ID = getNewID();
 	
-	public SingleLineTextEntry(Vector2f from, Vector2f to, float layer, boolean limitCharacters) {
+	public SingleLineTextEntry(Vector2f from, Vector2f to, float layer) {
 		float taperDist = (to.y - from.y) * TAPER_MULT;
 		
 		textSize = (to.y - from.y) * .8f;
@@ -54,13 +54,13 @@ public class SingleLineTextEntry extends UIElement {
 	int realeaseHandler;
 	@Override
 	public void onAdd() {
-		pressHandler = KeyIO.addMouseListener(this::onClick, 0, KeyIO.BUTTON_PRESSED);
-		realeaseHandler = KeyIO.addMouseListener(this::onRelease, 0, KeyIO.BUTTON_RELEASED);
+		pressHandler = PerfIO.addMouseListener(this::onClick, 0, PerfIO.BUTTON_PRESSED);
+		realeaseHandler = PerfIO.addMouseListener(this::onRelease, 0, PerfIO.BUTTON_RELEASED);
 	}
 	
 	@Override
 	public void onRemove() {
-		KeyIO.removeMouseListener(pressHandler);
+		PerfIO.removeMouseListener(pressHandler);
 	}
 	
 	
@@ -77,7 +77,7 @@ public class SingleLineTextEntry extends UIElement {
 		
 		isMouseDown = true;
 		
-		TypingRequest newRequest = KeyIO.getText();
+		TypingRequest newRequest = PerfIO.getText();
 		newRequest.setText(request.getText());
 		request = newRequest;
 		
@@ -124,7 +124,7 @@ public class SingleLineTextEntry extends UIElement {
 		
 		if(isMouseDown) {
 			//set the position based on the click location
-			float dist = (KeyIO.getPos().x - textStart.x) / textSize;
+			float dist = (PerfIO.getPos().x - textStart.x) / textSize;
 			float acc = 0;
 			
 			int index = 0;
