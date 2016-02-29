@@ -34,8 +34,11 @@ public class TextRenderer extends Renderer {
 	static final int GRID_COLUMNS = 16;
 	static final String FONT_PATH = "path/";
 
-	static final int BYTES_PER_LETTER = 1 + 1 + 8 + 16 + 4 + 4;
+	public static final int BYTES_PER_LETTER = 1 + 1 + 8 + 16 + 4 + 4;
+	
 	static final float TEXT_WIDTH_MOD = 0.65f;
+	static final float TAB_WIDTH = 2;
+	
 	static final int OFFSET = 32;
 	static final float MIN_SIZE = 0.04f;
 
@@ -145,6 +148,7 @@ public class TextRenderer extends Renderer {
 		addString(text, position, size, colour, font, -1);
 	}
 	
+	/** Data is font, character index, x, y, colour (rgba), size, ID */
 	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font, int ID) {
 		ByteBuffer data = ByteBuffer.wrap(new byte[text.length() * BYTES_PER_LETTER]).order(ByteOrder.nativeOrder());
 
@@ -166,7 +170,7 @@ public class TextRenderer extends Renderer {
 				y -= size;
 				break;
 			case '\t':
-				x += size * 2f;
+				x += size * TAB_WIDTH * xCorrectionScalar;
 				break;
 			default:
 				data.put((byte) font);
@@ -227,9 +231,18 @@ public class TextRenderer extends Renderer {
 		return 1;
 	}
 
-	/** Returns the width of the text if it was at 1 size */
+	/** Does not support multi line strings */
+	public static float getWidth(char c) {
+		return (c == '\t' ? TAB_WIDTH : TEXT_WIDTH_MOD) * xCorrectionScalar;
+	}
+	
+	/** Returns the width of the text if it was at 1 size, Does not support multi line strings */
 	public static float getWidth(String text) {
-		return (text.length() * (2 + TEXT_WIDTH_MOD) - text.replace("\t", "").length() * 2) * xCorrectionScalar;
+		float acc = 0;
+		for(int i = 0; i < text.length(); i++) {
+			acc += getWidth(text.charAt(i)); //everything will explode with non single codepoint characters, TODO FIX
+		}
+		return acc;
 	}
 
 	/** Returns the height of the text as if it was at 1 size */

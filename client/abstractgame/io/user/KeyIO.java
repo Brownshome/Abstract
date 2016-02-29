@@ -45,7 +45,7 @@ public class KeyIO {
 	public static float dz;
 
 	public static boolean holdMouse = true;
-	
+
 	static boolean isPolling = false;
 	static List<Runnable> afterPoll = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class KeyIO {
 			Mouse.setGrabbed(hold);
 		}
 	}
-	
+
 	public static TypingRequest getText(Consumer<TypingRequest> l) {
 		return getText(l, Keyboard.KEY_RETURN, true);
 	}
@@ -98,27 +98,27 @@ public class KeyIO {
 	public static TypingRequest getText(Consumer<TypingRequest> l, int terminator, boolean block) {
 		return request = new TypingRequest(terminator, l, block);
 	}
-	
+
 	static int id = Integer.MIN_VALUE;
-	
+
 	public static void removeMouseListener(int id) {
 		if(isPolling) {
 			afterPoll.add(() -> removeMouseListener(id));
 			return;
 		}
-		
+
 		mouseClickListeners.remove(id);
 	}
-	
+
 	public static void removeKeyListener(int id) {
 		if(isPolling) {
 			afterPoll.add(() -> removeKeyListener(id));
 			return;
 		}
-		
+
 		keyListeners.remove(id);
 	}
-	
+
 	public static int addMouseListener(Runnable action, int button, int flags) {
 		return addMouseListener(e -> action.run(), button, flags);
 	}
@@ -129,62 +129,63 @@ public class KeyIO {
 			afterPoll.add(() -> addMouseListener(action, button, flags));
 			return id;
 		}
-			
+
 		if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
 			throw new ApplicationException("Invalid Flag", "KEYBINDS");
-			
+
 		mouseClickListeners.put(id, new MouseListener(action, button, flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)));
-		
+
 		return id++;
 	}
-	
+
 	public static int addKeyListener(Runnable action, int code, int flags) {
 		if(isPolling) {
 			afterPoll.add(() -> addKeyListener(action, code, flags));
 			return id;
 		}
-			
+
 		if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
 			throw new ApplicationException("Invalid Flag", "KEYBINDS");
-			
+
 		keyListeners.put(id, new KeyListener(action, code, flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)));
-		
+
 		return id++;
 	}
 
-	
+
 	static Vector2f tmp = new Vector2f();
 	/** NB if keeping the output of this function please clone it */
-	static Vector2f getPos(int x, int y) {
+	public static Vector2f getPos(int x, int y) {
 		tmp.set(x * 2 / (float) Display.getWidth() - 1, y * 2 / (float) Display.getHeight() - 1);
 		return tmp;
 	}
 	
+	public static Vector2f getPos() {
+		return getPos(Mouse.getX(), Mouse.getY());
+	}
+
 	public static void tick() {
 		isPolling = true;
-		if(request == null || !request.blockInput) {
-			dx = Mouse.getDX();
-			dy = Mouse.getDY();
-			dz = Mouse.getDWheel();
 
-			if(request == null || !request.blockInput) {
-				for (MouseListener l : mouseClickListeners.values()) {
-					if ((l.flags & BUTTON_DOWN) != 0
-						&& Mouse.isButtonDown(l.code))
-						l.action.accept(getPos(Mouse.getX(), Mouse.getY()));
+		dx = Mouse.getDX();
+		dy = Mouse.getDY();
+		dz = Mouse.getDWheel();
 
-					if ((l.flags & BUTTON_UP) != 0 && !Mouse.isButtonDown(l.code))
-						l.action.accept(getPos(Mouse.getX(), Mouse.getY()));
-				}
+		for (MouseListener l : mouseClickListeners.values()) {
+			if ((l.flags & BUTTON_DOWN) != 0
+					&& Mouse.isButtonDown(l.code))
+				l.action.accept(getPos(Mouse.getX(), Mouse.getY()));
 
-				for (KeyListener l : keyListeners.values()) {
-					if ((l.flags & BUTTON_DOWN) != 0 && Keyboard.isKeyDown(l.code))
-						l.action.run();
+			if ((l.flags & BUTTON_UP) != 0 && !Mouse.isButtonDown(l.code))
+				l.action.accept(getPos(Mouse.getX(), Mouse.getY()));
+		}
 
-					if ((l.flags & BUTTON_UP) != 0 && !Keyboard.isKeyDown(l.code))
-						l.action.run();
-				}
-			}
+		for (KeyListener l : keyListeners.values()) {
+			if ((l.flags & BUTTON_DOWN) != 0 && Keyboard.isKeyDown(l.code))
+				l.action.run();
+
+			if ((l.flags & BUTTON_UP) != 0 && !Keyboard.isKeyDown(l.code))
+				l.action.run();
 		}
 
 		shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
@@ -195,18 +196,18 @@ public class KeyIO {
 			int key = Keyboard.getEventKey();
 			char c = Keyboard.getEventCharacter();
 
-			if(Keyboard.getEventKeyState())
+			if(Keyboard.getEventKeyState()) {
 				down.put(key, new int[] {0, c});
-			else
+			} else
 				down.remove(key);
 
-			if(request != null && request.blockInput) 
+			if(request != null && request.blockOtherKeyEvents) 
 				continue;
 
 			for (KeyListener l : keyListeners.values()) {
 				if (key != l.code && l.code != ALL_KEYS) 
 					continue;
-				
+
 				if ((l.flags & BUTTON_PRESSED) != 0 && Keyboard.getEventKeyState()) {
 					l.action.run();
 					continue;
@@ -230,32 +231,31 @@ public class KeyIO {
 				e.getValue()[0]++;
 			}
 
-		if(request == null || !request.blockInput)
-			while (Mouse.next()) {
-				int button = Mouse.getEventButton();
-				
-				if (button == -1) 
-					continue;
-				
-				for (MouseListener l : mouseClickListeners.values()) {
-					if (button != l.code) 
-						continue;
-					
-					if ((l.flags & BUTTON_PRESSED) != 0
-						&& Mouse.getEventButtonState()) {
-						l.action.accept(getPos(Mouse.getEventX(), Mouse.getEventY()));
-						continue;
-					}
+		while (Mouse.next()) {
+			int button = Mouse.getEventButton();
 
-					if ((l.flags & BUTTON_RELEASED) != 0
+			if (button == -1) 
+				continue;
+
+			for (MouseListener l : mouseClickListeners.values()) {
+				if (button != l.code) 
+					continue;
+
+				if ((l.flags & BUTTON_PRESSED) != 0
+						&& Mouse.getEventButtonState()) {
+					l.action.accept(getPos(Mouse.getEventX(), Mouse.getEventY()));
+					continue;
+				}
+
+				if ((l.flags & BUTTON_RELEASED) != 0
 						&& !Mouse.getEventButtonState()) {
-						l.action.accept(getPos(Mouse.getEventX(), Mouse.getEventY()));
-						continue;
-					}
+					l.action.accept(getPos(Mouse.getEventX(), Mouse.getEventY()));
+					continue;
 				}
 			}
+		}
 		isPolling = false;
-		
+
 		afterPoll.forEach(Runnable::run);
 		afterPoll.clear();
 	}

@@ -24,7 +24,7 @@ public class TypingRequest {
 	}
 
 	String text = "";
-	final boolean blockInput;
+	final boolean blockOtherKeyEvents;
 	boolean done = false;
 	final int terminator; //the key that closes the text box
 
@@ -37,7 +37,7 @@ public class TypingRequest {
 	TypingRequest(int terminator, Consumer<TypingRequest> l, boolean blockInput) {
 		this.terminator = terminator;
 		this.l = l;
-		this.blockInput = blockInput;
+		this.blockOtherKeyEvents = blockInput;
 	}
 
 	public void ignore(int n) {
@@ -49,6 +49,7 @@ public class TypingRequest {
 		return position;
 	}
 
+	/** Selection is -1 when there is no selection and goes to text.length() */
 	public int getSelectionIndex() {
 		return selection;
 	}
@@ -71,31 +72,56 @@ public class TypingRequest {
 		}
 
 		switch(key) {
-			case Keyboard.KEY_BACK:
-				if(position != 0)
-					if(selection == -1) {
-						text = text.substring(0, position - 1) + text.substring(position);
-						position--;
-					} else {
-						text = text.substring(0, selection) + text.substring(position);
-						position = selection;
-						selection = -1;
-					}
+		case Keyboard.KEY_BACK:
+			if(text.length() == 0)
+				return;
+
+			if(selection == -1) {
+				if(position == 0)
+					return;
+				
+				text = text.substring(0, position - 1) + text.substring(position);
+				position--;
+			} else {
+				int start, end;
+				if(position > selection) {
+					start = selection;
+					end = position;
+				} else {
+					start = position;
+					end = selection;
+				}
+
+				text = text.substring(0, start) + text.substring(end);
+				position = start;
+				selection = -1;
+			}
 
 				return;
 			case Keyboard.KEY_DELETE:
-				if(position != 0)
-					if(selection == -1) {
-						if(position == text.length()) {
-							text = text.substring(0, position - 1);
-							position--;
-						} else text = text.substring(0, position) + text.substring(position + 1);
-
+				if(text.length() == 0)
+					return;
+				
+				if(selection == -1) {
+					if(position == text.length()) {
+						text = text.substring(0, position - 1);
+						position--;
+					} else 
+						text = text.substring(0, position) + text.substring(position + 1);
+				} else {
+					int start, end;
+					if(position > selection) {
+						start = selection;
+						end = position;
 					} else {
-						text = text.substring(0, selection) + text.substring(position);
-						position = selection;
-						selection = -1;
+						start = position;
+						end = selection;
 					}
+
+					text = text.substring(0, start) + text.substring(end);
+					position = start;
+					selection = -1;
+				}
 
 				return;
 			case Keyboard.KEY_V:
@@ -103,8 +129,17 @@ public class TypingRequest {
 
 				String clipText = ClipboardWrapper.getClipboardContents();
 				if(selection != -1) {
-					text = text.substring(0, selection) + clipText + text.substring(position);
-					position = selection + clipText.length();
+					int start, end;
+					if(position > selection) {
+						start = selection;
+						end = position;
+					} else {
+						start = position;
+						end = selection;
+					}
+					
+					text = text.substring(0, start) + clipText + text.substring(end);
+					position = start + clipText.length();
 					selection = -1;
 				} else {
 					text = text.substring(0, position) + clipText + text.substring(position);
@@ -114,13 +149,31 @@ public class TypingRequest {
 			case Keyboard.KEY_C:
 				if(!KeyIO.isCtrlDown() || selection == -1) break;
 
-				ClipboardWrapper.setClipboardContents(text.substring(selection, position));
+				int start, end;
+				if(position > selection) {
+					start = selection;
+					end = position;
+				} else {
+					start = position;
+					end = selection;
+				}
+				
+				ClipboardWrapper.setClipboardContents(text.substring(start, end));
 				return;
 			case Keyboard.KEY_X:
 				if(!KeyIO.isCtrlDown() || selection == -1) break;
 
-				ClipboardWrapper.setClipboardContents(text.substring(selection, position));
-				text = text.substring(0, selection) + text.substring(position);
+				if(position > selection) {
+					start = selection;
+					end = position;
+				} else {
+					start = position;
+					end = selection;
+				}
+				
+				ClipboardWrapper.setClipboardContents(text.substring(start, end));
+				text = text.substring(0, start) + text.substring(end);
+				
 				position = selection;
 				selection = -1;
 				return;
@@ -132,38 +185,54 @@ public class TypingRequest {
 				return;
 			case Keyboard.KEY_LEFT:
 				if(KeyIO.isShiftDown()) {
-					if(selection == -1 && position > 0) selection = position - 1;
-					if(selection > 0) selection--;
+					if(selection == -1 && position != 0) 
+						selection = position;
+					
+					if(position > 0) 
+						position--;
 				} else {
-					if(position > 0) position--;
-					selection = -1;
+					if(selection != -1) {
+						if(selection < position) {
+							position = selection;
+						}
+						
+						selection = -1;
+					} else if(position != 0) 
+						position--;
 				}
 
 				return;
 
 			case Keyboard.KEY_RIGHT:
-				if(selection == -1)
-					selection = position;
-
-				if(!KeyIO.isShiftDown())
-					selection = -1;
-
-				if(position < text.length())
-					position++;
+				if(KeyIO.isShiftDown()) {
+					if(selection == -1 && position != text.length()) 
+						selection = position;
+					
+					if(position != text.length()) 
+						position++;
+				} else {
+					if(selection != -1) {
+						if(selection > position) {
+							position = selection;
+						}
+						
+						selection = -1;
+					} else if(position != text.length()) 
+						position++;
+				}
 
 				return;
 		}
 
-		String addition = specialActions.getOrDefault(key, () -> (character == 0 ? "" : "" + character)).get();
-
-		if(selection == -1) {
-			text = text.substring(0, position) + addition + text.substring(position);
-			position += addition.length();
-		} else {
-			text = text.substring(0, selection) + addition + text.substring(position);
-			position = selection + addition.length();
-			selection = -1;
-		}
+		if(character >= 32)
+			if(selection == -1) {
+				text = text.substring(0, position) + character + text.substring(position);
+				position++;
+			} else {
+				text = text.substring(0, selection) + character + text.substring(position);
+				position = selection + 1;
+				selection = -1;
+			}
 	}
 
 	public boolean isDone() {
@@ -178,5 +247,14 @@ public class TypingRequest {
 
 	public void addSpecialKey(int key, Supplier<String> task) {
 		specialActions.put(key, task);
+	}
+
+	public void setPosition(int index) {
+		position = index;
+		selection = -1;
+	}
+
+	public void setSelectionIndex(int index) {
+		selection = index;
 	}
 }

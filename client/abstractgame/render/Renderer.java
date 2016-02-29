@@ -158,10 +158,10 @@ public abstract class Renderer {
 			onResize();
 		
 		checkGL();
-		RENDERERS.forEach(r -> {
+		for(Renderer r : RENDERERS) {
 			r.render();
 			checkGL("OpenGL error in " + r.getClass() + ": ");
-		});
+		}
 		
 		//read -> MAIN
 		
