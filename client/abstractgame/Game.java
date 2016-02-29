@@ -1,5 +1,10 @@
 package abstractgame;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Keyboard;
@@ -10,6 +15,8 @@ import abstractgame.io.config.ConfigFile;
 import abstractgame.io.user.Console;
 import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
+import abstractgame.net.Server;
+import abstractgame.net.packet.Packet;
 import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
 import abstractgame.render.Renderer;
@@ -28,6 +35,8 @@ public class Game {
 	public static ConfigFile GLOBAL_CONFIG;
 	public static final Clock GAME_CLOCK = new Clock();
 	public static final String NAME = "ABSTRACT";
+	
+	public static Server server;
 	
 	public static void main(String[] args) {
 		try {
