@@ -155,13 +155,17 @@ public class SingleLineTextEntry extends UIElement {
 				end = request.getSelectionIndex();
 			}
 			
-			int bufferIndex = start;
-			for(int position = start; position < end; position++) {
+			int bufferIndex = 0;
+			for(int position = 0; position < end; position++) {
 				if(Character.isWhitespace(text.charAt(position)))
 					continue;
 				
-				buffer.position(bufferIndex++ * TextRenderer.BYTES_PER_LETTER + 10);
-				buffer.putFloat(UIRenderer.HIGHLIGHT_STRONG.x).putFloat(UIRenderer.HIGHLIGHT_STRONG.y).putFloat(UIRenderer.HIGHLIGHT_STRONG.z).putFloat(UIRenderer.HIGHLIGHT_STRONG.w);
+				if(position >= start) {
+					buffer.position(bufferIndex * TextRenderer.BYTES_PER_LETTER + 10);
+					buffer.putFloat(UIRenderer.HIGHLIGHT_STRONG.x).putFloat(UIRenderer.HIGHLIGHT_STRONG.y).putFloat(UIRenderer.HIGHLIGHT_STRONG.z).putFloat(UIRenderer.HIGHLIGHT_STRONG.w);
+				}
+				
+				bufferIndex++;
 			}
 			
 			buffer.position(0); //prepare for reading

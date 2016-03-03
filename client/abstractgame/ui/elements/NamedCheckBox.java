@@ -4,7 +4,6 @@ import java.nio.FloatBuffer;
 
 import javax.vecmath.Vector2f;
 
-import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
 public class NamedCheckBox extends CheckBox {
@@ -47,6 +46,10 @@ public class NamedCheckBox extends CheckBox {
 		this.to = new Vector2f(start, to.y);
 	}
 	
+	public NamedCheckBox(Vector2f from, Vector2f to, String text, float layer) {
+		this(from, to, text, layer, UIElement.getNewID());
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
