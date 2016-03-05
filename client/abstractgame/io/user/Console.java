@@ -3,7 +3,7 @@ package abstractgame.io.user;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.util.ApplicationException;
 
 public class Console {
@@ -65,6 +65,6 @@ public class Console {
 		if(level < 4) 
 			report(ex);
 		
-		Game.close();
+		Client.close();
 	}
 }

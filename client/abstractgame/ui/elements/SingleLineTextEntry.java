@@ -2,14 +2,11 @@ package abstractgame.ui.elements;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.stream.IntStream;
 
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
-import org.lwjgl.input.Mouse;
-
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.user.PerfIO;
 import abstractgame.io.user.TypingRequest;
 import abstractgame.render.Renderer;
@@ -107,7 +104,7 @@ public class SingleLineTextEntry extends UIElement {
 	}
 	
 	boolean isCursorVisable() {
-		return !request.isDone() && Game.GAME_CLOCK.getFrame() % BLINK_DELAY > BLINK_DELAY / 2;
+		return !request.isDone() && Client.GAME_CLOCK.getFrame() % BLINK_DELAY > BLINK_DELAY / 2;
 	}
 	
 	@Override
@@ -116,7 +113,6 @@ public class SingleLineTextEntry extends UIElement {
 		
 		
 		String text = request.getText();
-		float height = TextRenderer.getHeight(text);
 		
 		float cursorX = textStart.x + TextRenderer.getWidth(request.getText().substring(0, request.getPosition())) * textSize + .01f;
 		cursor.from.x = cursorX;
@@ -202,5 +198,9 @@ public class SingleLineTextEntry extends UIElement {
 		leftBottom.setID(ID);
 		leftTop.setID(ID);
 		cursor.setID(ID);
+	}
+
+	public String getText() {
+		return request.getText();
 	}
 }

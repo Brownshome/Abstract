@@ -22,7 +22,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL42;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.image.ImageIO;
 import abstractgame.io.image.Texture;
 import abstractgame.io.user.Console;
@@ -60,8 +60,8 @@ public class TextRenderer extends Renderer {
 
 	@Override
 	public void initialize() {
-		List<String> textureNames = Game.GLOBAL_CONFIG.getProperty("font.list", Arrays.asList("Courier-New"), List.class);
-		int textureSize = Game.GLOBAL_CONFIG.getProperty("font.size", 1024);
+		List<String> textureNames = Client.GLOBAL_CONFIG.getProperty("font.list", Arrays.asList("Courier-New"), List.class);
+		int textureSize = Client.GLOBAL_CONFIG.getProperty("font.size", 1024);
 
 		Future<Texture>[] textureFutures = (Future<Texture>[]) new Future<?>[textureNames.size()];
 

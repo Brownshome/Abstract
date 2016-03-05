@@ -42,7 +42,7 @@ import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GL45;
 import org.lwjgl.opengl.PixelFormat;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.FileIO;
 import abstractgame.io.user.Console;
 import abstractgame.io.user.KeyBinds;
@@ -50,7 +50,7 @@ import abstractgame.io.user.PerfIO;
 import abstractgame.util.ApplicationException;
 
 public abstract class Renderer {
-	public static final boolean CHECK_GL = Game.GLOBAL_CONFIG.getProperty("opengl.debug", false);
+	public static final boolean CHECK_GL = Client.GLOBAL_CONFIG.getProperty("opengl.debug", false);
 	public static final String SHADER_PATH = "res/shaders/";
 	public static final String SHADER_EXT = ".glsl";
 	public static boolean vSync = false;
@@ -246,12 +246,12 @@ public abstract class Renderer {
 
 	public static void createDisplay() {
 		try {
-			if(Game.GLOBAL_CONFIG.getProperty("display.fullscreen", false)) {
+			if(Client.GLOBAL_CONFIG.getProperty("display.fullscreen", false)) {
 				Display.setFullscreen(true);
 			} else {
 				Display.setFullscreen(false);
 				Display.setResizable(true);
-				Display.setDisplayMode(new DisplayMode(Game.GLOBAL_CONFIG.getProperty("display.size.width", 800), Game.GLOBAL_CONFIG.getProperty("display.size.height", 600)));
+				Display.setDisplayMode(new DisplayMode(Client.GLOBAL_CONFIG.getProperty("display.size.width", 800), Client.GLOBAL_CONFIG.getProperty("display.size.height", 600)));
 			}
 			
 			Display.setVSyncEnabled(true);

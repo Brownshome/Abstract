@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.render.IconRenderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
@@ -34,7 +34,7 @@ public class TitleScreen extends Screen {
 	public void tick() {
 		super.tick();
 		
-		TextRenderer.addString(Game.NAME, new Vector2f(-0.85f, -0.25f), 0.5f, new Color4f(0, 0, 0, 1), 0);
+		TextRenderer.addString(Client.NAME, new Vector2f(-0.85f, -0.25f), 0.5f, new Color4f(0, 0, 0, 1), 0);
 		TextRenderer.addString("Loading...", new Vector2f(-.4f, -.35f), 0.12f, new Color4f(0, 0, 0, 1), 0);
 		
 		if(done)
@@ -42,10 +42,10 @@ public class TitleScreen extends Screen {
 	}
 	
 	static Supplier<Float> nothingBar() {
-		long start = Game.GAME_CLOCK.getFrame();
+		long start = Client.GAME_CLOCK.getFrame();
 		
 		return () -> {
-			float v = Math.min((Game.GAME_CLOCK.getFrame() - start) / 60f, 1);
+			float v = Math.min((Client.GAME_CLOCK.getFrame() - start) / 60f, 1);
 			if(v == 1)
 				done = true;
 			return v;

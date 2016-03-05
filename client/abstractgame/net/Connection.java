@@ -2,13 +2,26 @@ package abstractgame.net;
 
 import abstractgame.net.packet.Packet;
 
-public interface Connection {
+public interface Connection {	
 	/** This object will be notified when the packet reaches the other end */
-	@FunctionalInterface
-	public interface Ack {
-		boolean isDone();
+	public class Ack {
+		private boolean done;
+		
+		public boolean isDone() {
+			return done;
+		}
+		
+		public synchronized void waitFor() throws InterruptedException {
+			while(!done)
+				this.wait();
+		}
+		
+		public synchronized void trigger() {
+			done = true;
+			this.notify();
+		}
 	}
-
+	
 	/** Sends a packet along this conenction, this method should not block if possible.
 	 * This method will attempt to cause the packet's handler to be called on the other
 	 * end of the connection on the correct thread. */

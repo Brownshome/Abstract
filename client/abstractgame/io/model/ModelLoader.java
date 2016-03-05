@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.FileIO;
 import abstractgame.util.ApplicationException;
 

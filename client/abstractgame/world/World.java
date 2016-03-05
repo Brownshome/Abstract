@@ -1,6 +1,6 @@
 package abstractgame.world;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.world.entity.DynamicEntity;
 
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;

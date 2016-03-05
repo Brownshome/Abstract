@@ -2,7 +2,7 @@ package abstractgame.ui;
 
 import javax.vecmath.Vector2f;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.user.PerfIO;
 import abstractgame.render.IconRenderer;
 import abstractgame.render.Renderer;
@@ -24,7 +24,7 @@ public class TopMenu extends Screen {
 	static int ID_EXIT = UIElement.getNewID();
 	static int ID_CREDITS = UIElement.getNewID();
 
-	static Button exitButton = new Button.Weak(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Exit", Game::close, 0, ID_EXIT);
+	static Button exitButton = new Button.Weak(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Exit", Client::close, 0, ID_EXIT);
 	static Button creditsButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "Show Credits", () -> Screen.setScreen(CreditScreen.INSTANCE), 0, ID_CREDITS);
 
 	static QuadIcon settings = new QuadIcon(UIRenderer.BASE, new Vector2f(-1.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(-.5f * Renderer.xCorrectionScalar, .5f), "settings", ID_SETTINGS);
@@ -83,7 +83,7 @@ public class TopMenu extends Screen {
 			create.colour = UIRenderer.BASE;
 		}
 
-		TextRenderer.addString(Game.NAME, new Vector2f(-TextRenderer.getWidth(Game.NAME) * .25f, .45f), .5f, UIRenderer.BASE_STRONG, 0);
+		TextRenderer.addString(Client.NAME, new Vector2f(-TextRenderer.getWidth(Client.NAME) * .25f, .45f), .5f, UIRenderer.BASE_STRONG, 0);
 	}
 
 	@Override

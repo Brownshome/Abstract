@@ -1,62 +1,40 @@
 package abstractgame.net;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 
+import abstractgame.Client;
 import abstractgame.net.packet.Packet;
 
-public class MemoryConnection extends Thread implements Connection {
-	static final Ack DONE = () -> true;
+@Sided(Side.CLIENT)
+public class MemoryConnection implements Connection {
 	static int counter = 0;
 	
-	BlockingQueue<byte[]> in;
-	BlockingQueue<byte[]> out;
+	BlockingQueue<Runnable> threadQueue;
+	boolean setID;
 	
-	/** Creates a memory connection linking to 'other' */
-	public MemoryConnection(MemoryConnection other) {
-		super("PacketHandler" + counter++);
-		
-		in = other.out;
-		out = other.in;
-		
-		other.start();
-		super.start();
-	}
-	
-	/** Creates an unlinked memory connection */
-	public MemoryConnection() {
-		super("PacketHandler" + counter++);
-		
-		in = new SynchronousQueue<>();
-		out = new SynchronousQueue<>();
-	}
-	
-	@Override
-	public void run() {
-		while(true) {
-			try {	
-				byte[] data = null;
-				data = in.take();
-				int packetID = data[0];
-				Packet.packetReaders.get(packetID).apply(data).handle();
-			} catch (InterruptedException e) {}
-		}
+	public MemoryConnection(BlockingQueue<Runnable> threadQueue, boolean setID) {
+		this.threadQueue = threadQueue;
+		this.setID = setID;
 	}
 	
 	@Override
 	public void send(Packet packet) {
 		try {
-			out.put(packet.send());
+			threadQueue.put(() -> packet.handle(setID ? Client.getIdentity() : null));
 		} catch (InterruptedException e) {}
 	}
 
 	@Override
 	public Ack sendWithAck(Packet packet) {
+		Ack ack = new Ack();
+		
 		try {
-			out.put(packet.send());
+			threadQueue.put(() -> {
+				packet.handle(setID ? Client.getIdentity() : null);
+				ack.trigger();
+			});
 		} catch (InterruptedException e) {}
 		
-		return DONE;
+		return ack;
 	}
 }

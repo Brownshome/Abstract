@@ -1,14 +1,18 @@
 package abstractgame.ui;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.vecmath.Vector2f;
 
+import abstractgame.net.ServerProxy;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
 import abstractgame.ui.elements.Button;
 import abstractgame.ui.elements.LabeledSingleTextEntry;
-import abstractgame.ui.elements.Line;
+import abstractgame.ui.elements.NamedCheckBox;
 import abstractgame.ui.elements.SingleLineTextEntry;
-import abstractgame.ui.elements.UIElement;
+import abstractgame.util.ApplicationException;
 
 public class ServerScreen extends Screen {
 	public static ServerScreen INSTANCE = new ServerScreen();
@@ -17,18 +21,27 @@ public class ServerScreen extends Screen {
 	static SingleLineTextEntry addressJoin = new LabeledSingleTextEntry(new Vector2f(-.9f, .15f), new Vector2f(-.3f, .25f), 0, "Address: ");
 	
 	static SingleLineTextEntry portHost = new LabeledSingleTextEntry(new Vector2f(.1f, .35f), new Vector2f(.7f, .45f), 0, "Port:    ");
-	static SingleLineTextEntry nameHost = new LabeledSingleTextEntry(new Vector2f(.1f, .15f), new Vector2f(.7f, .25f), 0, "Name:    ");
-	static SingleLineTextEntry configFileHost = new LabeledSingleTextEntry(new Vector2f(.1f, -.05f), new Vector2f(.7f, .05f), 0, "Config:  ");
+	static SingleLineTextEntry configFileHost = new LabeledSingleTextEntry(new Vector2f(.1f, .15f), new Vector2f(.7f, .25f), 0, "Config:  ");
+	static NamedCheckBox privateButton = new NamedCheckBox(new Vector2f(.1f, -.05f), new Vector2f(.7f, .05f), "Open Connection", 0);
 	
 	static Button joinButton = new Button.Weak(new Vector2f(-.8f, -.8f), new Vector2f(-.2f, -.7f), "Join", ServerScreen::join);
 	static Button hostButton = new Button.Weak(new Vector2f(.2f, -.8f), new Vector2f(.8f, -.7f), "Host", ServerScreen::host);
 	
 	static void join() {
-		assert false : "not implemented";
+		try {
+			ServerProxy.connectToServer(InetAddress.getByName(addressJoin.getText()), Integer.parseInt(portJoin.getText()));
+		} catch (UnknownHostException e) {
+			throw new ApplicationException("Host not found", "SERVER SCREEN");
+		}
 	}
 	
 	static void host() {
-		assert false : "not implemented";
+		boolean connection = privateButton.getState();
+		
+		if(connection)
+			ServerProxy.startIntegratedServer(Integer.parseInt(portHost.getText()), configFileHost.getText());
+		else
+			ServerProxy.startPrivateServer(configFileHost.getText());
 	}
 	
 	@Override
@@ -37,9 +50,9 @@ public class ServerScreen extends Screen {
 		UIRenderer.addElement(portHost);
 		UIRenderer.addElement(addressJoin);
 		UIRenderer.addElement(configFileHost);
-		UIRenderer.addElement(nameHost);
 		UIRenderer.addElement(joinButton);
 		UIRenderer.addElement(hostButton);
+		UIRenderer.addElement(privateButton);
 	}
 	
 	@Override
@@ -54,8 +67,8 @@ public class ServerScreen extends Screen {
 		UIRenderer.removeElement(portHost);
 		UIRenderer.removeElement(addressJoin);
 		UIRenderer.removeElement(configFileHost);
-		UIRenderer.removeElement(nameHost);
 		UIRenderer.removeElement(joinButton);
 		UIRenderer.removeElement(hostButton);
+		UIRenderer.removeElement(privateButton);
 	}
 }

@@ -1,9 +1,7 @@
 package abstractgame;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 import javax.vecmath.Vector3f;
 
@@ -15,8 +13,10 @@ import abstractgame.io.config.ConfigFile;
 import abstractgame.io.user.Console;
 import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
-import abstractgame.net.Server;
-import abstractgame.net.packet.Packet;
+import abstractgame.net.Identity;
+import abstractgame.net.ServerProxy;
+import abstractgame.net.Side;
+import abstractgame.net.Sided;
 import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
 import abstractgame.render.Renderer;
@@ -26,7 +26,9 @@ import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;
 import abstractgame.world.World;
 
-public class Game {
+/** This is the main class for the client */
+@Sided(Side.CLIENT)
+public class Client {
 	/*  The final game will most probably have an IO thread, a phyiscs thread and a render thread
 	 *  atm the physics thread and render thread are the same
 	 */
@@ -36,7 +38,7 @@ public class Game {
 	public static final Clock GAME_CLOCK = new Clock();
 	public static final String NAME = "ABSTRACT";
 	
-	public static Server server;
+	public static BlockingQueue<Runnable> inboundPackets = new SynchronousQueue<>();
 	
 	public static void main(String[] args) {
 		try {
@@ -85,7 +87,7 @@ public class Game {
 		setupErrorHandlingAndLogging();
 		Renderer.createDisplay();
 		Renderer.initializeRenderer();
-		KeyBinds.add(Game::close, Keyboard.KEY_ESCAPE, PerfIO.BUTTON_PRESSED, "game.exit");
+		KeyBinds.add(Client::close, Keyboard.KEY_ESCAPE, PerfIO.BUTTON_PRESSED, "game.exit");
 		
 		FreeCamera c = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
 		
@@ -106,6 +108,7 @@ public class Game {
 		
 		Camera.setCameraHost(c);
 		
+		ServerProxy.startClientNetThread();
 		Screen.setScreen(TitleScreen.INSTANCE);
 	}
 	
@@ -113,5 +116,14 @@ public class Game {
 		Thread.setDefaultUncaughtExceptionHandler(Console::error);
 		Console.setLevel(GLOBAL_CONFIG.getProperty("logging.level", 0));
 		Console.setFormat(GLOBAL_CONFIG.getProperty("logging.format", "HH:mm:ss"));
+	}
+
+	static Identity ID = new Identity("James", 11257);
+	public static Identity getIdentity() {
+		return ID;
+	}
+
+	public static BlockingQueue<Runnable> getInboundQueue() {
+		return inboundPackets;
 	}
 }

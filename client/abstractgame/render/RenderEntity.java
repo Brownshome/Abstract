@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.model.Model;
 import abstractgame.util.Util;
 import abstractgame.world.entity.BasicEntity;
@@ -63,7 +63,7 @@ public class RenderEntity extends BasicEntity {
 		QuaternionUtil.quatRotate(parent.getOrientation(), super.getPosition(), positionCashe);
 		positionCashe.add(parent.getPosition());
 		
-		lastFrame = Game.GAME_CLOCK.getFrame();
+		lastFrame = Client.GAME_CLOCK.getFrame();
 	}
 	
 	@Override
@@ -71,7 +71,7 @@ public class RenderEntity extends BasicEntity {
 		if(parent == null)
 			return super.getOrientation();
 		
-		if(Game.GAME_CLOCK.getFrame() != lastFrame)
+		if(Client.GAME_CLOCK.getFrame() != lastFrame)
 			updateCashe();
 			
 		return orientationCashe;
@@ -82,7 +82,7 @@ public class RenderEntity extends BasicEntity {
 		if(parent == null)
 			return super.getPosition();
 		
-		if(Game.GAME_CLOCK.getFrame() != lastFrame)
+		if(Client.GAME_CLOCK.getFrame() != lastFrame)
 			updateCashe();
 			
 		return positionCashe;

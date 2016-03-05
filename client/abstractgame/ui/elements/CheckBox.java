@@ -80,4 +80,8 @@ public class CheckBox extends UIElement {
 	public void fillLines(FloatBuffer buffer) {
 		line.fillLines(buffer);
 	}
+	
+	public boolean getState() {
+		return checked;
+	}
 }

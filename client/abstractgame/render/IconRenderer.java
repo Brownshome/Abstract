@@ -18,7 +18,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL42;
 
-import abstractgame.Game;
+import abstractgame.Client;
 import abstractgame.io.image.ImageIO;
 import abstractgame.io.image.Texture;
 import abstractgame.ui.elements.Icon;
