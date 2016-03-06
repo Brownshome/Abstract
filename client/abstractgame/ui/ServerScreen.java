@@ -5,7 +5,9 @@ import java.net.UnknownHostException;
 
 import javax.vecmath.Vector2f;
 
+import abstractgame.net.InternalServerProxy;
 import abstractgame.net.ServerProxy;
+import abstractgame.net.packet.QueryPacket;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
 import abstractgame.ui.elements.Button;
@@ -29,7 +31,13 @@ public class ServerScreen extends Screen {
 	
 	static void join() {
 		try {
-			ServerProxy.connectToServer(InetAddress.getByName(addressJoin.getText()), Integer.parseInt(portJoin.getText()));
+			if(ServerProxy.getCurrentServerProxy() instanceof InternalServerProxy) {
+				ServerProxy.getCurrentServerProxy().getConnection().sendWithAck(new QueryPacket());
+			} else {
+				ServerProxy.connectToServer(InetAddress.getByName(addressJoin.getText()), Integer.parseInt(portJoin.getText()));
+			}
+			
+			Screen.setScreen(GameScreen.INSTANCE);
 		} catch (UnknownHostException e) {
 			throw new ApplicationException("Host not found", "SERVER SCREEN");
 		}
@@ -38,10 +46,21 @@ public class ServerScreen extends Screen {
 	static void host() {
 		boolean connection = privateButton.getState();
 		
-		if(connection)
+		if(connection) {
 			ServerProxy.startIntegratedServer(Integer.parseInt(portHost.getText()), configFileHost.getText());
-		else
+			portJoin.setText(portHost.getText());
+		} else {
+			portJoin.setText("Memory");
 			ServerProxy.startPrivateServer(configFileHost.getText());
+		}
+			
+		hostButton.disabled = true;
+		portHost.disabled = true;
+		configFileHost.disabled = true;
+		portJoin.disabled = true;
+		privateButton.disabled = true;
+		addressJoin.disabled = true;
+		addressJoin.setText("localhost");
 	}
 	
 	@Override

@@ -9,19 +9,21 @@ import abstractgame.util.ApplicationException;
 /** This represents the server as viewed from one of the clients */
 @Sided(Side.CLIENT)
 public abstract class ServerProxy {
-	static ServerProxy currentProxy;
+	static ServerProxy INSTANCE;
 	
 	String serverVersion;
+	String mapIdentifier;
+	Identity connected;
 	
 	private static void checkNoServerRunning() {
-		if(currentProxy != null)
+		if(INSTANCE != null)
 			throw new ApplicationException("Server already running", "NET");
 	}
 	
 	public static void startPrivateServer(String config) {
 		checkNoServerRunning();
 		
-		currentProxy = new InternalServerProxy(config);
+		INSTANCE = new InternalServerProxy(config);
 	}
 	
 	public static void startIntegratedServer(int port, String config) {
@@ -35,7 +37,7 @@ public abstract class ServerProxy {
 	}
 	
 	public static ServerProxy getCurrentServerProxy() {
-		return currentProxy;
+		return INSTANCE;
 	}
 	
 	public static void startClientNetThread() {
@@ -54,6 +56,11 @@ public abstract class ServerProxy {
 	
 	public void setVersion(String version) {
 		serverVersion = version;
+	}
+	
+	public void setServerInfo(String worldIdentifier, long[] ids) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public abstract String getName();

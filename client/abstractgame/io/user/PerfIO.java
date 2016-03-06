@@ -76,7 +76,7 @@ public class PerfIO {
 	}
 
 	public static void setRequest(TypingRequest request) {
-		if(PerfIO.request != null) PerfIO.request.finish();
+		if(PerfIO.request != null && PerfIO.request != request) PerfIO.request.finish();
 		PerfIO.request = request;
 	}
 	

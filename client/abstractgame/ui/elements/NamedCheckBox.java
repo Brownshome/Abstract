@@ -54,7 +54,7 @@ public class NamedCheckBox extends CheckBox {
 	public void tick() {
 		super.tick();
 		
-		UIElement.renderTextWithinBounds(from, to, text, UIRenderer.BASE_STRONG, ID, true);
+		UIElement.renderTextWithinBounds(from, to, text, disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG, ID, true);
 	}
 	
 	@Override

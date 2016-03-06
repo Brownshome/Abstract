@@ -1,6 +1,8 @@
 package abstractgame;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
@@ -17,7 +19,6 @@ import abstractgame.net.UDPConnection;
  * Server		Client
  * 				QueryPacket
  * InfoPacket
- * 				ClientInfoPacket
  * 
  * 		.....
  */
@@ -32,6 +33,8 @@ public class Server {
 	public static String name;
 	public static int port;
 	public static String version;
+	public static String mapIdentifier;
+	
 	static boolean isInternal = true;
 	
 	public static void main(String[] args) {
@@ -43,6 +46,7 @@ public class Server {
 		name = file.getProperty("name", "Server");
 		version = file.getProperty("version", "0.1.0");
 		port = file.getProperty("port", 35565);
+		mapIdentifier = file.getProperty("map", "LOCAL:testmap");
 		
 		Thread netThread = new Thread(() -> {
 			while(true) {
@@ -92,5 +96,9 @@ public class Server {
 		}
 		
 		return c;
+	}
+
+	public static Collection<Identity> getConnectedIds() {
+		return CONNECTIONS.keySet();
 	}
 }

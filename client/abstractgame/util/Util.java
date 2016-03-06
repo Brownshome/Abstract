@@ -1,6 +1,12 @@
 package abstractgame.util;
 
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -14,6 +20,33 @@ import org.lwjgl.BufferUtils;
 
 public class Util {
 	private static final FloatBuffer MAT_BUFFER = BufferUtils.createFloatBuffer(16);
+	
+	/** This reads UTF-8 strings terminated by 0xFF, this allows NUL to occur in
+	 * the string without weirdness happening. This will throw  */
+	public static String readTerminatedString(ByteBuffer buffer) {
+		buffer.mark();
+		
+		try {
+			while(buffer.get() != -1);
+		} catch(BufferUnderflowException bue) {
+			throw new ApplicationException("String not 0xFF terminated", "NET");
+		}
+		
+		int oldLimit = buffer.limit();
+		buffer.limit(buffer.position() - 1);
+		buffer.reset();
+		String s = StandardCharsets.UTF_8.decode(buffer).toString();
+		buffer.get(); //discard the NUL byte
+		buffer.limit(oldLimit);
+		return s;
+	}
+	
+	/** This writes UTF-8 strings terminated by 0xFF, this allows NUL to occur in
+	 * the string without weirdness happening */
+	public static void writeTerminatedString(ByteBuffer buffer, String string) {
+		buffer.put(string.getBytes(StandardCharsets.UTF_8));
+		buffer.put((byte) -1); //0xff
+	}
 	
 	public static String collect(List<String> list) {
 		if(list.isEmpty())

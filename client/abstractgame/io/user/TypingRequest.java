@@ -11,17 +11,11 @@ import abstractgame.util.ApplicationException;
 
 public class TypingRequest {
 	/** A request to be used when avoiding null pointer exceptions */
-	public static final TypingRequest DUMMY_REQUEST = new TypingRequest(0, null, false);
-
 	static final int FRAMES_OF_GRACE = 20;
 	static final int POST_GRACE_REFRESH_RATE = 1;
 
 	int ignoreCount = 0;
 	Map<Integer, Supplier<String>> specialActions = new HashMap<>();
-
-	static {
-		DUMMY_REQUEST.done = true;
-	}
 
 	String text = "";
 	final boolean blockOtherKeyEvents;
@@ -34,7 +28,7 @@ public class TypingRequest {
 	Consumer<TypingRequest> l;
 
 	/** l can be null, if that is the case no event will be fired upon termination */
-	TypingRequest(int terminator, Consumer<TypingRequest> l, boolean blockInput) {
+	public TypingRequest(int terminator, Consumer<TypingRequest> l, boolean blockInput) {
 		this.terminator = terminator;
 		this.l = l;
 		this.blockOtherKeyEvents = blockInput;
@@ -260,5 +254,9 @@ public class TypingRequest {
 		if(l != null) l.accept(this);
 		if(PerfIO.request == this) PerfIO.request = null;
 		done = true;
+	}
+
+	public void setIsDone(boolean b) {
+		done = false;
 	}
 }

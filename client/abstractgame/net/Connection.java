@@ -16,6 +16,13 @@ public interface Connection {
 				this.wait();
 		}
 		
+		/** This method simply exits on interupt */
+		public void waitForSafe() {
+			try {
+				waitFor();
+			} catch (InterruptedException e) {}
+		}
+		
 		public synchronized void trigger() {
 			done = true;
 			this.notify();

@@ -22,6 +22,6 @@ public class LabeledSingleTextEntry extends SingleLineTextEntry {
 	public void tick() {
 		super.tick();
 		
-		TextRenderer.addString(label, oldStart, super.textSize, UIRenderer.BASE_STRONG, 0);
+		TextRenderer.addString(label, oldStart, super.textSize, disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG, 0);
 	}
 }

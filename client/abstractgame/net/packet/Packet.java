@@ -50,8 +50,7 @@ public abstract class Packet {
 	public void handleServer(Identity id) { 
 		throw new ApplicationException("Unhandled packet on server " + getClass(), "NET");
 	}
-	
-	public abstract int getSize();
+
 	public abstract void fill(byte[] data, int offset);
 	
 	/** Gets the side that should handle this packet */

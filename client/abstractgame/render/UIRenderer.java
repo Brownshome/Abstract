@@ -21,7 +21,7 @@ public class UIRenderer extends Renderer {
 	/** The base color for basic UI elements */
 	public static final Color4f BASE_STRONG = new Color4f(0, 0, 0, 1);
 	/** A more sudtle base color */
-	public static final Color4f BASE = new Color4f(.5f, .5f, .5f, 1);
+	public static final Color4f BASE = new Color4f(.6f, .6f, .6f, 1);
 	/** An attention grabbing strong color */
 	public static final Color4f HIGHLIGHT_STRONG = new Color4f(1, .2f, 0, 1);
 	/** An attention grabbing weaker color */

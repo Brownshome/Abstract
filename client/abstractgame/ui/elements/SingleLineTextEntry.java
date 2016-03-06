@@ -6,6 +6,8 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import org.lwjgl.input.Keyboard;
+
 import abstractgame.Client;
 import abstractgame.io.user.PerfIO;
 import abstractgame.io.user.TypingRequest;
@@ -15,6 +17,8 @@ import abstractgame.render.UIRenderer;
 
 public class SingleLineTextEntry extends UIElement {
 	static int BLINK_DELAY = 30;
+	
+	public boolean disabled = false;
 	
 	Line base;
 	Line leftBottom;
@@ -29,7 +33,11 @@ public class SingleLineTextEntry extends UIElement {
 	
 	final Color4f colour = new Color4f(UIRenderer.BASE);
 	
-	public TypingRequest request = TypingRequest.DUMMY_REQUEST;
+	TypingRequest request = new TypingRequest(Keyboard.KEY_RETURN, null, true);
+	
+	{
+		request.finish();
+	}
 	
 	int ID = getNewID();
 	
@@ -69,14 +77,13 @@ public class SingleLineTextEntry extends UIElement {
 	}
 	
 	void onClick(Vector2f position) {
-		if(Renderer.hoveredID != ID)
+		if(Renderer.hoveredID != ID || disabled)
 			return;
 		
 		isMouseDown = true;
 		
-		TypingRequest newRequest = PerfIO.getText();
-		newRequest.setText(request.getText());
-		request = newRequest;
+		request.setIsDone(false);
+		PerfIO.setRequest(request);
 		
 		//set the position based on the click location
 		float dist = (position.x - textStart.x) / textSize;
@@ -109,8 +116,7 @@ public class SingleLineTextEntry extends UIElement {
 	
 	@Override
 	public void tick() {
-		colour.set(Renderer.hoveredID == ID || !request.isDone() ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE);
-		
+		colour.set(!disabled && (Renderer.hoveredID == ID || !request.isDone()) ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE);
 		
 		String text = request.getText();
 		
@@ -140,7 +146,7 @@ public class SingleLineTextEntry extends UIElement {
 		}
 		
 		if(!request.isDone() && request.getSelectionIndex() != -1) {
-			ByteBuffer buffer = TextRenderer.encode(text, textStart, textSize, request.isDone() ? UIRenderer.BASE : UIRenderer.BASE_STRONG, 0, ID);
+			ByteBuffer buffer = TextRenderer.encode(text, textStart, textSize, request.isDone() || disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG, 0, ID);
 			
 			int start, end;
 			if(request.getPosition() > request.getSelectionIndex()) {
@@ -202,5 +208,9 @@ public class SingleLineTextEntry extends UIElement {
 
 	public String getText() {
 		return request.getText();
+	}
+
+	public void setText(String text) {
+		request.setText(text);
 	}
 }

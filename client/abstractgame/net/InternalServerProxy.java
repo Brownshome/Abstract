@@ -10,7 +10,6 @@ public class InternalServerProxy extends ServerProxy {
 	public InternalServerProxy(String config) {
 		Server.startServer(config);
 		connection = new MemoryConnection(Server.getInboundPacketQueue(), true);
-		connection.send(new QueryPacket());
 	}
 	
 	@Override

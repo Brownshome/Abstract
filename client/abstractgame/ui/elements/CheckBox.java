@@ -16,6 +16,8 @@ public class CheckBox extends UIElement {
 	HexFill baseFill;
 	HexLine line;
 	int ID;
+
+	public boolean disabled;
 	
 	/** Size is the height of the checkbox in screen space. pos is the center of the checkbox */
 	public CheckBox(Vector2f pos, float size, float layer, int ID) {
@@ -32,7 +34,7 @@ public class CheckBox extends UIElement {
 	@Override
 	public void onAdd() {
 		clickID = PerfIO.addMouseListener(() -> {
-			if(ID == Renderer.hoveredID) 
+			if(ID == Renderer.hoveredID && !disabled) 
 				setState(!checked);
 		}, 0, PerfIO.BUTTON_PRESSED);
 	}
@@ -60,7 +62,8 @@ public class CheckBox extends UIElement {
 	
 	@Override
 	public void tick() {
-		line.colour.set(ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
+		fill.colour = disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG;
+		line.colour.set(disabled ? UIRenderer.BASE : ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
 	}
 	
 	@Override

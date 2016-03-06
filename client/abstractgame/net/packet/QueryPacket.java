@@ -16,11 +16,6 @@ public class QueryPacket extends Packet {
 	}
 
 	@Override
-	public int getSize() {
-		return 0;
-	}
-
-	@Override
 	public void fill(byte[] data, int offset) {
 		//do nothing
 	}

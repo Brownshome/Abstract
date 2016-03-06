@@ -1,5 +1,6 @@
 package abstractgame;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
@@ -24,6 +25,7 @@ import abstractgame.time.Clock;
 import abstractgame.ui.DebugScreen;
 import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;
+import abstractgame.util.Util;
 import abstractgame.world.World;
 
 /** This is the main class for the client */
@@ -76,9 +78,6 @@ public class Client {
 		PerfIO.tick();
 		Renderer.checkGL();
 		
-		if(World.currentWorld != null)
-			World.currentWorld.tick();
-		
 		GAME_CLOCK.tick();
 	}
 
@@ -87,26 +86,10 @@ public class Client {
 		setupErrorHandlingAndLogging();
 		Renderer.createDisplay();
 		Renderer.initializeRenderer();
+		
 		KeyBinds.add(Client::close, Keyboard.KEY_ESCAPE, PerfIO.BUTTON_PRESSED, "game.exit");
-		
-		FreeCamera c = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
-		
-		World.currentWorld = new World();
-		World.currentWorld.onTick(c);
-		
-		KeyBinds.add(c::up, Keyboard.KEY_SPACE, PerfIO.BUTTON_DOWN, "free camera.up");
-		KeyBinds.add(c::down, Keyboard.KEY_LSHIFT, PerfIO.BUTTON_DOWN, "free camera.down");
-		KeyBinds.add(c::forward, Keyboard.KEY_W, PerfIO.BUTTON_DOWN, "free camera.forward");
-		KeyBinds.add(c::backward, Keyboard.KEY_S, PerfIO.BUTTON_DOWN, "free camera.backward");
-		KeyBinds.add(c::left, Keyboard.KEY_A, PerfIO.BUTTON_DOWN, "free camera.left");
-		KeyBinds.add(c::right, Keyboard.KEY_D, PerfIO.BUTTON_DOWN, "free camera.right");
-		KeyBinds.add(() -> c.slow = true, Keyboard.KEY_LMENU, PerfIO.BUTTON_DOWN, "free camera.slow");
-		KeyBinds.add(() -> c.slow = false, Keyboard.KEY_LMENU, PerfIO.BUTTON_UP, "free camera.slow");
-		KeyBinds.add(c::stop, Keyboard.KEY_X, PerfIO.BUTTON_PRESSED, "free camera.stop");
 		KeyBinds.add(() -> PerfIO.holdMouse(!PerfIO.holdMouse), Keyboard.KEY_F, PerfIO.BUTTON_PRESSED, "game.free mouse");
 		KeyBinds.add(DebugScreen::toggle, Keyboard.KEY_F3, PerfIO.BUTTON_PRESSED, "debug.toggle debug display");
-		
-		Camera.setCameraHost(c);
 		
 		ServerProxy.startClientNetThread();
 		Screen.setScreen(TitleScreen.INSTANCE);

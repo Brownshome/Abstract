@@ -44,6 +44,8 @@ public abstract class Button extends UIElement {
 		@Override
 		public void tick() {
 			super.tick();
+			
+			fill.colour = disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG;
 		}
 
 		@Override
@@ -58,7 +60,7 @@ public abstract class Button extends UIElement {
 
 		@Override
 		public int getLinesLength() {
-			return ID == Renderer.hoveredID ? line.getLinesLength() : 0;
+			return !disabled && ID == Renderer.hoveredID ? line.getLinesLength() : 0;
 		}
 
 		@Override
@@ -91,7 +93,7 @@ public abstract class Button extends UIElement {
 
 		@Override
 		Color4f getTextColour() {
-			return UIRenderer.BASE_STRONG;
+			return disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG;
 		}
 
 		@Override
@@ -108,7 +110,7 @@ public abstract class Button extends UIElement {
 		public void tick() {
 			super.tick();
 			
-			outline.colour.set(ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
+			outline.colour.set(disabled ? UIRenderer.BASE : ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
 		}
 		
 		@Override
@@ -133,6 +135,8 @@ public abstract class Button extends UIElement {
 	Runnable task;
 	float layer;
 	int ID;
+	
+	public boolean disabled = false;
 
 	public Button(Vector2f from, Vector2f to, String text, Runnable task, float layer, int ID) {
 		this.task = task;
@@ -142,7 +146,7 @@ public abstract class Button extends UIElement {
 		this.layer = layer;
 		this.ID = ID;
 	}
-
+	
 	@Override
 	public void tick() {
 		UIElement.renderTextWithinBounds(from, to, text, getTextColour(), ID, true);
@@ -154,7 +158,7 @@ public abstract class Button extends UIElement {
 	@Override
 	public void onAdd() {
 		clickListenerID = PerfIO.addMouseListener(() -> {
-			if(Renderer.hoveredID == ID)
+			if(Renderer.hoveredID == ID && !disabled)
 				task.run();
 		}, 0, PerfIO.BUTTON_PRESSED);
 	}
