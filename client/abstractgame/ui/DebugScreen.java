@@ -4,6 +4,7 @@ import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
 import abstractgame.Client;
+import abstractgame.render.Camera;
 import abstractgame.render.TextRenderer;
 
 public class DebugScreen extends Screen {
@@ -13,6 +14,9 @@ public class DebugScreen extends Screen {
 	@Override
 	public void tick() {
 		TextRenderer.addString(String.valueOf(Client.GAME_CLOCK.getTPS()), new Vector2f(-1, .95f), .05f, new Color4f(0, 0, 0, 1), 0);
+		
+		TextRenderer.addString("C: " + Camera.position.toString(), new Vector2f(-1, .9f), .05f, new Color4f(0, 0, 0, 1), 0);
+		//TextRenderer.addString(String.valueOf(Client.GAME_CLOCK.getTPS()), new Vector2f(-1, .85f), .05f, new Color4f(0, 0, 0, 1), 0);
 	}
 
 	@Override

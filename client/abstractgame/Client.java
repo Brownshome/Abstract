@@ -1,10 +1,10 @@
 package abstractgame;
 
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
-
-import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -18,15 +18,12 @@ import abstractgame.net.Identity;
 import abstractgame.net.ServerProxy;
 import abstractgame.net.Side;
 import abstractgame.net.Sided;
-import abstractgame.render.Camera;
-import abstractgame.render.FreeCamera;
 import abstractgame.render.Renderer;
 import abstractgame.time.Clock;
 import abstractgame.ui.DebugScreen;
 import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;
-import abstractgame.util.Util;
-import abstractgame.world.World;
+import abstractgame.world.MapObject;
 
 /** This is the main class for the client */
 @Sided(Side.CLIENT)
@@ -39,6 +36,8 @@ public class Client {
 	public static ConfigFile GLOBAL_CONFIG;
 	public static final Clock GAME_CLOCK = new Clock();
 	public static final String NAME = "ABSTRACT";
+	public static Thread THREAD;
+	public static List<Runnable> runnableList = Collections.synchronizedList(new ArrayList<>());
 	
 	public static BlockingQueue<Runnable> inboundPackets = new SynchronousQueue<>();
 	
@@ -73,6 +72,8 @@ public class Client {
 	}
 
 	static void loop() {
+		runnableList.forEach(Runnable::run);
+		runnableList.clear();
 		Screen.tickScreen();
 		Renderer.tick();
 		PerfIO.tick();
@@ -82,10 +83,12 @@ public class Client {
 	}
 
 	static void initialize() {
+		THREAD = Thread.currentThread();
 		GLOBAL_CONFIG = ConfigFile.getFile("globalConfig");
 		setupErrorHandlingAndLogging();
 		Renderer.createDisplay();
 		Renderer.initializeRenderer();
+		MapObject.loadCreators();
 		
 		KeyBinds.add(Client::close, Keyboard.KEY_ESCAPE, PerfIO.BUTTON_PRESSED, "game.exit");
 		KeyBinds.add(() -> PerfIO.holdMouse(!PerfIO.holdMouse), Keyboard.KEY_F, PerfIO.BUTTON_PRESSED, "game.free mouse");
@@ -108,5 +111,9 @@ public class Client {
 
 	public static BlockingQueue<Runnable> getInboundQueue() {
 		return inboundPackets;
+	}
+
+	public static void addTask(Runnable r) {
+		runnableList.add(r);
 	}
 }

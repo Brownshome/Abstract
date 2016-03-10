@@ -4,7 +4,9 @@ import java.net.InetAddress;
 
 import abstractgame.Client;
 import abstractgame.io.user.Console;
+import abstractgame.ui.GameScreen;
 import abstractgame.util.ApplicationException;
+import abstractgame.world.World;
 
 /** This represents the server as viewed from one of the clients */
 @Sided(Side.CLIENT)
@@ -45,7 +47,7 @@ public abstract class ServerProxy {
 			while(true) {
 				try {
 					Client.inboundPackets.take().run();
-				} catch (Exception e) {}
+				} catch (InterruptedException e) {}
 			}
 		}, "CLIENT-NET-THREAD");
 		ioThread.setDaemon(true);
@@ -59,8 +61,12 @@ public abstract class ServerProxy {
 	}
 	
 	public void setServerInfo(String worldIdentifier, long[] ids) {
-		// TODO Auto-generated method stub
+		mapIdentifier = worldIdentifier;
 		
+		if(GameScreen.getWorld() == null || GameScreen.getWorld().getMapIdentifier() != mapIdentifier) {
+			Console.inform("Changing world to: " + mapIdentifier, "WORLD");
+			GameScreen.setWorld(new World(mapIdentifier));
+		}
 	}
 	
 	public abstract String getName();

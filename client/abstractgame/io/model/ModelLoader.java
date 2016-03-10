@@ -3,7 +3,10 @@ package abstractgame.io.model;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
@@ -18,16 +21,33 @@ public class ModelLoader {
 	static final String MODEL_DIR = "res/model/";
 	static final String OBJ_EXT = ".obj";
 	static final String MTL_EXT = ".mtl";
-	static boolean hasPreloaded = false;
 	
-	public static Future<Model> loadModel(String name) {
-		if(!hasPreloaded)
-			return null;
-		
-		return FileIO.IO_THREAD.submit(() -> {
+	static final Map<String, Future<Model>> MODEL_FUTURES = new HashMap<>();
+	
+	/** This method does nothing if the model is already loading */
+	public static void preLoadModel(String name) {
+		MODEL_FUTURES.putIfAbsent(name, FileIO.IO_THREAD.submit(() -> {
 			List<String> lines = Files.readAllLines(Paths.get(MODEL_DIR + name + OBJ_EXT));
 			return decodeOBJ(lines);
-		});
+		}));
+	}
+
+	/** Loads a model, this method will block until the model is loaded
+	 * if the model was not preloaded by a prior call to preLoadModel */
+	public static Model loadModel(String name) {
+		Future<Model> task = MODEL_FUTURES.get(name);
+		if(task != null) {
+			try {
+				return task.get();
+			} catch (InterruptedException e) {
+				//DO NOTHING
+			} catch (ExecutionException e) {
+				throw new ApplicationException("Error loading model", "MODEL IO");
+			}
+		}
+		
+		preLoadModel(name);
+		return loadModel(name);
 	}
 
 	static Model decodeOBJ(List<String> lines) {

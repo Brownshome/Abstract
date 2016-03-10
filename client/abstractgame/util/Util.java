@@ -18,6 +18,8 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.BufferUtils;
 
+import abstractgame.Client;
+
 public class Util {
 	private static final FloatBuffer MAT_BUFFER = BufferUtils.createFloatBuffer(16);
 	
@@ -128,5 +130,10 @@ public class Util {
 	public static void upright(Quat4d quat) {
 		Matrix3d mat = new Matrix3d();
 		mat.set(quat);
+	}
+
+	/** Runs the task on the main thread */
+	public static void queueOnMainThread(Runnable r) {
+		Client.addTask(r);
 	}
 }

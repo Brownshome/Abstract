@@ -33,7 +33,9 @@ public class InfoPacket extends Packet {
 
 	@Override
 	public void handleClient() {
-		ServerProxy.getCurrentServerProxy().setServerInfo(worldIdentifier, ids);
+		Util.queueOnMainThread(() -> {
+			ServerProxy.getCurrentServerProxy().setServerInfo(worldIdentifier, ids);
+		});
 	}
 
 	@Override

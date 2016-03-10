@@ -1,0 +1,17 @@
+format on next load: false
+size: [100.0, 100.0]
+objects:
+  - type: static
+    model: box
+    position: [0.0, 2.0, 0.0]
+    orientation: [0.707, 0.0, 0.0, 0.707]
+  
+  - type: static
+    model: box
+    position: [0.0, 0.0, 0.0]
+    orientation: [0.0, 0.0, 0.0, 1.0]
+  
+  - type: static
+    model: CorridorWithBarricade
+    position: [0.0, 1.0, 0.0]
+    orientation: [0.0, 0.0, 0.0, 1.0]

@@ -36,6 +36,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
@@ -56,8 +57,6 @@ public abstract class Renderer {
 	public static boolean vSync = false;
 	
 	private static final List<Renderer> RENDERERS = new ArrayList<>();
-	
-	private static int IDTexture;
 	
 	/** Don't edit this unless you know what you are doing */
 	public static int MAIN_FRAMEBUFFER;

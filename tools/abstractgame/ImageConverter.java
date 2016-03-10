@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -59,7 +57,6 @@ public class ImageConverter {
 		
 		IntStream.range(0, destResX).parallel().forEach(x -> {
 			for(int y = 0; y < destResY; y++) {
-				int tmp = 100 * (x * destResY + y) / (destResX * destResY);		
 				//decide whether the sample is inside or outside
 
 				//x & 0x80 != 0  ==  x > 127 in unsigned
