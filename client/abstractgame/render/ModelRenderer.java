@@ -15,7 +15,7 @@ import com.bulletphysics.linearmath.MatrixUtil;
 
 import abstractgame.util.Util;
 
-public class ModelRenderer extends Renderer {
+public class ModelRenderer implements Renderer {
 	static boolean isDirty = false;
 	
 	static List<RenderEntity> staticMesh = new ArrayList<>();
@@ -51,9 +51,9 @@ public class ModelRenderer extends Renderer {
 	
 	@Override
 	public void initialize() {
-		int vertexShader = Renderer.createShader("model-vertex", GL20.GL_VERTEX_SHADER);
-		int fragmentShader = Renderer.createShader("model-fragment", GL20.GL_FRAGMENT_SHADER);
-		modelProgram = Renderer.createProgram(vertexShader, fragmentShader);
+		int vertexShader = GLHandler.createShader("model-vertex", GL20.GL_VERTEX_SHADER);
+		int fragmentShader = GLHandler.createShader("model-fragment", GL20.GL_FRAGMENT_SHADER);
+		modelProgram = GLHandler.createProgram(vertexShader, fragmentShader);
 		
 		staticMeshVAO = GL30.glGenVertexArrays();
 		staticMeshVBO = GL15.glGenBuffers();

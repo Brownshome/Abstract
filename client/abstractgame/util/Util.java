@@ -136,4 +136,26 @@ public class Util {
 	public static void queueOnMainThread(Runnable r) {
 		Client.addTask(r);
 	}
+
+	/** fills vec with 3 floats from data, reading only the first 3 values */
+	public static Vector3f toVector3f(List<? extends Number> data, Vector3f vec) {
+		vec.set(data.get(0).floatValue(), data.get(1).floatValue(), data.get(2).floatValue());
+		return vec;
+	}
+	
+	/** fills vec with 3 floats from data, reading only the first 3 values */
+	public static Vector3f toVector3f(List<? extends Number> data) {
+		return toVector3f(data, new Vector3f());
+	}
+	
+	/** fills quat with 4 floats from data, reading only the first 4 values */
+	public static Quat4f toQuat4f(List<? extends Number> data, Quat4f quat) {
+		quat.set(data.get(0).floatValue(), data.get(1).floatValue(), data.get(2).floatValue(), data.get(3).floatValue());
+		return quat;
+	}
+	
+	/** fills quat with 4 floats from data, reading only the first 4 values */
+	public static Quat4f toQuat4f(List<? extends Number> data) {
+		return toQuat4f(data);
+	}
 }

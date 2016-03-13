@@ -6,6 +6,7 @@ import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
 import abstractgame.io.user.PerfIO;
+import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
@@ -34,7 +35,7 @@ public class CheckBox extends UIElement {
 	@Override
 	public void onAdd() {
 		clickID = PerfIO.addMouseListener(() -> {
-			if(ID == Renderer.hoveredID && !disabled) 
+			if(ID == GLHandler.hoveredID && !disabled) 
 				setState(!checked);
 		}, 0, PerfIO.BUTTON_PRESSED);
 	}
@@ -63,7 +64,7 @@ public class CheckBox extends UIElement {
 	@Override
 	public void tick() {
 		fill.colour = disabled ? UIRenderer.BASE : UIRenderer.BASE_STRONG;
-		line.colour.set(disabled ? UIRenderer.BASE : ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
+		line.colour.set(disabled ? UIRenderer.BASE : ID == GLHandler.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
 	}
 	
 	@Override

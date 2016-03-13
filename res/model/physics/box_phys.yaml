@@ -1,0 +1,12 @@
+format on next load: false
+type: compound
+children:
+  - type: box
+    offset: [0, 0, 0]
+    orientation: [0, 0, 0, 1]
+    size: [0.5, 0.5, 0.5]
+
+  - type: external
+    offset: [0, 0, 0]
+    orientation: [0, 0, 0, 1]
+    file: littleBox

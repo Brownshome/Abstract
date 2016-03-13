@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
@@ -38,7 +39,7 @@ public class HexFill extends UIElement {
 	void putVertex(float x, float y, FloatBuffer buffer) {
 		buffer.put(x).put(y).put(layer);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);
-		buffer.put(Renderer.encodeIDAsFloat(ID));
+		buffer.put(GLHandler.encodeIDAsFloat(ID));
 	}
 	
 	@Override

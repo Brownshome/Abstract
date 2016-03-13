@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import abstractgame.io.FileIO;
 import abstractgame.io.user.Console;
@@ -39,7 +40,7 @@ public class ConfigFile {
 			return file;
 		});
 	}
-
+	
 	public static ConfigFile loadConfigFile(String name) {
 		try {
 			String lines = FileIO.readTextFileAsString(Paths.get(CONFIG_PATH + name + CONFIG_EXT), true);
@@ -51,12 +52,17 @@ public class ConfigFile {
 		}
 	}
 
-	public static ConfigFile getFile(String name) {
-		return OPEN_FILES.computeIfAbsent(name, ConfigFile::loadConfigFile);
+	public static ConfigFile getFile(String path) {
+		return OPEN_FILES.computeIfAbsent(path, ConfigFile::loadConfigFile);
 	}
 
 	ConfigFile(String file, String name) {
-		map = (LinkedHashMap<String, Object>) PARSER.load(file);
+		try {
+			map = (LinkedHashMap<String, Object>) PARSER.load(file);
+		} catch(ScannerException se) {
+			throw new ApplicationException("Unable to read " + name, se, "IO");
+		}
+		
 		if(map == null)
 			map = new LinkedHashMap<String, Object>();
 		this.name = name;
@@ -106,5 +112,9 @@ public class ConfigFile {
 
 	void writeToFileSystem() {
 		FileIO.writeAsync(Paths.get(CONFIG_PATH + name + CONFIG_EXT), PARSER.dump(map));
+	}
+
+	public Map<String, Object> getTree() {
+		return map;
 	}
 }

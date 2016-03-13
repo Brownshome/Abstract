@@ -9,27 +9,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import abstractgame.io.config.ConfigFile;
+import abstractgame.io.config.Decoder;
+import abstractgame.render.PhysicsRenderer;
 import abstractgame.world.entity.DynamicEntity;
 
+import com.bulletphysics.collision.dispatch.CollisionDispatcher;
+import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 
 /** Represents a game world, when the game is running in embeded server mode there is only one copy
  * held by both the server and client sides */
 public class World extends TickableImpl {
-	DiscreteDynamicsWorld physicsWorld;
+	public DiscreteDynamicsWorld physicsWorld;
 
-	public static final String MAP_FOLDER = "maps/";
+	public static final String MAP_FOLDER = "../maps/";
 	
-	static final Map<String, MapObjectReader> CREATORS = new HashMap<>();
-	
-	/** No check is made for duplicate entries */
-	public static void regesterObjectType(String name, MapObjectReader creator) {
-		CREATORS.put(name, creator);
-	}
-	
-	public static boolean isRegestered(String name) {
-		return CREATORS.containsKey(name);
-	}
+	public static final Map<String, Decoder<MapObject>> DECODERS = new HashMap<>();
 	
 	static enum Source {
 		SERVER,
@@ -47,6 +42,9 @@ public class World extends TickableImpl {
 	List<MapObject> mapObjects = new ArrayList<>();
 
 	public World(String identifier) {
+		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), null, null, null);
+		physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
+		
 		String[] split = identifier.split(":");
 		
 		name = split[1];
@@ -66,7 +64,7 @@ public class World extends TickableImpl {
 		
 		List<Map<String, Object>> objects = mapFile.getProperty("objects", Collections.EMPTY_LIST, List.class);
 		
-		mapObjects = objects.stream().map(o -> CREATORS.get(o.get("type")).apply(o)).collect(Collectors.toList());
+		mapObjects = objects.stream().map(o -> DECODERS.get(o.get("type")).apply(o)).collect(Collectors.toList());
 		mapObjects.forEach(o -> o.addToWorld(this));
 	}
 	

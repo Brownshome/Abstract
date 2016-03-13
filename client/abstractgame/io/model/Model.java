@@ -29,13 +29,11 @@ public class Model {
 	public IntBuffer indexBuffer;
 
 	Vector3f[] vertexs;
-	Vector2f[] textureCoords;
 	Vector3f[] normals;
 	Face[] faces;
 
-	public Model(Vector3f[] vertexs, Vector2f[] textureCoords, Vector3f[] normals, Face[] faces) {
+	public Model(Vector3f[] vertexs, Vector3f[] normals, Face[] faces) {
 		this.vertexs = vertexs;
-		this.textureCoords = textureCoords;
 		this.normals = normals;
 		this.faces = faces;
 	}
@@ -60,6 +58,7 @@ public class Model {
 				this.array = array;
 			}
 
+			@Override
 			public boolean equals(Object other) {
 				if(!(other instanceof WrappedIntArray))
 					return false;
@@ -73,6 +72,7 @@ public class Model {
 				return true;
 			}
 
+			@Override
 			public int hashCode() {
 				int hash = 7;
 
@@ -84,6 +84,7 @@ public class Model {
 				return hash;
 			}
 
+			@Override
 			public String toString() {
 				return Arrays.toString(array);
 			}

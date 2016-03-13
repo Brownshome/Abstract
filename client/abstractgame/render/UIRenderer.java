@@ -15,7 +15,7 @@ import org.lwjgl.opengl.GL30;
 import abstractgame.ui.elements.UIElement;
 
 /** The UI renderer renders buttons, taskbars and window frames */
-public class UIRenderer extends Renderer {
+public class UIRenderer implements Renderer {
 	//modders can change any of these
 	
 	/** The base color for basic UI elements */
@@ -49,9 +49,9 @@ public class UIRenderer extends Renderer {
 	
 	@Override
 	public void initialize() {
-		int vertex = Renderer.createShader("ui-vertex", GL20.GL_VERTEX_SHADER);
-		int fragment = Renderer.createShader("ui-fragment", GL20.GL_FRAGMENT_SHADER);
-		flatProgram = Renderer.createProgram(vertex, fragment);
+		int vertex = GLHandler.createShader("ui-vertex", GL20.GL_VERTEX_SHADER);
+		int fragment = GLHandler.createShader("ui-fragment", GL20.GL_FRAGMENT_SHADER);
+		flatProgram = GLHandler.createProgram(vertex, fragment);
 		
 		flatVAO = GL30.glGenVertexArrays();
 		flatVBO = GL30.glGenVertexArrays();

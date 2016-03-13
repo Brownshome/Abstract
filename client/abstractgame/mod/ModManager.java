@@ -9,4 +9,9 @@ public class ModManager {
 	public void postGameInitMods() {
 		
 	}
+
+	public static void loadHooks() {
+		// TODO Auto-generated method stub
+		
+	}
 }

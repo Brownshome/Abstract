@@ -26,7 +26,7 @@ import abstractgame.util.ApplicationException;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 /** Renderers alpha tested images */
-public class IconRenderer extends Renderer {
+public class IconRenderer implements Renderer {
 	static final int ICON_RES = 128;
 	
 	static int VBO;
@@ -82,13 +82,13 @@ public class IconRenderer extends Renderer {
 		GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 40, 24);
 		GL30.glVertexAttribIPointer(3, 1, GL11.GL_UNSIGNED_INT, 40, 36);
 		
-		int vertexShader = Renderer.createShader("icon-vertex", GL20.GL_VERTEX_SHADER);
-		ICON_PROGRAM = Renderer.createProgram(vertexShader, Renderer.alphaTestShader);
+		int vertexShader = GLHandler.createShader("icon-vertex", GL20.GL_VERTEX_SHADER);
+		ICON_PROGRAM = GLHandler.createProgram(vertexShader, GLHandler.alphaTestShader);
 		
 		TEXTURE = GL11.glGenTextures();
 		
 		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
-		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(ICON_RES), GL30.GL_R8, ICON_RES, ICON_RES, iconNames.size());
+		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, GLHandler.getNumberOfMipmaps(ICON_RES), GL30.GL_R8, ICON_RES, ICON_RES, iconNames.size());
 		
 		int layer = 0;
 		for(Future<Texture> t : textureFutures) {

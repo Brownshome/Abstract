@@ -3,6 +3,8 @@ game:
   vsync: V
   exit: ESCAPE
   free mouse: F
+debug:
+  toggle debug display: F3
 free camera:
   up: SPACE
   down: LSHIFT
@@ -12,5 +14,3 @@ free camera:
   right: D
   slow: LMENU
   stop: X
-debug:
-  toggle debug display: F3

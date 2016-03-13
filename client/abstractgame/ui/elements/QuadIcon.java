@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.GLHandler;
 import abstractgame.render.IconRenderer;
 import abstractgame.render.Renderer;
 
@@ -25,7 +26,7 @@ public class QuadIcon extends Icon {
 	
 	@Override
 	public void fillBuffer(FloatBuffer buffer) {
-		float encodedID = Renderer.encodeIDAsFloat(ID);
+		float encodedID = GLHandler.encodeIDAsFloat(ID);
 		
 		buffer.put(from.x).put(from.y);
 		buffer.put(colour.x).put(colour.y).put(colour.z).put(colour.w);

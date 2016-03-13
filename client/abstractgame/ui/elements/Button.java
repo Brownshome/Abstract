@@ -6,6 +6,7 @@ import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
 import abstractgame.io.user.PerfIO;
+import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
@@ -60,12 +61,12 @@ public abstract class Button extends UIElement {
 
 		@Override
 		public int getLinesLength() {
-			return !disabled && ID == Renderer.hoveredID ? line.getLinesLength() : 0;
+			return !disabled && ID == GLHandler.hoveredID ? line.getLinesLength() : 0;
 		}
 
 		@Override
 		public void fillLines(FloatBuffer buffer) {
-			if(ID == Renderer.hoveredID) {
+			if(ID == GLHandler.hoveredID) {
 				line.fillLines(buffer);
 			}
 		}
@@ -78,7 +79,7 @@ public abstract class Button extends UIElement {
 		public Weak(Vector2f from, Vector2f to, String text, Runnable task, float layer, int ID) {
 			super(new Vector2f(from), new Vector2f(to), text, task, layer, ID);
 
-			float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * Renderer.xCorrectionScalar;
+			float taperDist = HexFill.TAPER_MULT * (to.y - from.y) * GLHandler.xCorrectionScalar;
 
 			super.from.x += taperDist;
 			super.to.x -= taperDist;
@@ -110,7 +111,7 @@ public abstract class Button extends UIElement {
 		public void tick() {
 			super.tick();
 			
-			outline.colour.set(disabled ? UIRenderer.BASE : ID == Renderer.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
+			outline.colour.set(disabled ? UIRenderer.BASE : ID == GLHandler.hoveredID ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE_STRONG);
 		}
 		
 		@Override
@@ -158,7 +159,7 @@ public abstract class Button extends UIElement {
 	@Override
 	public void onAdd() {
 		clickListenerID = PerfIO.addMouseListener(() -> {
-			if(Renderer.hoveredID == ID && !disabled)
+			if(GLHandler.hoveredID == ID && !disabled)
 				task.run();
 		}, 0, PerfIO.BUTTON_PRESSED);
 	}

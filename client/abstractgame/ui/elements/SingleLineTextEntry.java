@@ -11,6 +11,7 @@ import org.lwjgl.input.Keyboard;
 import abstractgame.Client;
 import abstractgame.io.user.PerfIO;
 import abstractgame.io.user.TypingRequest;
+import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
@@ -77,7 +78,7 @@ public class SingleLineTextEntry extends UIElement {
 	}
 	
 	void onClick(Vector2f position) {
-		if(Renderer.hoveredID != ID || disabled)
+		if(GLHandler.hoveredID != ID || disabled)
 			return;
 		
 		isMouseDown = true;
@@ -116,7 +117,7 @@ public class SingleLineTextEntry extends UIElement {
 	
 	@Override
 	public void tick() {
-		colour.set(!disabled && (Renderer.hoveredID == ID || !request.isDone()) ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE);
+		colour.set(!disabled && (GLHandler.hoveredID == ID || !request.isDone()) ? UIRenderer.HIGHLIGHT_STRONG : UIRenderer.BASE);
 		
 		String text = request.getText();
 		

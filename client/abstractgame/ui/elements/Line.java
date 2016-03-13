@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.UIRenderer;
 
@@ -41,7 +42,7 @@ public class Line extends UIElement {
 		buffer.put(colour.y);
 		buffer.put(colour.z);
 		buffer.put(colour.w);
-		buffer.put(Renderer.encodeIDAsFloat(ID));
+		buffer.put(GLHandler.encodeIDAsFloat(ID));
 
 		buffer.put(to.x);
 		buffer.put(to.y);
@@ -50,7 +51,7 @@ public class Line extends UIElement {
 		buffer.put(colour.y);
 		buffer.put(colour.z);
 		buffer.put(colour.w);
-		buffer.put(Renderer.encodeIDAsFloat(ID));
+		buffer.put(GLHandler.encodeIDAsFloat(ID));
 	}
 
 	@Override

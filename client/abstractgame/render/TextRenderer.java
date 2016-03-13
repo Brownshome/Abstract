@@ -29,7 +29,7 @@ import abstractgame.io.user.Console;
 import abstractgame.util.ApplicationException;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
-public class TextRenderer extends Renderer {
+public class TextRenderer implements Renderer {
 	static final int GRID_ROWS = 8;
 	static final int GRID_COLUMNS = 16;
 	static final String FONT_PATH = "path/";
@@ -51,12 +51,6 @@ public class TextRenderer extends Renderer {
 
 	static ArrayList<ByteBuffer> buffer = new ArrayList<>();
 	static int length;
-
-	public static void updateCorrectionFactor() {
-		xCorrectionScalar = (float) Display.getHeight() / Display.getWidth();
-		GL20.glUseProgram(PROGRAM);
-		GL20.glUniform1f(2, xCorrectionScalar);
-	}
 
 	@Override
 	public void initialize() {
@@ -94,18 +88,18 @@ public class TextRenderer extends Renderer {
 		GL30.glVertexAttribIPointer(5, 1, GL11.GL_UNSIGNED_INT, b, 30);
 
 		//create the program
-		int vertex = Renderer.createShader("text-vertex", GL20.GL_VERTEX_SHADER);
-		int geometry = Renderer.createShader("text-geometry", GL32.GL_GEOMETRY_SHADER);
+		int vertex = GLHandler.createShader("text-vertex", GL20.GL_VERTEX_SHADER);
+		int geometry = GLHandler.createShader("text-geometry", GL32.GL_GEOMETRY_SHADER);
 
-		PROGRAM = Renderer.createProgram(vertex, geometry, alphaTestShader);
+		PROGRAM = GLHandler.createProgram(vertex, geometry, GLHandler.alphaTestShader);
 
-		Renderer.checkGL();
+		GLHandler.checkGL();
 		
 		//load the texture file
 		TEXTURE = GL11.glGenTextures();
 		GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, TEXTURE);
 		
-		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, Renderer.getNumberOfMipmaps(textureSize), GL30.GL_R8, textureSize, textureSize, textureNames.size());
+		GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, GLHandler.getNumberOfMipmaps(textureSize), GL30.GL_R8, textureSize, textureSize, textureNames.size());
 		
 		int layer = 0;
 		for(String textureName : textureNames) {
@@ -122,7 +116,7 @@ public class TextRenderer extends Renderer {
 			GL12.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer++, textureSize, textureSize, 1, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, texture.data);
 		}
 
-		Renderer.checkGL();
+		GLHandler.checkGL();
 		
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
@@ -130,14 +124,18 @@ public class TextRenderer extends Renderer {
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 		GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D_ARRAY);
 
-		xCorrectionScalar = (float) Display.getHeight() / Display.getWidth();
-
 		GL20.glUseProgram(PROGRAM);
 		GL20.glUniform1i(0, GRID_ROWS);
 		GL20.glUniform1i(1, GRID_COLUMNS);
-		GL20.glUniform1f(2, xCorrectionScalar);
+		GL20.glUniform1f(2, GLHandler.xCorrectionScalar);
 
-		Renderer.checkGL();
+		GLHandler.checkGL();
+	}
+	
+	@Override
+	public void onAspectChange() {
+		GL20.glUseProgram(TextRenderer.PROGRAM);
+		GL20.glUniform1f(2, GLHandler.xCorrectionScalar);
 	}
 	
 	public static void addString(String text, Vector2f position, float size, Color4f colour, int font, int ID) {
@@ -170,7 +168,7 @@ public class TextRenderer extends Renderer {
 				y -= size;
 				break;
 			case '\t':
-				x += size * TAB_WIDTH * xCorrectionScalar;
+				x += size * TAB_WIDTH * GLHandler.xCorrectionScalar;
 				break;
 			default:
 				data.put((byte) font);
@@ -182,9 +180,9 @@ public class TextRenderer extends Renderer {
 				data.putFloat(colour.z);
 				data.putFloat(colour.w);
 				data.putFloat(size);
-				data.putFloat(Renderer.encodeIDAsFloat(ID));
+				data.putFloat(GLHandler.encodeIDAsFloat(ID));
 			case ' ':
-				x += size * TEXT_WIDTH_MOD * xCorrectionScalar;
+				x += size * TEXT_WIDTH_MOD * GLHandler.xCorrectionScalar;
 			}
 		}
 
@@ -233,7 +231,7 @@ public class TextRenderer extends Renderer {
 
 	/** Does not support multi line strings */
 	public static float getWidth(char c) {
-		return (c == '\t' ? TAB_WIDTH : TEXT_WIDTH_MOD) * xCorrectionScalar;
+		return (c == '\t' ? TAB_WIDTH : TEXT_WIDTH_MOD) * GLHandler.xCorrectionScalar;
 	}
 	
 	/** Returns the width of the text if it was at 1 size, Does not support multi line strings */

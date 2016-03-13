@@ -4,6 +4,7 @@ import javax.vecmath.Vector2f;
 
 import abstractgame.Client;
 import abstractgame.io.user.PerfIO;
+import abstractgame.render.GLHandler;
 import abstractgame.render.IconRenderer;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
@@ -27,13 +28,13 @@ public class TopMenu extends Screen {
 	static Button exitButton = new Button.Weak(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Exit", Client::close, 0, ID_EXIT);
 	static Button creditsButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "Show Credits", () -> Screen.setScreen(CreditScreen.INSTANCE), 0, ID_CREDITS);
 
-	static QuadIcon settings = new QuadIcon(UIRenderer.BASE, new Vector2f(-1.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(-.5f * Renderer.xCorrectionScalar, .5f), "settings", ID_SETTINGS);
-	static QuadIcon server = new QuadIcon(UIRenderer.BASE, new Vector2f(-.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(.5f * Renderer.xCorrectionScalar, .5f), "server", ID_SERVER);
-	static QuadIcon create = new QuadIcon(UIRenderer.BASE, new Vector2f(.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(1.5f * Renderer.xCorrectionScalar, .5f), "new", ID_CREATE);
+	static QuadIcon settings = new QuadIcon(UIRenderer.BASE, new Vector2f(-1.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(-.5f * GLHandler.xCorrectionScalar, .5f), "settings", ID_SETTINGS);
+	static QuadIcon server = new QuadIcon(UIRenderer.BASE, new Vector2f(-.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(.5f * GLHandler.xCorrectionScalar, .5f), "server", ID_SERVER);
+	static QuadIcon create = new QuadIcon(UIRenderer.BASE, new Vector2f(.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(1.5f * GLHandler.xCorrectionScalar, .5f), "new", ID_CREATE);
 
-	static Quad settingsClick = new Quad(new Vector2f(-1.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(-.5f * Renderer.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_SETTINGS);
-	static Quad serverClick = new Quad(new Vector2f(-.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(.5f * Renderer.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_SERVER);
-	static Quad createClick = new Quad(new Vector2f(.5f * Renderer.xCorrectionScalar, -.5f), new Vector2f(1.5f * Renderer.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_CREATE);
+	static Quad settingsClick = new Quad(new Vector2f(-1.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(-.5f * GLHandler.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_SETTINGS);
+	static Quad serverClick = new Quad(new Vector2f(-.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(.5f * GLHandler.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_SERVER);
+	static Quad createClick = new Quad(new Vector2f(.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(1.5f * GLHandler.xCorrectionScalar, .5f), .1f, UIRenderer.BACKGROUND, ID_CREATE);
 
 	static int clickHandler;
 	
@@ -50,11 +51,11 @@ public class TopMenu extends Screen {
 	}
 
 	static void handleClick() {
-		if(Renderer.hoveredID == ID_SETTINGS) {
+		if(GLHandler.hoveredID == ID_SETTINGS) {
 			Screen.setScreen(SettingsScreen.INSTANCE);
-		} else if(Renderer.hoveredID == ID_SERVER) {
+		} else if(GLHandler.hoveredID == ID_SERVER) {
 			Screen.setScreen(ServerScreen.INSTANCE);
-		} else if(Renderer.hoveredID == ID_CREATE) {
+		} else if(GLHandler.hoveredID == ID_CREATE) {
 			Screen.setScreen(CreateScreen.INSTANCE);
 		}
 	}
@@ -65,15 +66,15 @@ public class TopMenu extends Screen {
 		IconRenderer.addIcon(server);
 		IconRenderer.addIcon(create);
 
-		if(Renderer.hoveredID == ID_SETTINGS) {
+		if(GLHandler.hoveredID == ID_SETTINGS) {
 			settings.colour = UIRenderer.BASE_STRONG;
 			server.colour = UIRenderer.BASE;
 			create.colour = UIRenderer.BASE;
-		} else if(Renderer.hoveredID == ID_SERVER) {
+		} else if(GLHandler.hoveredID == ID_SERVER) {
 			settings.colour = UIRenderer.BASE;
 			server.colour = UIRenderer.BASE_STRONG;
 			create.colour = UIRenderer.BASE;
-		} else if(Renderer.hoveredID == ID_CREATE) {
+		} else if(GLHandler.hoveredID == ID_CREATE) {
 			settings.colour = UIRenderer.BASE;
 			server.colour = UIRenderer.BASE;
 			create.colour = UIRenderer.BASE_STRONG;

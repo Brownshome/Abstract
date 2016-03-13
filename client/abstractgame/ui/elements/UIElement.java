@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
 
@@ -17,9 +18,9 @@ public abstract class UIElement {
 	
 	/** Updates the constants used in building the UI */
 	public static void populateValues() {
-		INSET_DIST_X = INSET_DIST_Y * 2 / (float) Math.sqrt(3) * Renderer.xCorrectionScalar;
-		TAPER_MULT = .5f / (float) Math.sqrt(3) * Renderer.xCorrectionScalar;
-		HEX_ASPECT = 2 / (float) Math.sqrt(3) * Renderer.xCorrectionScalar;
+		INSET_DIST_X = INSET_DIST_Y * 2 / (float) Math.sqrt(3) * GLHandler.xCorrectionScalar;
+		TAPER_MULT = .5f / (float) Math.sqrt(3) * GLHandler.xCorrectionScalar;
+		HEX_ASPECT = 2 / (float) Math.sqrt(3) * GLHandler.xCorrectionScalar;
 	}
 	
 	static int ID = 0;
