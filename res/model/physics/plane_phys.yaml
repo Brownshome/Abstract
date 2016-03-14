@@ -1,0 +1,4 @@
+format on next load: false
+type: plane
+normal: [0, 1, 0]
+constant: 0

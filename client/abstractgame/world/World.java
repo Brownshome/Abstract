@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.vecmath.Vector3f;
+
 import abstractgame.Client;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
@@ -49,6 +51,7 @@ public class World extends TickableImpl {
 		//TODO tune these paramaters
 		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), new DbvtBroadphase(), null, new DefaultCollisionConfiguration());
 		physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
+		physicsWorld.setGravity(new Vector3f(0, -0.1f, 0));
 		
 		String[] split = identifier.split(":");
 		

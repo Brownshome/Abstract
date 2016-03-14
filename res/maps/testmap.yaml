@@ -6,5 +6,11 @@ objects:
     physics: 
         file: box
         offset: [0.5, 0.5, 0.5]
-    position: [0.0, 0.0, 0.0]
+    position: [0.0, 5, 0.0]
     orientation: [0, 0.5, 0.5, .707]
+
+  - type: static
+    physics:
+        file: plane
+    position: [0, 0, 0]
+    orientation: [0, 0, 0, 1]

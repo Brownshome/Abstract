@@ -44,7 +44,7 @@ public class StaticMapObject extends RenderEntity implements MapObject {
 		
 		if(model == null) {
 			/** A physics only object */
-			return new PhysicsShapeWrapper(shape, p, q);
+			return new StaticPhysicsObject(shape, p, q);
 		}
 	
 		return new StaticMapObject(model, shape, p, q, o);
