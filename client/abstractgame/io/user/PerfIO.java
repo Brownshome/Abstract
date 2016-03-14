@@ -105,7 +105,7 @@ public class PerfIO {
 		return request = new TypingRequest(terminator, l, block);
 	}
 
-	static int id = Integer.MIN_VALUE;
+	static int id = 0;
 
 	public static void removeMouseListener(int id) {
 		if(isPolling) {
@@ -132,8 +132,15 @@ public class PerfIO {
 	/** returns an index to be used to remove it, The Vector2f is the position of the mouse in the window */
 	public static int addMouseListener(Consumer<Vector2f> action, int button, int flags) {
 		if(isPolling) {
-			afterPoll.add(() -> addMouseListener(action, button, flags));
-			return id;
+			int i = id;
+			
+			afterPoll.add(() -> {
+				if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
+					throw new ApplicationException("Invalid Flag", "KEYBINDS");
+
+				mouseClickListeners.put(i, new MouseListener(action, button, flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)));
+			});
+			return id++;
 		}
 
 		if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
@@ -146,8 +153,15 @@ public class PerfIO {
 
 	public static int addKeyListener(Runnable action, int code, int flags) {
 		if(isPolling) {
-			afterPoll.add(() -> addKeyListener(action, code, flags));
-			return id;
+			int i = id;
+			
+			afterPoll.add(() -> {
+				if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
+					throw new ApplicationException("Invalid Flag", "KEYBINDS");
+
+				keyListeners.put(i, new KeyListener(action, code, flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)));
+			});
+			return id++;
 		}
 
 		if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
