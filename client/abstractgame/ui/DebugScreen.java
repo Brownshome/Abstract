@@ -15,7 +15,7 @@ public class DebugScreen extends Screen {
 	public void tick() {
 		TextRenderer.addString(String.valueOf(Client.GAME_CLOCK.getTPS()), new Vector2f(-1, .95f), .05f, new Color4f(0, 0, 0, 1), 0);
 		
-		TextRenderer.addString("C: " + Camera.position.toString(), new Vector2f(-1, .9f), .05f, new Color4f(0, 0, 0, 1), 0);
+		TextRenderer.addString(String.format("C: (%.2f, %.2f, %.2f)", Camera.position.x, Camera.position.y, Camera.position.z), new Vector2f(-1, .9f), .05f, new Color4f(0, 0, 0, 1), 0);
 		//TextRenderer.addString(String.valueOf(Client.GAME_CLOCK.getTPS()), new Vector2f(-1, .85f), .05f, new Color4f(0, 0, 0, 1), 0);
 	}
 

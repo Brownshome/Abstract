@@ -103,7 +103,8 @@ public class Clock {
 		return frameNo;
 	}
 
-	/** returns the last frame delta in seconds */
+	/** returns the last frame delta in seconds, this returns 0 for the first
+	 * tick */
 	public float getDelta() {
 		return lastDelta / RES;
 	}

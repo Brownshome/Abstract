@@ -5,6 +5,7 @@ game:
   free mouse: F
 debug:
   toggle debug display: F3
+  toggle physics display: F4
 free camera:
   up: SPACE
   down: LSHIFT

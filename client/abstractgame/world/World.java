@@ -8,14 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import abstractgame.Client;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
 import abstractgame.render.PhysicsRenderer;
 import abstractgame.world.entity.DynamicEntity;
 
+import com.bulletphysics.collision.broadphase.DbvtBroadphase;
 import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
+import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 
 /** Represents a game world, when the game is running in embeded server mode there is only one copy
  * held by both the server and client sides */
@@ -42,7 +45,9 @@ public class World extends TickableImpl {
 	List<MapObject> mapObjects = new ArrayList<>();
 
 	public World(String identifier) {
-		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), null, null, null);
+		
+		//TODO tune these paramaters
+		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), new DbvtBroadphase(), null, new DefaultCollisionConfiguration());
 		physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
 		
 		String[] split = identifier.split(":");
@@ -66,6 +71,14 @@ public class World extends TickableImpl {
 		
 		mapObjects = objects.stream().map(o -> DECODERS.get(o.get("type")).apply(o)).collect(Collectors.toList());
 		mapObjects.forEach(o -> o.addToWorld(this));
+	}
+	
+	@Override
+	public void tick() {
+		super.tick();
+		
+		physicsWorld.debugDrawWorld();
+		physicsWorld.stepSimulation(Client.GAME_CLOCK.getDelta(), 7);
 	}
 	
 	public String getMapIdentifier() {

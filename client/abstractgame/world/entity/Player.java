@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import abstractgame.render.CameraHost;
 import abstractgame.world.entity.modules.UpgradeModule;
 
-public class Player extends DynamicEntity {
+public class Player extends DynamicEntity implements CameraHost {
 	double heat;
 	protected List<Runnable> onHeat = new ArrayList<>();
 	
@@ -38,5 +39,11 @@ public class Player extends DynamicEntity {
 
 	public double getHeat() {
 		return heat;
+	}
+
+	@Override
+	public void onCameraUnset() {
+		// TODO Auto-generated method stub
+		
 	}
 }

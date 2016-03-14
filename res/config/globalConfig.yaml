@@ -3,7 +3,7 @@ logging:
   level: 0
   format: HH:mm:ss
 opengl:
-  debug: false
+  debug: true
 display:
   fullscreen: false
   size:
