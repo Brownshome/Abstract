@@ -1,12 +1,10 @@
 package abstractgame.world;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.vecmath.Vector3f;
 
@@ -14,13 +12,13 @@ import abstractgame.Client;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
 import abstractgame.render.PhysicsRenderer;
+import abstractgame.util.ApplicationException;
 import abstractgame.world.entity.DynamicEntity;
 
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;
 import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
-import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 
 /** Represents a game world, when the game is running in embeded server mode there is only one copy
  * held by both the server and client sides */
@@ -40,12 +38,11 @@ public class World extends TickableImpl {
 	String name;
 	Source source;
 	ConfigFile mapFile;
+	Map<String, MapObject> namedObjects = new HashMap<>();
 
 	float sizeX;
 	float sizeY;
-
-	List<MapObject> mapObjects = new ArrayList<>();
-
+	
 	public World(String identifier) {
 		
 		//TODO tune these paramaters
@@ -72,8 +69,17 @@ public class World extends TickableImpl {
 		
 		List<Map<String, Object>> objects = mapFile.getProperty("objects", Collections.EMPTY_LIST, List.class);
 		
-		mapObjects = objects.stream().map(o -> DECODERS.get(o.get("type")).apply(o)).collect(Collectors.toList());
-		mapObjects.forEach(o -> o.addToWorld(this));
+		objects.stream().map(o -> {
+			MapObject object = DECODERS.get(o.get("type")).apply(o);
+			object.setID((String) o.get("ID"));
+			return object;
+		}).forEach(o -> {
+			if(o.getID() != null)
+				if(namedObjects.put(o.getID(), o) != null)
+					throw new ApplicationException("Duplicate map object names: " + o.getID(), "MAP LOADER");
+			
+			o.addToWorld(this);
+		});
 	}
 	
 	@Override

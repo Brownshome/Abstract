@@ -51,6 +51,7 @@ public class StaticMapObject extends RenderEntity implements MapObject {
 	}
 	
 	RigidBody body;
+	String ID;
 	
 	public StaticMapObject(String modelName, CollisionShape shape, Vector3f position, Quat4f orientation, Vector3f offset) {
 		super(ModelLoader.loadModel(modelName), position, orientation);
@@ -83,5 +84,15 @@ public class StaticMapObject extends RenderEntity implements MapObject {
 	public void addToWorld(World world) {
 		ModelRenderer.addDynamicModel(this);
 		world.physicsWorld.addRigidBody(body);
+	}
+
+	@Override
+	public String getID() {
+		return ID;
+	}
+
+	@Override
+	public void setID(String ID) {
+		this.ID = ID;
 	}
 }

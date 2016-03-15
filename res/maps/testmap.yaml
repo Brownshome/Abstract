@@ -14,3 +14,8 @@ objects:
         file: plane
     position: [0, 0, 0]
     orientation: [0, 0, 0, 1]
+    
+  - type: spawn
+    ID: testSpawn
+    position: [0, 0, 0]
+    orientation: [0, 0, 0, 1]

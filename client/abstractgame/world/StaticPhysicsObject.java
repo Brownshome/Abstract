@@ -3,16 +3,16 @@ package abstractgame.world;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import abstractgame.world.entity.BasicEntity;
+
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 
-import abstractgame.io.model.PhysicsMeshLoader;
-import abstractgame.world.entity.BasicEntity;
-
 public class StaticPhysicsObject extends BasicEntity implements MapObject {
 	RigidBody body;
+	String ID;
 	
 	StaticPhysicsObject(CollisionShape shape, Vector3f position, Quat4f orientation) {
 		super(position, orientation);
@@ -37,5 +37,15 @@ public class StaticPhysicsObject extends BasicEntity implements MapObject {
 	@Override
 	public void addToWorld(World world) {
 		world.physicsWorld.addRigidBody(body);
+	}
+	
+	@Override
+	public String getID() {
+		return ID;
+	}
+
+	@Override
+	public void setID(String ID) {
+		this.ID = ID;
 	}
 }
