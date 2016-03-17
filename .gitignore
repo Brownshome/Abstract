@@ -4,3 +4,4 @@
 .classpath
 *.db
 build/
+eclipse/
