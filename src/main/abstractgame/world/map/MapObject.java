@@ -1,4 +1,6 @@
-package abstractgame.world;
+package abstractgame.world.map;
+
+import abstractgame.world.World;
 
 /** Map objects are non-player elements that make up a map */
 public interface MapObject {

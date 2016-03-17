@@ -18,10 +18,15 @@ import abstractgame.util.ApplicationException;
 import abstractgame.util.ProcessFuture;
 
 public class ConfigFile {
-	static final String CONFIG_PATH = "res/config/";
+	public static final String CONFIG_PATH = "resources/config/";
 	static final String CONFIG_EXT = ".yaml";
 	static final Map<String, ConfigFile> OPEN_FILES = new HashMap<>();
 	static final Yaml PARSER;
+	
+	public static enum Policy {
+		WRITE,
+		NO_WRITE
+	}
 	
 	static {
 		DumperOptions dumper = new DumperOptions();
@@ -31,6 +36,7 @@ public class ConfigFile {
 
 	LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 	String name;
+	Policy policy = Policy.WRITE;
 
 	public static Future<ConfigFile> loadConfigFileAsync(String name) {
 		Future<String> innerFuture = FileIO.readTextFileAsyncAsString(Paths.get(CONFIG_PATH + name + CONFIG_EXT), false);
@@ -52,10 +58,26 @@ public class ConfigFile {
 		}
 	}
 
+	public static ConfigFile getFile(String path, Policy policy) {
+		//TODO possibly cashe these values too
+		
+		ConfigFile file = getFile(path);
+		if(file.policy != policy)
+			return new ConfigFile(file, policy);
+		else
+			return file;
+	}
+	
 	public static ConfigFile getFile(String path) {
 		return OPEN_FILES.computeIfAbsent(path, ConfigFile::loadConfigFile);
 	}
 
+	ConfigFile(ConfigFile file, Policy policy) {
+		this.map = file.map;
+		this.name = file.name;
+		this.policy = policy;
+	}
+	
 	ConfigFile(String file, String name) {
 		try {
 			map = (LinkedHashMap<String, Object>) PARSER.load(file);
@@ -74,11 +96,16 @@ public class ConfigFile {
 		}
 	}
 
+	/** This method returns null if there is no value assigned */
+	public <T> T getPropertyNoDefault(String string, Class<T> clazz) {
+		return getProperty(string, null, clazz);
+	}
+	
 	public <T> T getProperty(String location, T defaultValue) {
 		return getProperty(location, defaultValue, (Class<T>) defaultValue.getClass());
 	}
 	
-	public <T extends V, V> T getProperty(String location, T defaultValue, Class<V> clazz) {
+	public <T extends V, V> V getProperty(String location, T defaultValue, Class<V> clazz) {
 		String[] tree = location.split("[.]");
 
 		assert tree.length != 0;
@@ -97,17 +124,22 @@ public class ConfigFile {
 		Object value = mapLevel.get(tree[tree.length - 1]);
 
 		if(value == null) {
-			mapLevel.put(tree[tree.length - 1], defaultValue);
-			writeToFileSystem();
+			if(defaultValue == null)
+				return null;
+			
+			if(policy == Policy.WRITE) {
+				mapLevel.put(tree[tree.length - 1], defaultValue);
+				writeToFileSystem();
+				Console.inform("Config value " + location + " in file " + name + " was missing, creating.", "CONFIG");
+			}
+			
 			value = defaultValue;
-
-			Console.inform("Config value " + location + " in file " + name + " was missing, creating.", "CONFIG");
 		}
 
 		if(!clazz.isAssignableFrom(value.getClass()))
 			throw new ApplicationException("Item " + location + " already exists but is not " + defaultValue.getClass().getSimpleName(), "CONFIG");
 
-		return (T) value;
+		return (V) value;
 	}
 
 	void writeToFileSystem() {

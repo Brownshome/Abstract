@@ -52,7 +52,7 @@ import abstractgame.util.ApplicationException;
 
 public class GLHandler {
 	public static final boolean CHECK_GL = Client.GLOBAL_CONFIG.getProperty("opengl.debug", false);
-	public static final String SHADER_PATH = "res/shaders/";
+	public static final String SHADER_PATH = "resources/shaders/";
 	public static final String SHADER_EXT = ".glsl";
 	public static boolean vSync = false;
 	

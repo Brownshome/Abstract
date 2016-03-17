@@ -18,7 +18,7 @@ import abstractgame.io.FileIO;
 import abstractgame.util.ApplicationException;
 
 public class ModelLoader {
-	static final String MODEL_DIR = "res/model/";
+	static final String MODEL_DIR = "resources/model/";
 	static final String OBJ_EXT = ".obj";
 	
 	static final Map<String, Future<Model>> MODEL_FUTURES = new HashMap<>();

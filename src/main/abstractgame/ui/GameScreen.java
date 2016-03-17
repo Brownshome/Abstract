@@ -46,6 +46,9 @@ public class GameScreen extends Screen {
 	}
 
 	public static void setWorld(World newWorld) {
+		if(world != null)
+			world.cleanUp();
+		
 		world = newWorld;
 		FreeCamera camera = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
 		

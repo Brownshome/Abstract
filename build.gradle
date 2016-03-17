@@ -1,17 +1,25 @@
 apply plugin: 'application'
-apply plugin: 'eclipse'
-apply plugin: 'com.stehno.natives'
 
-mainClassName = "main.Game"
+import org.gradle.internal.os.OperatingSystem
 
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+version = 0.1
+mainClassName = 'abstractgame.Client'
+
+def OS = getOS()
+
+String getOS() {
+    def os = OperatingSystem.current()
+
+    if(os.isWindows()) {
+        return 'windows'
     }
-    dependencies {
-        classpath "gradle.plugin.com.stehno:gradle-natives:0.2.3"
+    
+    if(os.isMacOsX()) {
+        return 'osx'
+    }
+    
+    if(os.isLinux()) {
+        return 'linux'
     }
 }
 
@@ -22,12 +30,35 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDir 'src'
+            srcDir 'src/main'
         }
+        
         resources {
-            srcDir 'res'
+            srcDir 'src/resources'
+            
+            exclude '**/*.java'
         }
+        
+        output.resourcesDir "${buildDir}/resources"
     }
+    
+    logic {
+        java {
+            srcDir 'src/resources/maps'
+        }
+        
+        output.classesDir "${buildDir}/resources/maps"
+    }
+}
+
+jar {
+    exclude { 
+        it.file in sourceSets.main.output.resourcesDir.listFiles()
+    }
+}
+
+classes {
+    finalizedBy logicClasses
 }
 
 dependencies {
@@ -36,22 +67,111 @@ dependencies {
 	compile 'org.yaml:snakeyaml:1.16'
 	compile 'cz.advel.jbullet:jbullet:20101010'
 	compile 'org.l33tlabs.twl:pngdecoder:1.0'
-	compile 'java3d:vecmath:1.3.1'
-
+    
+    logicCompile sourceSets.main.output
 }
 
-natives {
-    jars = [
-        'lwjgl-platform-2.9.3-natives-windows', 
-        'lwjgl-platform-2.9.3-natives-osx', 
-        'lwjgl-platform-2.9.3-natives-linux'
-    ]
-	
-    platforms = 'windows'
+task nameOS << {
+    println OS
 }
+
+def platforms = ['windows', 'linux', 'osx']
+
+import org.gradle.api.internal.plugins.DefaultJavaAppStartScriptGenerationDetails
+
+class DelegateGenerator implements ScriptGenerator {
+    ScriptGenerator delegate
+    String line
+    boolean isLinux
+
+    DelegateGenerator(ScriptGenerator delegate, String line, boolean isLinux) {
+        this.delegate = delegate
+        this.line = line
+        this.isLinux = isLinux
+    }
+    
+    void generateScript(JavaAppStartScriptGenerationDetails details, Writer destination) {
+        List<String> newArgs = new ArrayList<String>(details.defaultJvmOpts)
+        
+        if(isLinux) {
+            destination.write('#!/usr/bin/env bash\n')
+            destination.write('OS = "linux"\n')
+            destination.write('if [[ "$OSTYPE" == "darwin*" ]]; then OS = "osx"  \n')
+        
+            newArgs.add( '-Djava.library.path=natives/$OS' )
+            
+            
+        } else {
+            newArgs.add( '-Djava.library.path=natives/windows' )
+        }
+        
+        destination.write(line)
+        delegate.generateScript(new DefaultJavaAppStartScriptGenerationDetails(
+            details.applicationName, 
+            details.optsEnvironmentVar,
+            details.exitEnvironmentVar,
+            details.mainClassName,
+            newArgs,
+            details.classpath,
+            details.scriptRelPath,
+            details.appNameSystemProperty
+        ), destination)
+    }
+}
+
+startScripts {
+    windowsStartScriptGenerator = new DelegateGenerator(windowsStartScriptGenerator, "@cd ..\n", false)
+    unixStartScriptGenerator = new DelegateGenerator(unixStartScriptGenerator, "cd ..\n", true)
+}
+
+task unpackNatives
+
+platforms.each {
+    platform -> 
+    
+    task "${platform}Natives"(type: Copy) {
+        includeEmptyDirs = false
+    
+        def outDir = "$buildDir/natives/$platform"
+        
+        configurations.compile.resolvedConfiguration.resolvedArtifacts.findAll { 
+            it.classifier == "natives-$platform"
+        }.each {
+            from(zipTree(it.file)) {
+                exclude '**/META-INF/*'
+            }
+        }
+                
+        into file(outDir)
+    }
+    
+    unpackNatives.dependsOn "${platform}Natives"
+}
+
+processResources.dependsOn "unpackNatives"
 
 run {
-	systemProperty 'java.library.path', file( 'build/natives/windows' )
+    doFirst {
+        jvmArgs.clear()
+        jvmArgs.add("-Djava.library.path=natives/${OS}")
+        workingDir "${buildDir}"
+    }
 }
 
-run.dependsOn unpackNatives
+distributions {
+    main {
+        contents {
+            from("${buildDir}/natives") {
+                into "natives"
+            }
+            
+            from("${buildDir}/resources") {
+                into "resources"
+            }
+            
+            /*from(sourceSets.logic.output) {
+                into "resources/maps"
+            }*/
+        }
+    }
+}

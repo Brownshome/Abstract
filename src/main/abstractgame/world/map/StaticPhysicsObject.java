@@ -1,8 +1,9 @@
-package abstractgame.world;
+package abstractgame.world.map;
 
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import abstractgame.world.World;
 import abstractgame.world.entity.BasicEntity;
 
 import com.bulletphysics.collision.shapes.CollisionShape;

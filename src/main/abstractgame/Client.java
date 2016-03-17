@@ -31,9 +31,10 @@ import abstractgame.time.Clock;
 import abstractgame.ui.DebugScreen;
 import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;
-import abstractgame.world.MapObject;
-import abstractgame.world.StaticMapObject;
 import abstractgame.world.World;
+import abstractgame.world.map.MapLogicProxy;
+import abstractgame.world.map.MapObject;
+import abstractgame.world.map.StaticMapObject;
 
 /** This is the main class for the client */
 @Sided(Side.CLIENT)
@@ -41,6 +42,10 @@ public class Client {
 	/*  The final game will most probably have an IO thread, a phyiscs thread and a render thread
 	 *  atm the physics thread and render thread are the same
 	 */
+	
+	static {
+		System.out.println("libraryDir: " + System.getProperty("java.library.path"));
+	}
 	
 	public static boolean close = false;
 	public static ConfigFile GLOBAL_CONFIG;
@@ -106,6 +111,9 @@ public class Client {
 		PhysicsMeshLoader.DECODERS.put("plane", PhysicsMeshLoader::decodePlane);
 		PhysicsMeshLoader.DECODERS.put("compound", PhysicsMeshLoader::decodeCompound);
 		PhysicsMeshLoader.DECODERS.put("external", PhysicsMeshLoader::decodeExternal);
+		
+		MapLogicProxy.DECODERS.put("none", m -> MapLogicProxy.NO_LOGIC);
+		MapLogicProxy.DECODERS.put("java", MapLogicProxy::javaScript);
 		
 		GLHandler.addRenderer(new TextRenderer());
 		GLHandler.addRenderer(new ModelRenderer());

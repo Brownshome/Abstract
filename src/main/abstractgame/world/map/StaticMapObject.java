@@ -1,4 +1,4 @@
-package abstractgame.world;
+package abstractgame.world.map;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +16,7 @@ import abstractgame.io.model.ModelLoader;
 import abstractgame.io.model.PhysicsMeshLoader;
 import abstractgame.render.ModelRenderer;
 import abstractgame.render.RenderEntity;
+import abstractgame.world.World;
 
 public class StaticMapObject extends RenderEntity implements MapObject {
 	public static MapObject creator(Map<String, Object> data) {

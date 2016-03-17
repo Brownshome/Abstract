@@ -29,7 +29,7 @@ import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 public class ImageIO {
-	static final String IMAGE_DIR = "res/image/";
+	static final String IMAGE_DIR = "resources/image/";
 	static final String PNG_EXT = ".png";
 	static final String GLI_EXT = ".gli";
 	static final String DDS_EXT = ".dds";

@@ -1,21 +1,22 @@
 format on next load: false
-size: [100.0, 100.0]
+
+size: [100, 100]
+
+script: 
+    type: java
+    class: abstractgame.maps.TestmapLogic
+
 objects:
   - type: static
     model: box
-    physics: 
+    physics:
         file: box
         offset: [0.5, 0.5, 0.5]
-    position: [0.0, 5, 0.0]
-    orientation: [0, 0.5, 0.5, .707]
-
+    position: [0, 5, 0]
+    orientation: [0, 0.5, 0.5, 0.707]
+  
   - type: static
     physics:
         file: plane
-    position: [0, 0, 0]
-    orientation: [0, 0, 0, 1]
-    
-  - type: spawn
-    ID: testSpawn
     position: [0, 0, 0]
     orientation: [0, 0, 0, 1]
