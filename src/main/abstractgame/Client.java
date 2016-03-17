@@ -1,5 +1,6 @@
 package abstractgame;
 
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
+import abstractgame.security.GamePolicy;
 import abstractgame.time.Clock;
 import abstractgame.ui.DebugScreen;
 import abstractgame.ui.Screen;
@@ -42,10 +44,6 @@ public class Client {
 	/*  The final game will most probably have an IO thread, a phyiscs thread and a render thread
 	 *  atm the physics thread and render thread are the same
 	 */
-	
-	static {
-		System.out.println("libraryDir: " + System.getProperty("java.library.path"));
-	}
 	
 	public static boolean close = false;
 	public static ConfigFile GLOBAL_CONFIG;
@@ -124,7 +122,14 @@ public class Client {
 		ModManager.loadHooks();
 	}
 	
+	static void setupSecurity() {
+		Policy.setPolicy(new GamePolicy());
+		System.setSecurityManager(new SecurityManager());
+	}
+	
 	static void initialize() {
+		setupSecurity();
+		
 		THREAD = Thread.currentThread();
 		GLOBAL_CONFIG = ConfigFile.getFile("globalConfig");
 		setupErrorHandlingAndLogging();

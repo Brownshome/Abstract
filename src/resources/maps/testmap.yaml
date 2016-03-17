@@ -4,7 +4,7 @@ size: [100, 100]
 
 script: 
     type: java
-    class: abstractgame.maps.TestmapLogic
+    class: TestmapLogic
 
 objects:
   - type: static

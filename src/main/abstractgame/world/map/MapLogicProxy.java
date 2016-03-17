@@ -5,11 +5,15 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.Policy;
 import java.util.HashMap;
 import java.util.Map;
 
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
+import abstractgame.security.GamePolicy;
 import abstractgame.util.ApplicationException;
 import abstractgame.world.World;
 
@@ -19,23 +23,14 @@ public interface MapLogicProxy {
 	/** Holds the creators for the different types of map logic */
 	Map<String, Decoder<MapLogicProxy>> DECODERS = new HashMap<>();
 	
-	/** The classloader has been edited so that calls to find abstractgame.maps.CLASSNAME search the maps folder without
-	 * the abstractgame.maps. header */
 	URLClassLoader MAP_CLASSLOADER = createClassLoader();
-	public static final String HEADER = "abstractgame.maps.";
 	
 	static URLClassLoader createClassLoader() {
 		try {
 			return new URLClassLoader(new URL[] { Paths.get(ConfigFile.CONFIG_PATH + World.MAP_FOLDER).toUri().toURL() }) {
 				@Override
-				protected Class<?> findClass(final String string) throws ClassNotFoundException {
-					int i = string.indexOf(HEADER);
-					
-					if(i != -1)
-						return super.findClass(string.substring(i + HEADER.length()));
-					else
-						return super.findClass(string);
-						
+				protected PermissionCollection getPermissions(CodeSource cs) {
+					return super.getPermissions(cs);
 				}
 			};
 		} catch (MalformedURLException e) {
