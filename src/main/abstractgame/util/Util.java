@@ -24,6 +24,8 @@ import abstractgame.Server;
 public class Util {
 	private static final FloatBuffer MAT_BUFFER = BufferUtils.createFloatBuffer(16);
 	
+	public static final Vector3f ZERO_VEC3 = new Vector3f(0, 0, 0);
+	
 	/** This reads UTF-8 strings terminated by 0xFF, this allows NUL to occur in
 	 * the string without weirdness happening. This will throw  */
 	public static String readTerminatedString(ByteBuffer buffer) {

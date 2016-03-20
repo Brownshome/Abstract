@@ -19,7 +19,8 @@ import abstractgame.net.Side;
 import abstractgame.net.Sided;
 import abstractgame.render.PhysicsRenderer;
 import abstractgame.util.ApplicationException;
-import abstractgame.world.entity.DynamicEntity;
+import abstractgame.world.entity.Entity;
+import abstractgame.world.entity.PhysicsEntity;
 import abstractgame.world.entity.Player;
 import abstractgame.world.map.MapLogicProxy;
 import abstractgame.world.map.MapObject;
@@ -124,11 +125,6 @@ public class World extends TickableImpl {
 	public String getMapIdentifier() {
 		return source.toString() + ":" + name;
 	}
-	
-	/** Adds the entity to the physics grid, this will not add it to the tick counter */
-	public void addDynamicEntity(DynamicEntity entity) {
-		physicsWorld.addRigidBody(entity);
-	}
 
 	/** Calls the hooks for the logic proxy to unload */
 	public void cleanUp() {
@@ -149,5 +145,11 @@ public class World extends TickableImpl {
 	/** The handler is called on the server side only */
 	public void setConnectHandler(Consumer<Identity> handler) {
 		connectionHandler = handler;
+	}
+
+	public void addEntity(Entity entity) {
+		//TODO handle synchronization here
+		
+		entity.onAddedToWorld(this);
 	}
 }

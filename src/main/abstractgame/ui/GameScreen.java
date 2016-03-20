@@ -60,17 +60,19 @@ public class GameScreen extends Screen {
 			world.tick();
 		
 		if(respawnTimer != null) {
-			float timeLeft = respawnTimer.supply();
+			final float max = .2f;
+			final float min = .075f;
 			
-			if(timeLeft < 0)
-				timeLeft = 0;
+			float timeLeft = respawnTimer.supply();
 				
+			float lerp = Math.min(Math.max(0, timeLeft * .2f), 1);
+			
 			String text = String.format("Spawning in %3.1fs", timeLeft);
 			
-			float size = .2f * (1 - Math.min(timeLeft / 5, .8f));
+			float size = min * lerp + max * (1 - lerp);
 			
 			Color4f colour = new Color4f();
-			colour.interpolate(UIRenderer.HIGHLIGHT_STRONG, UIRenderer.BASE, Math.min(timeLeft / 5, .8f));
+			colour.interpolate(UIRenderer.HIGHLIGHT_STRONG, UIRenderer.BASE, lerp);
 			
 			TextRenderer.addString(text, new Vector2f(-TextRenderer.getWidth(text) * size * .5f, -TextRenderer.getHeight(text) * size * .5f), size, colour, 0);
 		}

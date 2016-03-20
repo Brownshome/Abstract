@@ -68,7 +68,9 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	/** Spawns the player now, this method is also used internally
 	 * so this is the one to override for custom spawning logic */
 	public void spawnNow(Player player) {
-		//TODO
+		player.getPosWritable().set(getPosition());
+		player.flushChanges();
+		Server.getWorld().addEntity(player);
 	}
 	
 	/** Adds the player to the spawn queue, returning the time left until

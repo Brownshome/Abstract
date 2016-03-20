@@ -2,6 +2,7 @@ package abstractgame.render;
 
 import javax.vecmath.Vector3f;
 
+import abstractgame.util.Util;
 import abstractgame.world.entity.Entity;
 
 public interface CameraHost extends Entity {
@@ -16,7 +17,7 @@ public interface CameraHost extends Entity {
 	}
 	
 	default Vector3f getOffest() {
-		return new Vector3f();
+		return Util.ZERO_VEC3;
 	}
 	
 	void onCameraUnset();
