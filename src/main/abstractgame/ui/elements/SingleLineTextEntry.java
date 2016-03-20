@@ -112,7 +112,7 @@ public class SingleLineTextEntry extends UIElement {
 	}
 	
 	boolean isCursorVisable() {
-		return !request.isDone() && Client.GAME_CLOCK.getFrame() % BLINK_DELAY > BLINK_DELAY / 2;
+		return !request.isDone() && Client.GAME_CLOCK.getTickNo() % BLINK_DELAY > BLINK_DELAY / 2;
 	}
 	
 	@Override

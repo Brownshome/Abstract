@@ -3,3 +3,4 @@ name: Server
 version: 0.1.0
 port: 35565
 map: LOCAL:testmap
+tickInterval: 50

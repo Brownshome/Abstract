@@ -32,7 +32,7 @@ public class ServerScreen extends Screen {
 	static void join() {
 		try {
 			if(ServerProxy.getCurrentServerProxy() instanceof InternalServerProxy) {
-				ServerProxy.getCurrentServerProxy().getConnection().sendWithAck(new QueryPacket());
+				ServerProxy.getCurrentServerProxy().getConnection().send(new QueryPacket());
 			} else {
 				ServerProxy.connectToServer(InetAddress.getByName(addressJoin.getText()), Integer.parseInt(portJoin.getText()));
 			}

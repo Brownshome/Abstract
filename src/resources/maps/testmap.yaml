@@ -7,6 +7,12 @@ script:
     class: TestmapLogic
 
 objects:
+  - type: spawn
+    ID: playerSpawn
+    checkCollision: ALL
+    spawnInt: 200
+    position: [0, 0, 0]
+
   - type: static
     model: box
     physics:

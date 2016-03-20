@@ -3,6 +3,8 @@ package abstractgame.net;
 import java.util.concurrent.BlockingQueue;
 
 import abstractgame.Client;
+import abstractgame.Server;
+import abstractgame.io.user.Console;
 import abstractgame.net.packet.Packet;
 
 @Sided(Side.CLIENT)
@@ -19,6 +21,8 @@ public class MemoryConnection implements Connection {
 	
 	@Override
 	public void send(Packet packet) {
+		Console.fine("Sending " + packet.getClass().getCanonicalName(), "NET");
+		
 		try {
 			threadQueue.put(() -> packet.handle(setID ? Client.getIdentity() : null));
 		} catch (InterruptedException e) {}
@@ -26,6 +30,8 @@ public class MemoryConnection implements Connection {
 
 	@Override
 	public Ack sendWithAck(Packet packet) {
+		Console.fine("Sending with ack " + packet.getClass().getCanonicalName(), "NET");
+		
 		Ack ack = new Ack();
 		
 		try {

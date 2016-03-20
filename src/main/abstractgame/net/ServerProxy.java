@@ -2,7 +2,6 @@ package abstractgame.net;
 
 import java.net.InetAddress;
 
-import abstractgame.Client;
 import abstractgame.io.user.Console;
 import abstractgame.ui.GameScreen;
 import abstractgame.util.ApplicationException;
@@ -42,25 +41,11 @@ public abstract class ServerProxy {
 		return INSTANCE;
 	}
 	
-	public static void startClientNetThread() {
-		Thread ioThread = new Thread(() -> {
-			while(true) {
-				try {
-					Client.inboundPackets.take().run();
-				} catch (InterruptedException e) {}
-			}
-		}, "CLIENT-NET-THREAD");
-		ioThread.setDaemon(true);
-		ioThread.start();
-		
-		Console.inform("Started client net thread.", "THREAD ENGINE");
-	}
-	
 	public void setVersion(String version) {
 		serverVersion = version;
 	}
 	
-	public void setServerInfo(String worldIdentifier, long[] ids) {
+	public void setServerInfo(String worldIdentifier, int[] ids) {
 		mapIdentifier = worldIdentifier;
 		
 		if(GameScreen.getWorld() == null || GameScreen.getWorld().getMapIdentifier() != mapIdentifier) {

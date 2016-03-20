@@ -1,13 +1,24 @@
 package abstractgame.ui;
 
+import java.util.function.IntSupplier;
+
+import javax.vecmath.Color3f;
+import javax.vecmath.Color4f;
+import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Keyboard;
 
+import abstractgame.Client;
 import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
+import abstractgame.net.ServerProxy;
 import abstractgame.render.Camera;
 import abstractgame.render.FreeCamera;
+import abstractgame.render.GLHandler;
+import abstractgame.render.TextRenderer;
+import abstractgame.render.UIRenderer;
+import abstractgame.util.FloatSupplier;
 import abstractgame.world.World;
 
 public class GameScreen extends Screen {
@@ -22,6 +33,10 @@ public class GameScreen extends Screen {
 	
 	static State state = State.WAIT_FOR_SERVER;
 	static World world;
+	
+	/** This gives the number of seconds until respawn, if it is null there
+	 * is no respawn in progress */
+	public static FloatSupplier respawnTimer;
 	
 	public static World getWorld() {
 		return world;
@@ -43,6 +58,22 @@ public class GameScreen extends Screen {
 		
 		if(world != null)
 			world.tick();
+		
+		if(respawnTimer != null) {
+			float timeLeft = respawnTimer.supply();
+			
+			if(timeLeft < 0)
+				timeLeft = 0;
+				
+			String text = String.format("Spawning in %3.1fs", timeLeft);
+			
+			float size = .2f * (1 - Math.min(timeLeft / 5, .8f));
+			
+			Color4f colour = new Color4f();
+			colour.interpolate(UIRenderer.HIGHLIGHT_STRONG, UIRenderer.BASE, Math.min(timeLeft / 5, .8f));
+			
+			TextRenderer.addString(text, new Vector2f(-TextRenderer.getWidth(text) * size * .5f, -TextRenderer.getHeight(text) * size * .5f), size, colour, 0);
+		}
 	}
 
 	public static void setWorld(World newWorld) {

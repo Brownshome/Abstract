@@ -63,7 +63,7 @@ public class RenderEntity extends BasicEntity {
 		QuaternionUtil.quatRotate(parent.getOrientation(), super.getPosition(), positionCashe);
 		positionCashe.add(parent.getPosition());
 		
-		lastFrame = Client.GAME_CLOCK.getFrame();
+		lastFrame = Client.GAME_CLOCK.getTickNo();
 	}
 	
 	@Override
@@ -71,7 +71,7 @@ public class RenderEntity extends BasicEntity {
 		if(parent == null)
 			return super.getOrientation();
 		
-		if(Client.GAME_CLOCK.getFrame() != lastFrame)
+		if(Client.GAME_CLOCK.getTickNo() != lastFrame)
 			updateCashe();
 			
 		return orientationCashe;
@@ -82,7 +82,7 @@ public class RenderEntity extends BasicEntity {
 		if(parent == null)
 			return super.getPosition();
 		
-		if(Client.GAME_CLOCK.getFrame() != lastFrame)
+		if(Client.GAME_CLOCK.getTickNo() != lastFrame)
 			updateCashe();
 			
 		return positionCashe;

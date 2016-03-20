@@ -11,18 +11,13 @@ import abstractgame.net.Side;
 import abstractgame.util.ApplicationException;
 
 public abstract class Packet {
-	public static List<Function<byte[], Packet>> packetReaders = new ArrayList<>();
-	
-	public static void regesterPackets() {
-		regesterPacket(QueryPacket.class);
-		regesterPacket(InfoPacket.class);
-	}
+	public static final List<Function<byte[], Packet>> PACKET_READERS = new ArrayList<>();
 	
 	/** This method must be called in the same order in ALL situations */
 	public static void regesterPacket(Class packet) {
 		try {
 			Constructor constructor = packet.getConstructor(byte[].class);
-			packetReaders.add((byte[] b) -> {
+			PACKET_READERS.add((byte[] b) -> {
 				try {
 					return (Packet) constructor.newInstance(b);
 				} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

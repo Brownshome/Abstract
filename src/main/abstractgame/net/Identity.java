@@ -1,6 +1,9 @@
 package abstractgame.net;
 
 import java.net.InetAddress;
+import java.util.UUID;
+
+import abstractgame.util.Util;
 
 /*	The current security system is as follows, the password is salted with the uuid on the client.
  * 	This is used as the 'password' in a conventional hash salt system which is sent to the server
@@ -20,9 +23,9 @@ public class Identity {
 	/** This is used for displayname and other such things */
 	public String username;
 	/** This is used for login verification and stat tracking */
-	public long uuid;
+	public int uuid;
 	
-	public Identity(String username, long uuid) {
+	public Identity(String username, int uuid) {
 		this.username = username;
 		this.uuid = uuid;
 	}
@@ -40,5 +43,10 @@ public class Identity {
 	@Override
 	public int hashCode() {
 		return (int) uuid;
+	}
+	
+	@Override
+	public String toString() {
+		return Util.toHexString(uuid);
 	}
 }

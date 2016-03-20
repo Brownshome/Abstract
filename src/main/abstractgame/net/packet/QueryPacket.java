@@ -12,7 +12,7 @@ public class QueryPacket extends Packet {
 
 	@Override
 	public void handle(Identity id) {
-		Server.getConnection(id).send(new InfoPacket());
+		Server.getConnection(id).send(new QueryResponsePacket());
 	}
 
 	@Override

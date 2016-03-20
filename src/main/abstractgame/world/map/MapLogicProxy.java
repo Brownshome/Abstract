@@ -11,11 +11,15 @@ import java.security.Policy;
 import java.util.HashMap;
 import java.util.Map;
 
+import abstractgame.Server;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
+import abstractgame.net.ServerProxy;
+import abstractgame.net.packet.SpawnTimerPacket;
 import abstractgame.security.GamePolicy;
 import abstractgame.util.ApplicationException;
 import abstractgame.world.World;
+import abstractgame.world.entity.Player;
 
 /** This defines an interface that allows maps to have
  * complex logic added to them */
@@ -58,7 +62,7 @@ public interface MapLogicProxy {
 		}
 	}
 	
-	/** A MapLogicProxy that has no logic, used for the \"none\" script type */
+	/** A MapLogicProxy that has no logic, used for the "none" script type */
 	MapLogicProxy NO_LOGIC = new MapLogicProxy() {
 		@Override
 		public void initialize(World world) {}
@@ -67,11 +71,37 @@ public interface MapLogicProxy {
 		public void destroy(World world) {}
 	};
 	
+	/** A MapLogicProxy that has the default logic, used for the "default" script type */
+	MapLogicProxy DEFAULT_LOGIC = new MapLogicProxy() {};
+	
+	/** Allows the map to load add custom decoders, this is checked first so can
+	 * be used to override exising decoders, returning null will use the existing
+	 * decoder */
+	default Decoder<MapObject> getDecoder(String type) {
+		return null;
+	}
+	
 	/** Called after the creation of the world so that complex logic
 	 * can be added. Note that hooks such as decoders cannot be added
-	 * here. */
-	void initialize(World world);
+	 * here. The default implementation spawns the player with the default
+	 * loadout at the spawn with ID: playerSpawn */
+	default void initialize(World world) {
+		PlayerSpawn spawn;
+		
+		try {
+			spawn = (PlayerSpawn) world.getNamedObject("playerSpawn");
+		} catch(ApplicationException | ClassCastException cce) {
+			throw new ApplicationException("The loaded map does not override the initilaize method and has no \'playerSpawn\' object", cce, "WORLD");
+		}
+		
+		world.setConnectHandler(id -> {
+			Player player = Server.getPlayer(id);
+			int timeLeft = spawn.spawn(player);
+			
+			Server.getConnection(id).send(new SpawnTimerPacket(timeLeft));
+		});
+	}
 	
 	/** Called when the map is unloaded so the map can clean up after itself */
-	void destroy(World world);
+	default void destroy(World world) {}
 }

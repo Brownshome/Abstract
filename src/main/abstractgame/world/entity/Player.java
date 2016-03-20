@@ -4,17 +4,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import abstractgame.render.CameraHost;
-import abstractgame.world.entity.modules.UpgradeModule;
+import javax.vecmath.Vector3f;
 
+import com.bulletphysics.collision.shapes.BoxShape;
+import com.bulletphysics.linearmath.DefaultMotionState;
+
+import abstractgame.net.Identity;
+import abstractgame.render.CameraHost;
+import abstractgame.util.FloatSupplier;
+import abstractgame.world.entity.playermodules.UpgradeModule;
+
+/** This class represents a player object */
 public class Player extends DynamicEntity implements CameraHost {
 	double heat;
+	
 	protected List<Runnable> onHeat = new ArrayList<>();
 	
-	public List<UpgradeModule> modules = new ArrayList<>();
+	Identity id;
+	List<UpgradeModule> modules = new ArrayList<>();
+
+	public Player(Identity id) {
+		super(0, new DefaultMotionState(), new BoxShape(new Vector3f(.5f, .5f, .5f)), new Vector3f(0, 0, 0));
+		
+		this.id = id;
+	}
 	
-	public Player() {
-		super(0, null, null, null);
+	/** Gets the list of currently installed modules on
+	 * this player */
+	public List<UpgradeModule> getLoadout() {
+		return modules;
 	}
 	
 	@Override

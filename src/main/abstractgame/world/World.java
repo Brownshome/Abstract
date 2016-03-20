@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.vecmath.Vector3f;
 
@@ -12,9 +13,14 @@ import abstractgame.Client;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.ConfigFile.Policy;
 import abstractgame.io.config.Decoder;
+import abstractgame.io.user.Console;
+import abstractgame.net.Identity;
+import abstractgame.net.Side;
+import abstractgame.net.Sided;
 import abstractgame.render.PhysicsRenderer;
 import abstractgame.util.ApplicationException;
 import abstractgame.world.entity.DynamicEntity;
+import abstractgame.world.entity.Player;
 import abstractgame.world.map.MapLogicProxy;
 import abstractgame.world.map.MapObject;
 
@@ -23,8 +29,6 @@ import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 
-/** Represents a game world, when the game is running in embeded server mode there is only one copy
- * held by both the server and client sides */
 public class World extends TickableImpl {
 	public DiscreteDynamicsWorld physicsWorld;
 
@@ -43,7 +47,8 @@ public class World extends TickableImpl {
 	ConfigFile mapFile;
 	MapLogicProxy logic;
 	Map<String, MapObject> namedObjects = new HashMap<>();
-
+	Consumer<Identity> connectionHandler = id -> {};
+	
 	float sizeX;
 	float sizeY;
 	
@@ -108,6 +113,14 @@ public class World extends TickableImpl {
 		physicsWorld.stepSimulation(Client.GAME_CLOCK.getDelta(), 7);
 	}
 	
+	public MapObject getNamedObject(String ID) {
+		MapObject m;
+		if((m = namedObjects.get(ID)) == null)
+			throw new ApplicationException("There is no object named \'" + ID + "\'", "WORLD");
+		
+		return m;
+	}
+	
 	public String getMapIdentifier() {
 		return source.toString() + ":" + name;
 	}
@@ -120,5 +133,21 @@ public class World extends TickableImpl {
 	/** Calls the hooks for the logic proxy to unload */
 	public void cleanUp() {
 		logic.destroy(this);
+	}
+
+	/** Called whenever someone joins the server */
+	public void join(Identity id) {
+		Console.inform("Player " + id.username + " ( " + id + " ) joined the game", "WORLD");
+		
+		connectionHandler.accept(id);
+	}
+	
+	public Consumer<Identity> getConnectionHandler() {
+		return connectionHandler;
+	}
+	
+	/** The handler is called on the server side only */
+	public void setConnectHandler(Consumer<Identity> handler) {
+		connectionHandler = handler;
 	}
 }

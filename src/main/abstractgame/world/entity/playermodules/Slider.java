@@ -1,4 +1,4 @@
-package abstractgame.world.entity.modules;
+package abstractgame.world.entity.playermodules;
 
 public class Slider extends Customization {
 	double value;

@@ -19,6 +19,7 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.BufferUtils;
 
 import abstractgame.Client;
+import abstractgame.Server;
 
 public class Util {
 	private static final FloatBuffer MAT_BUFFER = BufferUtils.createFloatBuffer(16);
@@ -134,7 +135,10 @@ public class Util {
 
 	/** Runs the task on the main thread */
 	public static void queueOnMainThread(Runnable r) {
-		Client.addTask(r);
+		if(Server.isSeverSide())
+			Server.addTask(r);
+		else
+			Client.addTask(r);
 	}
 
 	/** fills vec with 3 floats from data, reading only the first 3 values */
@@ -157,5 +161,24 @@ public class Util {
 	/** fills quat with 4 floats from data, reading only the first 4 values */
 	public static Quat4f toQuat4f(List<? extends Number> data) {
 		return toQuat4f(data);
+	}
+
+	public static String toHexString(int val) {
+		String result = "";
+		String raw = Integer.toUnsignedString(val, 16);
+		
+		for(int i = 0; i < 8; i++) {
+			int index = i - 8 + raw.length();
+			
+			if(index < 0)
+				result += '0';
+			else
+				result += raw.charAt(index);
+			
+			if(i != 7 && i % 2 == 1)
+				result += '-';
+		}
+		
+		return result;
 	}
 }

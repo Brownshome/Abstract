@@ -42,10 +42,10 @@ public class TitleScreen extends Screen {
 	}
 	
 	static Supplier<Float> nothingBar() {
-		long start = Client.GAME_CLOCK.getFrame();
+		long start = Client.GAME_CLOCK.getTickNo();
 		
 		return () -> {
-			float v = Math.min((Client.GAME_CLOCK.getFrame() - start) / 60f, 1);
+			float v = Math.min((Client.GAME_CLOCK.getTickNo() - start) / 60f, 1);
 			if(v == 1)
 				done = true;
 			return v;

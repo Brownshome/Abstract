@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import abstractgame.Client;
+import abstractgame.Server;
 import abstractgame.util.ApplicationException;
 
 public class Console {
@@ -51,7 +52,7 @@ public class Console {
 	}
 
 	static String getFormatString(String level, String name) {
-		return "[" + new SimpleDateFormat(format).format(new Date()) + "][" + name + "][" + level + "]";
+		return "[" + new SimpleDateFormat(format).format(new Date()) + "][" + (Server.isSeverSide() ? "SERVER" : "CLIENT") + "][" + name + "][" + level + "]";
 	}
 
 	/**Please use Console.error(Throwable t, String name) instead */

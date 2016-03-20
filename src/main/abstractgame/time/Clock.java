@@ -41,18 +41,26 @@ public class Clock {
 	
 	long frameNo = 0;
 	long startTime = getABSTime(1000f);
-	long lastFrame = startTime;
+	long lastFrame = 0;
 	long lastDelta = 0;
 	
-	long lastAverage;
-	int tps = 0;
+	long lastAverage = 0;
+	int tps = -1;
 	int count = 0;
 
-	/** averaged over 1 seconds (in seconds) */
-	public double getAverageDelta() {
-		return 1.0 / tps;
+	public void startTimer() {
+		startTime = getABSTime(1000f);
+		frameNo = 0;
+	}
+	
+	/** averaged over 1 seconds (in seconds), this method returns -1 if there has
+	 * not been enough time to form an average */
+	public float getAverageDelta() {
+		return 1f / tps;
 	}
 
+	/** This method returns -1 if there has not been enough time to form
+	 * an average */
 	public int getTPS() {
 		return tps;
 	}
@@ -71,7 +79,7 @@ public class Clock {
 	
 	/** The time in 1 / resoloution of a second (Sys) */
 	public static long getABSTime(float resoloution) {
-		return (long) (Sys.getTime() * (resoloution / Sys.getTimerResolution()));
+		return (long) (getABSTime() * (resoloution / Sys.getTimerResolution()));
 	}
 
 	/** The time since started, in ms */
@@ -79,6 +87,11 @@ public class Clock {
 		return getABSTime(1000f) - startTime;
 	}
 
+	/** Returns the time of the last tick in millis */
+	public long getLastTick() {
+		return lastFrame;
+	}
+	
 	public void tick() {
 		long time = getTime();
 		
@@ -99,7 +112,7 @@ public class Clock {
 		}
 	}
 
-	public long getFrame() {
+	public long getTickNo() {
 		return frameNo;
 	}
 
