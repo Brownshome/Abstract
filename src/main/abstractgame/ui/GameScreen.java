@@ -67,7 +67,7 @@ public class GameScreen extends Screen {
 				
 			float lerp = Math.min(Math.max(0, timeLeft * .2f), 1);
 			
-			String text = String.format("Spawning in %3.1fs", timeLeft);
+			String text = timeLeft < 0 ? "Spawning..." : String.format("Spawning in %3.1fs", timeLeft);
 			
 			float size = min * lerp + max * (1 - lerp);
 			

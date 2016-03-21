@@ -3,6 +3,7 @@ package abstractgame;
 import java.security.Policy;
 
 import abstractgame.io.model.PhysicsMeshLoader;
+import abstractgame.net.packet.EntitySpawnPacket;
 import abstractgame.net.packet.JoinPacket;
 import abstractgame.net.packet.Packet;
 import abstractgame.net.packet.QueryPacket;
@@ -10,6 +11,7 @@ import abstractgame.net.packet.QueryResponsePacket;
 import abstractgame.net.packet.SpawnTimerPacket;
 import abstractgame.security.GamePolicy;
 import abstractgame.world.World;
+import abstractgame.world.entity.Player;
 import abstractgame.world.map.MapLogicProxy;
 import abstractgame.world.map.PlayerSpawn;
 import abstractgame.world.map.StaticMapObjectClient;
@@ -40,6 +42,9 @@ public class Common {
 		Packet.regesterPacket(QueryResponsePacket.class);
 		Packet.regesterPacket(JoinPacket.class);
 		Packet.regesterPacket(SpawnTimerPacket.class);
+		Packet.regesterPacket(EntitySpawnPacket.class);
+		
+		World.regesterNetworkEntity(Player.class);
 	}
 
 	public static void setupSecurity() {

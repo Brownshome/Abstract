@@ -3,15 +3,14 @@ format on next load: false
 size: [100, 100]
 
 script: 
-    type: java
-    class: TestmapLogic
+    type: default
 
 objects:
   - type: spawn
     ID: playerSpawn
     checkCollision: ALL
-    spawnInt: 200
-    position: [0, 0, 0]
+    spawnInt: 50
+    position: [-.5, 6, -.5]
 
   - type: static
     model: box

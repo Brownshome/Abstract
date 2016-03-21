@@ -16,9 +16,7 @@ public class QueryResponsePacket extends Packet {
 	String worldIdentifier;
 	int[] ids;
 	
-	public QueryResponsePacket(byte[] data) {
-		ByteBuffer buffer = ByteBuffer.wrap(data);
-		
+	public QueryResponsePacket(ByteBuffer buffer) {
 		version = Util.readTerminatedString(buffer);
 		worldIdentifier = Util.readTerminatedString(buffer);
 		int length = Byte.toUnsignedInt(buffer.get());
@@ -27,6 +25,7 @@ public class QueryResponsePacket extends Packet {
 	}
 	
 	public QueryResponsePacket() {
+		version = Server.version;
 		worldIdentifier = Server.mapIdentifier;
 		ids = Server.getConnectedIds().stream().mapToInt(i -> i.uuid).toArray();
 	}
@@ -36,22 +35,21 @@ public class QueryResponsePacket extends Packet {
 		//this is temporary, TODO implement server browser
 		
 		Util.queueOnMainThread(() -> {
-			ServerProxy.getCurrentServerProxy().setServerInfo(worldIdentifier, ids);
+			ServerProxy.getCurrentServerProxy().setServerInfo(version, worldIdentifier, ids);
 			ServerProxy.getCurrentServerProxy().getConnection().send(new JoinPacket());
 		});
 	}
 
 	@Override
-	public void fill(byte[] data, int offset) {
-		ByteBuffer buffer = ByteBuffer.wrap(data, offset, data.length - offset);
-		
-		Util.writeTerminatedString(buffer, version);
-		Util.writeTerminatedString(buffer, worldIdentifier);
-		buffer.asIntBuffer().put(ids);
+	public void fill(ByteBuffer output) {
+		Util.writeTerminatedString(output, version);
+		Util.writeTerminatedString(output, worldIdentifier);
+		for(int id : ids)
+			output.putInt(id);
 	}
 
 	@Override
-	public Side getHandleSide() {
-		return Side.CLIENT;
+	public int getPayloadSize() {
+		return Util.getMaxLength(version) + Util.getMaxLength(worldIdentifier) + ids.length * Integer.BYTES;
 	}
 }

@@ -18,6 +18,8 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.BufferUtils;
 
+import com.bulletphysics.linearmath.Transform;
+
 import abstractgame.Client;
 import abstractgame.Server;
 
@@ -41,8 +43,8 @@ public class Util {
 		buffer.limit(buffer.position() - 1);
 		buffer.reset();
 		String s = StandardCharsets.UTF_8.decode(buffer).toString();
-		buffer.get(); //discard the NUL byte
 		buffer.limit(oldLimit);
+		buffer.get(); //discard the NUL byte
 		return s;
 	}
 	
@@ -51,6 +53,11 @@ public class Util {
 	public static void writeTerminatedString(ByteBuffer buffer, String string) {
 		buffer.put(string.getBytes(StandardCharsets.UTF_8));
 		buffer.put((byte) -1); //0xff
+	}
+	
+	static final float MBPC = StandardCharsets.UTF_8.newEncoder().maxBytesPerChar();
+	public static int getMaxLength(String string) {
+		return (int) (string.length() * MBPC + 1);
 	}
 	
 	public static String collect(List<String> list) {
@@ -182,5 +189,11 @@ public class Util {
 		}
 		
 		return result;
+	}
+
+	public static Transform getIdentityTransform() {
+		Transform t = new Transform();
+		t.setIdentity();
+		return t;
 	}
 }

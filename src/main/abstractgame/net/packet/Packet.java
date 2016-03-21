@@ -2,8 +2,11 @@ package abstractgame.net.packet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import abstractgame.net.Identity;
@@ -11,21 +14,25 @@ import abstractgame.net.Side;
 import abstractgame.util.ApplicationException;
 
 public abstract class Packet {
-	public static final List<Function<byte[], Packet>> PACKET_READERS = new ArrayList<>();
+	public static final List<Function<ByteBuffer, Packet>> PACKET_READERS = new ArrayList<>();
+	public static final Map<Class<? extends Packet>, Integer> IDS = new HashMap<>();
 	
 	/** This method must be called in the same order in ALL situations */
 	public static void regesterPacket(Class packet) {
 		try {
-			Constructor constructor = packet.getConstructor(byte[].class);
-			PACKET_READERS.add((byte[] b) -> {
+			IDS.put(packet, PACKET_READERS.size());
+			Constructor constructor = packet.getConstructor(ByteBuffer.class);
+			PACKET_READERS.add((ByteBuffer b) -> {
 				try {
 					return (Packet) constructor.newInstance(b);
-				} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new ApplicationException(packet.getName() + " was regestered inproperly", e, "NET");
+				} catch(InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+					throw new ApplicationException(packet.getSimpleName() + " was regestered improperly", e, "NET");
+				} catch(InvocationTargetException e) {
+					throw new ApplicationException("Error handling packet " + packet.getSimpleName(), e, "NET");
 				}
 			});
 		} catch (NoSuchMethodException | SecurityException | IllegalArgumentException e) {
-			throw new ApplicationException(packet.getName() + " was regestered inproperly", "NET");
+			throw new ApplicationException(packet.getName() + " was regestered improperly", "NET");
 		}
 	}
 	/** Runs the handler for this packet, id will only be populated on the serverSide,
@@ -46,8 +53,8 @@ public abstract class Packet {
 		throw new ApplicationException("Unhandled packet on server " + getClass(), "NET");
 	}
 
-	public abstract void fill(byte[] data, int offset);
+	public abstract void fill(ByteBuffer output);
 	
-	/** Gets the side that should handle this packet */
-	public abstract Side getHandleSide();
+	/** Returns the size of the packet payload in bytes */
+	public abstract int getPayloadSize();
 }

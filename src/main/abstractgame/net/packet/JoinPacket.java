@@ -1,26 +1,28 @@
 package abstractgame.net.packet;
 
+import java.nio.ByteBuffer;
+
 import abstractgame.Server;
 import abstractgame.net.Identity;
 import abstractgame.net.Side;
+import abstractgame.util.Util;
 import abstractgame.world.World;
 
 /** Set to the server whenever a client joins a game */
 public class JoinPacket extends Packet {
-	public JoinPacket(byte[] data) {}
+	public JoinPacket(ByteBuffer data) {}
 	public JoinPacket() {}
 
 	@Override
-	public void fill(byte[] data, int offset) {}
+	public void fill(ByteBuffer output) {}
 
 	@Override
 	public void handleServer(Identity id) {
-		Server.getWorld().join(id);
+		Util.queueOnMainThread(() -> Server.getWorld().join(id));
 	}
 	
 	@Override
-	public Side getHandleSide() {
-		return Side.SERVER;
+	public int getPayloadSize() {
+		return 0;
 	}
-
 }

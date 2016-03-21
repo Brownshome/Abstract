@@ -1,15 +1,22 @@
 package abstractgame.world;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.vecmath.Vector3f;
 
 import abstractgame.Client;
+import abstractgame.Server;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.ConfigFile.Policy;
 import abstractgame.io.config.Decoder;
@@ -20,6 +27,7 @@ import abstractgame.net.Sided;
 import abstractgame.render.PhysicsRenderer;
 import abstractgame.util.ApplicationException;
 import abstractgame.world.entity.Entity;
+import abstractgame.world.entity.NetworkEntity;
 import abstractgame.world.entity.PhysicsEntity;
 import abstractgame.world.entity.Player;
 import abstractgame.world.map.MapLogicProxy;
@@ -36,6 +44,51 @@ public class World extends TickableImpl {
 	public static final String MAP_FOLDER = "../maps/";
 	
 	public static final Map<String, Decoder<MapObject>> DECODERS = new HashMap<>();
+	
+	static final Map<Class<? extends NetworkEntity>, Integer> NETIDS = new HashMap<>();
+	static final List<Class<? extends NetworkEntity>> NETCLASSES = new ArrayList<>();
+	static final List<Function<ByteBuffer, ? extends NetworkEntity>> CONSTRUCTORS = new ArrayList<>();
+	
+	public static int getNetworkEntityID(NetworkEntity entity) {
+		try {
+			return NETIDS.get(entity.getClass());
+		} catch(NullPointerException npe) {
+			throw new ApplicationException("Unregestered NetworkEntity \'" + entity.getClass().getSimpleName() + "\'", "NET");
+		}
+	}
+	
+	public static <T extends NetworkEntity> void regesterNetworkEntity(Class<T> type) {
+		Constructor<T> c;
+		try {
+			c = type.getConstructor(ByteBuffer.class);
+		} catch (NoSuchMethodException e) {
+			throw new ApplicationException(type.getSimpleName() + " was not properly defined", e, "NET");
+		} catch (SecurityException e) {
+			throw new ApplicationException(e, "NET");
+		}
+		
+		regesterNetworkEntity(type, (ByteBuffer b) -> { 
+			try {
+				return c.newInstance(b);
+			} catch (IllegalAccessException | InstantiationException e) {
+				throw new ApplicationException("NetworkEntity " + type.getSimpleName() + " is improperly setup", e, "NET");
+			} catch(InvocationTargetException eiie) {
+				throw new ApplicationException("Error creating NetworkEntity " + type.getSimpleName(), eiie.getCause(), "NET");
+			}
+		});
+	}
+	
+	public static <T extends NetworkEntity> void regesterNetworkEntity(Class<T> type, Function<ByteBuffer, ? extends NetworkEntity> constructor) {
+		if(NETIDS.put(type, NETCLASSES.size()) != null)
+			throw new ApplicationException("NetworkEntity " + type.getSimpleName() + " is already regestered", "NET");
+		
+		CONSTRUCTORS.add(constructor);
+		NETCLASSES.add(type);
+	}
+	
+	public static NetworkEntity createNetworkEntity(int id, ByteBuffer data) {
+		return CONSTRUCTORS.get(id).apply(data);
+	}
 	
 	static enum Source {
 		SERVER,
@@ -56,8 +109,11 @@ public class World extends TickableImpl {
 	public World(String identifier) {
 		//TODO tune these paramaters
 		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), new DbvtBroadphase(), null, new DefaultCollisionConfiguration());
-		physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
-		physicsWorld.setGravity(new Vector3f(0, -0.1f, 0));
+		
+		if(!Server.isSeverSide())
+			physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
+		
+		physicsWorld.setGravity(new Vector3f(0, -3, 0));
 		
 		String[] split = identifier.split(":");
 		
@@ -148,7 +204,7 @@ public class World extends TickableImpl {
 	}
 
 	public void addEntity(Entity entity) {
-		//TODO handle synchronization here
+		assert !(entity instanceof PhysicsEntity) || !((PhysicsEntity) entity).getRigidBody().isInWorld() : "Entity already added";
 		
 		entity.onAddedToWorld(this);
 	}

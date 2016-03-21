@@ -104,6 +104,10 @@ public class Server {
 		startServer(ConfigFile.getFile(SERVER_FOLDER + file));
 	}
 	
+	public static Collection<Connection> getConnections() {
+		return CONNECTIONS.values();
+	}
+	
 	/** creates a new connection */
 	public static Connection createConnection(Identity id) {
 		return Server.isInternal()
@@ -122,9 +126,8 @@ public class Server {
 	}
 	
 	private static void doTimings() {
-		int delta = (int) (SERVER_CLOCK.getTime() - SERVER_CLOCK.getLastTick());
-
-		while(delta < tickInterval) {
+		int delta;
+		while((delta = (int) (SERVER_CLOCK.getTime() - SERVER_CLOCK.getLastTick())) < tickInterval) {
 			try {
 				Thread.sleep(tickInterval - delta);
 			} catch (InterruptedException e) {}

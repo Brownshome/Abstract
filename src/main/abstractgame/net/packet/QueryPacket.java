@@ -1,12 +1,14 @@
 package abstractgame.net.packet;
 
+import java.nio.ByteBuffer;
+
 import abstractgame.Server;
 import abstractgame.net.Identity;
 import abstractgame.net.Side;
 
 /** Starts retrieves information about the server */
 public class QueryPacket extends Packet {
-	public QueryPacket(byte[] data) {}
+	public QueryPacket(ByteBuffer data) {}
 	
 	public QueryPacket() {}
 
@@ -16,12 +18,12 @@ public class QueryPacket extends Packet {
 	}
 
 	@Override
-	public void fill(byte[] data, int offset) {
+	public void fill(ByteBuffer output) {
 		//do nothing
 	}
 
 	@Override
-	public Side getHandleSide() {
-		return Side.SERVER;
+	public int getPayloadSize() {
+		return 0;
 	}
 }

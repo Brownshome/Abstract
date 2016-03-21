@@ -25,7 +25,6 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 	//primary quantities
 	protected RigidBody body;
 	protected boolean movePhysBody = false;
-	protected MotionState motionState;
 	protected final Transform physicsOffset;
 	
 	//secondary
@@ -49,6 +48,13 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 		
 		transform = motionState.graphicsWorldTrans;
 		this.orientation = new Quat4f(orientation);
+		
+		//TODO get this number from somewhere
+		float mass = 1;
+		Vector3f inertia = new Vector3f();
+		shape.calculateLocalInertia(mass, inertia);
+		body = new RigidBody(mass, motionState, shape, inertia);
+		
 	}
 	
 	public RigidBody getRigidBody() {
@@ -68,7 +74,7 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 	@Override
 	public void flushChanges() {
 		transform.setRotation(orientation);
-		body.setWorldTransform(motionState.getWorldTransform(new Transform()));
+		body.setWorldTransform(getRigidBody().getMotionState().getWorldTransform(new Transform()));
 	}
 	
 	@Override

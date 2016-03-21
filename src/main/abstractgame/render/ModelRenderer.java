@@ -32,8 +32,10 @@ public class ModelRenderer implements Renderer {
 	 * within one frame. NB this model will be fixed in the position it is now, it will not respect
 	 * updates. Updating the entity and then invalidating the static mesh will move the model. */
 	public static void addStaticModel(RenderEntity entity) {
-		staticMesh.add(entity);
-		isDirty = true;
+		addDynamicModel(entity);
+		
+		/*staticMesh.add(entity);
+		isDirty = true;*/
 	}
 	
 	public static void removeStaticModel(RenderEntity entity) {

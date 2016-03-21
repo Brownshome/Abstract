@@ -15,8 +15,7 @@ public class SpawnTimerPacket extends Packet {
 	int ticks;
 	int TPS;
 	
-	public SpawnTimerPacket(byte[] array) {
-		ByteBuffer buffer = ByteBuffer.wrap(array);
+	public SpawnTimerPacket(ByteBuffer buffer) {
 		ticks = buffer.getInt();
 		TPS = buffer.getInt();
 	}
@@ -29,9 +28,9 @@ public class SpawnTimerPacket extends Packet {
 	}
 
 	@Override
-	public void fill(byte[] data, int offset) {
-		ByteBuffer buffer = ByteBuffer.wrap(data, offset, data.length - offset);
-		buffer.putInt(ticks);
+	public void fill(ByteBuffer output) {
+		output.putInt(ticks);
+		output.putInt(TPS);
 	}
 
 	@Override
@@ -41,10 +40,10 @@ public class SpawnTimerPacket extends Packet {
 		
 		GameScreen.respawnTimer = () -> seconds - (Client.GAME_CLOCK.getTime() - startFrame) / 1000f;
 	}
-	
+
 	@Override
-	public Side getHandleSide() {
-		return Side.CLIENT;
+	public int getPayloadSize() {
+		return 2 * Integer.BYTES;
 	}
 
 }

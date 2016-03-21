@@ -45,8 +45,9 @@ public abstract class ServerProxy {
 		serverVersion = version;
 	}
 	
-	public void setServerInfo(String worldIdentifier, int[] ids) {
+	public void setServerInfo(String version, String worldIdentifier, int[] ids) {
 		mapIdentifier = worldIdentifier;
+		serverVersion = version;
 		
 		if(GameScreen.getWorld() == null || GameScreen.getWorld().getMapIdentifier() != mapIdentifier) {
 			Console.inform("Changing world to: " + mapIdentifier, "WORLD");
