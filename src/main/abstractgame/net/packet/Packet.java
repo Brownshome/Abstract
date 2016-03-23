@@ -13,18 +13,20 @@ import abstractgame.net.Identity;
 import abstractgame.net.Side;
 import abstractgame.util.ApplicationException;
 
+/** Represents and data sent between the client and server, implementers of this class
+ * MUST define {@link Packet.&ltinit&gt(ByteBuffer)} and call {@link Packet.regesterPacket(Class)} */
 public abstract class Packet {
 	public static final List<Function<ByteBuffer, Packet>> PACKET_READERS = new ArrayList<>();
 	public static final Map<Class<? extends Packet>, Integer> IDS = new HashMap<>();
 	
 	/** This method must be called in the same order in ALL situations */
-	public static void regesterPacket(Class packet) {
+	public static <T extends Packet> void regesterPacket(Class<T> packet) {
 		try {
 			IDS.put(packet, PACKET_READERS.size());
-			Constructor constructor = packet.getConstructor(ByteBuffer.class);
+			Constructor<T> constructor = packet.getConstructor(ByteBuffer.class);
 			PACKET_READERS.add((ByteBuffer b) -> {
 				try {
-					return (Packet) constructor.newInstance(b);
+					return constructor.newInstance(b);
 				} catch(InstantiationException | IllegalAccessException | IllegalArgumentException e) {
 					throw new ApplicationException(packet.getSimpleName() + " was regestered improperly", e, "NET");
 				} catch(InvocationTargetException e) {
@@ -55,6 +57,6 @@ public abstract class Packet {
 
 	public abstract void fill(ByteBuffer output);
 	
-	/** Returns the size of the packet payload in bytes */
+	/** Returns the maximum size of the packet payload in bytes */
 	public abstract int getPayloadSize();
 }

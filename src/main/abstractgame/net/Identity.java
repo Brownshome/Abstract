@@ -14,8 +14,6 @@ import abstractgame.util.Util;
 
 /** Represents a player in the global state */
 public class Identity {
-	public static final Identity SERVER = new Identity("SERVER", 0);
-	
 	/** This field is only populated on the server */
 	public InetAddress ip;
 	/** This field is only populated on the server */

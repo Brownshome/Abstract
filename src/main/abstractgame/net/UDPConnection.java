@@ -19,4 +19,16 @@ public class UDPConnection implements Connection {
 		return null;
 	}
 
+	@Override
+	public void send(Class<? extends Packet> type, byte[] data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Ack sendWithAck(Class<? extends Packet> type, byte[] data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -10,6 +10,10 @@ import abstractgame.world.entity.playermodules.UpgradeModule;
 public class PlayerDataHandler {
 	static HashMap<Integer, Identity> identityCashe = new HashMap<>();
 	
+	static {
+		identityCashe.put(11257, new Identity("James Brown", 11257));
+	}
+	
 	private static int n = 0;
 	
 	public static Identity getIdentity(int uuid) {

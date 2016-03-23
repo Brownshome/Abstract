@@ -17,6 +17,7 @@ import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
 import abstractgame.mod.ModManager;
 import abstractgame.net.Identity;
+import abstractgame.net.PlayerDataHandler;
 import abstractgame.net.Side;
 import abstractgame.net.Sided;
 import abstractgame.render.IconRenderer;
@@ -136,9 +137,8 @@ public class Client {
 		Console.setFormat(GLOBAL_CONFIG.getProperty("logging.format", "HH:mm:ss"));
 	}
 
-	static Identity ID = new Identity("James", 11257);
 	public static Identity getIdentity() {
-		return ID;
+		return PlayerDataHandler.getIdentity(11257);
 	}
 
 	public static BlockingQueue<Runnable> getInboundQueue() {

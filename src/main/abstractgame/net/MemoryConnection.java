@@ -22,6 +22,21 @@ public class MemoryConnection implements Connection {
 	}
 	
 	@Override
+	public void send(Class<? extends Packet> type, byte[] data) {
+		Console.fine("Sending " + type.getSimpleName(), "NET");
+
+		ByteBuffer buffer = ByteBuffer.wrap(data); 
+
+		try {
+			threadQueue.put(() -> {
+				int id = Packet.IDS.get(type);
+				Packet reconstructed = Packet.PACKET_READERS.get(id).apply(buffer);
+				reconstructed.handle(isServerSide ? Client.getIdentity() : null);
+			});
+		} catch (InterruptedException e) {}
+	}
+	
+	@Override
 	public void send(Packet packet) {
 		Console.fine("Sending " + packet.getClass().getSimpleName(), "NET");
 		
@@ -39,6 +54,26 @@ public class MemoryConnection implements Connection {
 		} catch (InterruptedException e) {}
 	}
 
+	@Override
+	public Ack sendWithAck(Class<? extends Packet> type, byte[] data) {
+		Console.fine("Sending with ack " + type.getSimpleName(), "NET");
+
+		Ack ack = new Ack();
+		ByteBuffer buffer = ByteBuffer.wrap(data); 
+
+		try {
+			threadQueue.put(() -> {
+				int id = Packet.IDS.get(type);
+				Packet reconstructed = Packet.PACKET_READERS.get(id).apply(buffer);
+				reconstructed.handle(isServerSide ? Client.getIdentity() : null);
+
+				ack.trigger();
+			});
+		} catch (InterruptedException e) {}
+
+		return ack;
+	}
+	
 	@Override
 	public Ack sendWithAck(Packet packet) {
 		Console.fine("Sending with ack " + packet.getClass().getSimpleName(), "NET");

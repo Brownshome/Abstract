@@ -3,13 +3,17 @@ package abstractgame;
 import java.security.Policy;
 
 import abstractgame.io.model.PhysicsMeshLoader;
-import abstractgame.net.packet.EntitySpawnPacket;
+import abstractgame.net.packet.NetEntityCreatePacket;
+import abstractgame.net.packet.NetEntityUpdatePacket;
 import abstractgame.net.packet.JoinPacket;
+import abstractgame.net.packet.NetEntityCreateAck;
+import abstractgame.net.packet.NetEntityCreateClientRequest;
 import abstractgame.net.packet.Packet;
 import abstractgame.net.packet.QueryPacket;
 import abstractgame.net.packet.QueryResponsePacket;
 import abstractgame.net.packet.SpawnTimerPacket;
 import abstractgame.security.GamePolicy;
+import abstractgame.ui.GameScreen;
 import abstractgame.world.World;
 import abstractgame.world.entity.Player;
 import abstractgame.world.map.MapLogicProxy;
@@ -42,7 +46,10 @@ public class Common {
 		Packet.regesterPacket(QueryResponsePacket.class);
 		Packet.regesterPacket(JoinPacket.class);
 		Packet.regesterPacket(SpawnTimerPacket.class);
-		Packet.regesterPacket(EntitySpawnPacket.class);
+		Packet.regesterPacket(NetEntityCreatePacket.class);
+		Packet.regesterPacket(NetEntityCreateAck.class);
+		Packet.regesterPacket(NetEntityCreateClientRequest.class);
+		Packet.regesterPacket(NetEntityUpdatePacket.class);
 		
 		World.regesterNetworkEntity(Player.class);
 	}
@@ -50,5 +57,10 @@ public class Common {
 	public static void setupSecurity() {
 		Policy.setPolicy(new GamePolicy());
 		System.setSecurityManager(new SecurityManager());
+	}
+
+	/** @return the {@link World} object, taking into accout whether the */
+	public static World getWorld() {
+		return Server.isSeverSide() ? Server.getWorld() : GameScreen.getWorld();
 	}
 }

@@ -21,7 +21,10 @@ import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.ConfigFile.Policy;
 import abstractgame.io.config.Decoder;
 import abstractgame.io.user.Console;
+import abstractgame.net.ClientNetHandler;
 import abstractgame.net.Identity;
+import abstractgame.net.ServerNetHandler;
+import abstractgame.net.ServerProxy;
 import abstractgame.net.Side;
 import abstractgame.net.Sided;
 import abstractgame.render.PhysicsRenderer;
@@ -49,11 +52,20 @@ public class World extends TickableImpl {
 	static final List<Class<? extends NetworkEntity>> NETCLASSES = new ArrayList<>();
 	static final List<Function<ByteBuffer, ? extends NetworkEntity>> CONSTRUCTORS = new ArrayList<>();
 	
-	public static int getNetworkEntityID(NetworkEntity entity) {
+	public static int getNetworkEntityTypeID(NetworkEntity entity) {
 		try {
 			return NETIDS.get(entity.getClass());
 		} catch(NullPointerException npe) {
 			throw new ApplicationException("Unregestered NetworkEntity \'" + entity.getClass().getSimpleName() + "\'", "NET");
+		}
+	}
+	
+	/** This method returns null if there is no entity regestered to that ID */
+	public static NetworkEntity getNetworkEntity(int id) {
+		if(Server.isSeverSide()) {
+			return ServerNetHandler.getNetworkEntity(id);
+		} else {
+			return ClientNetHandler.getNetworkEntity(id);
 		}
 	}
 	
@@ -166,8 +178,14 @@ public class World extends TickableImpl {
 	public void tick() {
 		super.tick();
 		
-		physicsWorld.debugDrawWorld();
 		physicsWorld.stepSimulation(Client.GAME_CLOCK.getDelta(), 7);
+		
+		if(Server.isSeverSide()) {
+			ServerNetHandler.syncEntities();
+		} else {
+			ClientNetHandler.syncEntities();
+			physicsWorld.debugDrawWorld();
+		}
 	}
 	
 	public MapObject getNamedObject(String ID) {

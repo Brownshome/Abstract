@@ -45,12 +45,21 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	RenderEntity renderEntity;
 
 	public Player(ByteBuffer buffer) {
-		this(PlayerDataHandler.getIdentity(buffer.getInt()));
+		super(playerShape, new Vector3f(), new Quat4f(0, 0, 0, 1), getModelOffset());
+		id = PlayerDataHandler.getIdentity(buffer.getInt());
 		
 		updateState(buffer);
 	}
 	
-	private static Transform getTransform() {
+	@Override
+	public void initialize() {
+		if(!Server.isSeverSide())
+			renderEntity = new RenderEntity(ModelLoader.loadModel("box"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
+		
+		super.initialize();
+	}
+	
+	private static Transform getModelOffset() {
 		Transform t = new Transform();
 		t.basis.setIdentity();
 		t.origin.set(-.5f, -.5f, -.5f);
@@ -58,7 +67,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	}
 	
 	public Player(Identity id) {
-		super(playerShape, new Vector3f(), new Quat4f(0, 0, 0, 1), getTransform());
+		super(playerShape, new Vector3f(), new Quat4f(0, 0, 0, 1), getModelOffset());
 		
 		if(!Server.isSeverSide())
 			renderEntity = new RenderEntity(ModelLoader.loadModel("box"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
@@ -109,7 +118,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	@Override
 	public void onAddedToWorld(World world) {
 		if(!Server.isSeverSide())
-			ModelRenderer.addStaticModel(renderEntity);
+			ModelRenderer.addDynamicModel(renderEntity);
 		
 		super.onAddedToWorld(world);
 		

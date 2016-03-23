@@ -3,6 +3,7 @@ package abstractgame.world.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector2f;
@@ -28,8 +29,8 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 	protected final Transform physicsOffset;
 	
 	//secondary
-	protected final Transform transform;
-	protected final Quat4f orientation;
+	private final Transform transform;
+	private final Quat4f orientation;
 	
 	public PhysicsEntity(CollisionShape shape, Vector3f position, Quat4f orientation, Transform physicsOffset) {
 		Transform tmp = new Transform();
@@ -56,9 +57,17 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 		body = new RigidBody(mass, motionState, shape, inertia);
 		
 	}
-	
+
 	public RigidBody getRigidBody() {
 		return body;
+	}
+	
+	/**The returned transformation should not be set, use {@link MovableEntity.getOrientWritable()} and
+	 * {@link MovableEntity.getPosWritable()} to change this. 
+	 * 
+	 * @return the transform of the model in worldspace. */
+	public Transform getTransform() {
+		return transform;
 	}
 	
 	@Override

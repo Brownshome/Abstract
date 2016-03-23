@@ -44,6 +44,8 @@ public class ModelRenderer implements Renderer {
 	}
 	
 	public static void addDynamicModel(RenderEntity entity) {
+		assert entity != null;
+		
 		dynamicModels.add(entity);
 	}
 	
