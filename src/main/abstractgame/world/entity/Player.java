@@ -29,6 +29,7 @@ import abstractgame.world.Destroyable;
 import abstractgame.world.Destroyer;
 import abstractgame.world.Tickable;
 import abstractgame.world.World;
+import abstractgame.world.entity.playermodules.Heatsink;
 import abstractgame.world.entity.playermodules.UpgradeModule;
 
 /** This class represents a player object */
@@ -36,7 +37,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	static CollisionShape playerShape = new BoxShape(new Vector3f(.5f, .5f, .5f));
 	protected final List<Runnable> onTick = new ArrayList<>(); 
 	
-	double heat;
+	float heat = .5f;
 	
 	protected List<Runnable> onHeat = new ArrayList<>();
 	
@@ -49,6 +50,8 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		id = PlayerDataHandler.getIdentity(buffer.getInt());
 		
 		updateState(buffer);
+		
+		modules.add(new Heatsink(this));
 	}
 	
 	@Override
@@ -99,14 +102,14 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		onHeat.add(() -> { action.accept(this); });
 	}
 	
-	public void addHeat(double heat) {
+	public void addHeat(float heat) {
 		this.heat += heat;
 		
 		if(heat > 0)
 			onHeat.forEach(Runnable::run);
 	}
 
-	public double getHeat() {
+	public float getHeat() {
 		return heat;
 	}
 
@@ -125,6 +128,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		world.onTick(this::tick);
 		
 		if(!Server.isSeverSide()) {
+			GameScreen.setPlayerEntity(this);
 			GameScreen.INSTANCE.respawnTimer = null;
 			//Camera.setCameraHost(this);
 		}

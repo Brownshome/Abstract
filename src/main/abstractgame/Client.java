@@ -25,6 +25,7 @@ import abstractgame.render.ModelRenderer;
 import abstractgame.render.PhysicsRenderer;
 import abstractgame.render.GLHandler;
 import abstractgame.render.Renderer;
+import abstractgame.render.ServerPhysicsRenderer;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
 import abstractgame.time.Clock;
@@ -32,7 +33,6 @@ import abstractgame.ui.DebugScreen;
 import abstractgame.ui.Screen;
 import abstractgame.ui.TitleScreen;
 import abstractgame.world.World;
-import abstractgame.world.entity.Player;
 import abstractgame.world.map.MapLogicProxy;
 import abstractgame.world.map.MapObject;
 import abstractgame.world.map.PlayerSpawn;
@@ -107,15 +107,19 @@ public class Client {
 	}
 
 	static void loadHooks() {
+		IconRenderer.regesterIcon("settings");
+		IconRenderer.regesterIcon("server");
+		IconRenderer.regesterIcon("new");
+		IconRenderer.regesterIcon("module/default");
+		
 		GLHandler.addRenderer(new TextRenderer());
 		GLHandler.addRenderer(new ModelRenderer());
 		GLHandler.addRenderer(new UIRenderer());
 		GLHandler.addRenderer(new IconRenderer());
 		GLHandler.addRenderer(PhysicsRenderer.INSTANCE);
+		GLHandler.addRenderer(ServerPhysicsRenderer.INSTANCE);
 		
 		Common.loadHooks();
-		
-		ModManager.loadHooks();
 	}
 	
 	static void initialize() {
@@ -147,15 +151,6 @@ public class Client {
 
 	public static void addTask(Runnable r) {
 		runnableList.add(r);
-	}
-
-	//only populated when the player first joins a server
-	static Player player;
-	public static Player getPlayerEntity() {
-		if(player == null)
-			player = new Player(getIdentity());
-		
-		return player;
 	}
 
 	public static void startClientNetThread() {

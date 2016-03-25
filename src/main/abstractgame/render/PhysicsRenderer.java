@@ -33,10 +33,10 @@ public class PhysicsRenderer extends IDebugDraw implements Renderer {
 	public static int PROGRAM;
 	public static int VAO;
 	public static int VBO;
-	
-	static int size = 0;
-	static Map<Vector3f, List<Vector3f>> batches = new HashMap<>();
 	static boolean isActive = false;
+	
+	int size = 0;
+	Map<Vector3f, List<Vector3f>> batches = new HashMap<>();
 	
 	public static void setState(boolean active) {
 		isActive = active;
@@ -136,6 +136,15 @@ public class PhysicsRenderer extends IDebugDraw implements Renderer {
 		Console.warn(warningString, "PHYSICS ENGINE");
 	}
 
+	public void addBatches(Map<Vector3f, List<Vector3f>> batches) {
+		batches.forEach(this::addBatch);
+	}
+	
+	public void addBatch(Vector3f colour, List<Vector3f> lines) {
+		batches.computeIfAbsent(colour, v -> new ArrayList<>()).addAll(lines);
+		size += lines.size();
+	}
+	
 	@Override
 	public void draw3dText(Vector3f location, String textString) {
 		location = new Vector3f(location); //just for safety

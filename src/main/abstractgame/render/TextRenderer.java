@@ -199,7 +199,8 @@ public class TextRenderer implements Renderer {
 	public void render() {
 		GL30.glBindVertexArray(VAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
-
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		
 		if(buffer.size() == 0)
 			return;
 

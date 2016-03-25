@@ -39,13 +39,9 @@ public class IconRenderer implements Renderer {
 	
 	static List<Icon> icons = new ArrayList<>();
 	static int length = 0;
-
-	static {
-		regesterIcon("settings");
-		regesterIcon("server");
-		regesterIcon("new");
-	}
 	
+	/**Adds an icon to the render list for this frame only 
+	 * @param icon The icon to be rendered */
 	public static void addIcon(Icon icon) {
 		icons.add(icon);
 		length += icon.getLength();
@@ -111,6 +107,8 @@ public class IconRenderer implements Renderer {
 
 	@Override
 	public void render() {
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(length);
 		
 		for(Icon icon : icons)
@@ -133,18 +131,17 @@ public class IconRenderer implements Renderer {
 
 	@Override
 	public float getPass() {
-		return 0;
+		return .9f;
+	}
+	
+	public static int getIcon(String icon) {
+		try {
+			return idLookup.get(icon);
+		} catch(NullPointerException npe) {
+			throw new ApplicationException("Icon \'" + icon + "\' was not found", "IMAGEIO");
+		}
 	}
 
-	public static boolean isIconLoaded(String icon) {
-		return getIcon(icon) != null;
-	}
-	
-	/** Will return null if the icon does not exist */
-	public static Integer getIcon(String icon) {
-		return idLookup.get(icon);
-	}
-	
 	public static String getIcon(int icon) {
 		return iconNames.get(icon);
 	}

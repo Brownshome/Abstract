@@ -13,7 +13,7 @@ public class HexFill extends UIElement {
 	Vector2f to;
 	Vector2f from;
 	float layer;
-	final float taperDist;
+	float taperDist;
 	Color4f colour;
 	int ID;
 	

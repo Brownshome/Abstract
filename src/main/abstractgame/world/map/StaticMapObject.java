@@ -9,21 +9,28 @@ import abstractgame.world.entity.BasicEntity;
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.MotionState;
+import com.bulletphysics.linearmath.QuaternionUtil;
 import com.bulletphysics.linearmath.Transform;
 
 public class StaticMapObject extends BasicEntity implements MapObject {
 	RigidBody body;
 	String ID;
 	
-	StaticMapObject(CollisionShape shape, Vector3f position, Quat4f orientation) {
+	public StaticMapObject(CollisionShape shape, Vector3f position, Quat4f orientation, Vector3f offset) {
 		super(position, orientation);
 		
 		body = new RigidBody(0, new MotionState() {
 			@Override
 			public Transform getWorldTransform(Transform out) {
-				out.basis.set(StaticMapObject.super.getOrientation());
-				out.origin.set(StaticMapObject.super.getPosition());
+				out.basis.set(getOrientation());
 				
+				if(offset == null)
+					out.origin.set(getPosition());
+				else {
+					QuaternionUtil.quatRotate(getOrientation(), offset, out.origin);
+					out.origin.add(getPosition());
+				}
+					
 				return out;
 			}
 

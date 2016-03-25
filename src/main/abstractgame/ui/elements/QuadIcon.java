@@ -14,7 +14,6 @@ public class QuadIcon extends Icon {
 	public Vector2f from;
 	public Vector2f to;
 	public Color4f colour;
-	public int ID;
 	
 	public QuadIcon(Color4f colour, Vector2f from, Vector2f to, String icon, int ID) {
 		this.from = from;
@@ -63,5 +62,4 @@ public class QuadIcon extends Icon {
 	public int getLength() {
 		return 6 * Icon.FLOAT_PER_VERTEX;
 	}
-
 }

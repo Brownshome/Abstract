@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import javax.vecmath.Vector3f;
 
 import abstractgame.Client;
+import abstractgame.Common;
 import abstractgame.Server;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.ConfigFile.Policy;
@@ -28,6 +29,7 @@ import abstractgame.net.ServerProxy;
 import abstractgame.net.Side;
 import abstractgame.net.Sided;
 import abstractgame.render.PhysicsRenderer;
+import abstractgame.render.ServerPhysicsRenderer;
 import abstractgame.util.ApplicationException;
 import abstractgame.world.entity.Entity;
 import abstractgame.world.entity.NetworkEntity;
@@ -124,6 +126,8 @@ public class World extends TickableImpl {
 		
 		if(!Server.isSeverSide())
 			physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
+		else if(Server.isInternal())
+			physicsWorld.setDebugDrawer(ServerPhysicsRenderer.INSTANCE);
 		
 		physicsWorld.setGravity(new Vector3f(0, -3, 0));
 		
@@ -178,13 +182,22 @@ public class World extends TickableImpl {
 	public void tick() {
 		super.tick();
 		
-		physicsWorld.stepSimulation(Client.GAME_CLOCK.getDelta(), 7);
+		physicsWorld.stepSimulation(Common.getClock().getDelta(), Server.isSeverSide() ? 15 : 7);
 		
+		if(Server.isSeverSide()) {
+			ServerPhysicsRenderer.INSTANCE.reset();
+		}
+		
+		physicsWorld.debugDrawWorld();
+		
+		sync();
+	}
+	
+	void sync() {
 		if(Server.isSeverSide()) {
 			ServerNetHandler.syncEntities();
 		} else {
 			ClientNetHandler.syncEntities();
-			physicsWorld.debugDrawWorld();
 		}
 	}
 	

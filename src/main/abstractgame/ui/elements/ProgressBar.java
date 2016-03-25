@@ -6,27 +6,38 @@ import java.util.function.Supplier;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.render.UIRenderer;
+import abstractgame.util.FloatSupplier;
+
 public class ProgressBar extends UIElement {
+	public final Color4f colour;
+	
 	Line line;
 	Quad quad;
+	
 	float xStart;
 	float length;
-	Supplier<Float> value;
+	FloatSupplier value;
 	int ID;
 	
 	/** if initialValue is -1 to -2 the bar will show an indeterminate level, the bar will -1 to -2 (TODO) */
-	public ProgressBar(Vector2f position, Vector2f dim, Supplier<Float> value, int ID) {
+	public ProgressBar(Vector2f position, Vector2f dim, Color4f colour, FloatSupplier value, int ID) {
 		this.value = value;
 		xStart = position.x;
 		length = dim.x;
 		this.ID = ID;
 		
-		quad = new Quad(new Vector2f(position.x, position.y - dim.y), new Vector2f(position.x, position.y + dim.y), 0.1f, new Color4f(0, 0, 0, 1), ID);
-		line = new Line(position, new Vector2f(position.x + dim.x, position.y), .1f, new Color4f(0, 0, 0, 1), ID);
+		this.colour = colour;
+		quad = new Quad(new Vector2f(position.x, position.y - dim.y), new Vector2f(position.x, position.y + dim.y), 0.1f, colour, ID);
+		line = new Line(position, new Vector2f(position.x + dim.x, position.y), .1f, colour, ID);
 	}
 	
-	public ProgressBar(Vector2f position, Vector2f dim, Supplier<Float> value) {
-		this(position, dim, value, -1);
+	public ProgressBar(Vector2f position, Vector2f dim, FloatSupplier value) {
+		this(position, dim, UIRenderer.BASE_STRONG, value, -1);
+	}
+
+	public ProgressBar(Vector2f position, Vector2f dim, Color4f colour, FloatSupplier value) {
+		this(position, dim, colour, value, -1);
 	}
 
 	@Override
@@ -38,7 +49,7 @@ public class ProgressBar extends UIElement {
 	
 	@Override
 	public void tick() {
-		quad.to.x = xStart + length * value.get();
+		quad.to.x = xStart + length * value.supply();
 	}
 	
 	@Override

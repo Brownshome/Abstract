@@ -6,10 +6,10 @@ public class Heatsink extends UpgradeModule {
 	Slider coolantRate;
 	
 	int ticksSinceInc = 0;
-	double heatLastTick;
+	float heatLastTick;
 	
-	Heatsink(Player owner) {
-		super(owner, new Slider("Coolant Rate", "How quickly the fighter removes heat", 0, 10, 0));
+	public Heatsink(Player owner) {
+		super(owner, new Slider("Coolant Rate", "How quickly the module removes heat", 0, 10, 0));
 		coolantRate = (Slider) getCustomizations()[0];
 		
 		owner.onHeat(() -> {
@@ -24,7 +24,7 @@ public class Heatsink extends UpgradeModule {
 	}
 	
 	private void activateCooling() {
-		owner.addHeat(-coolantRate.getValue() * (0.01 + owner.getHeat() * 0.025));
+		owner.addHeat(-coolantRate.getValue() * (.01f + owner.getHeat() * .025f));
 	}
 	
 	private int getCooldown() {

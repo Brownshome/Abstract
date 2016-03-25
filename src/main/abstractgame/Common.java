@@ -3,6 +3,7 @@ package abstractgame;
 import java.security.Policy;
 
 import abstractgame.io.model.PhysicsMeshLoader;
+import abstractgame.mod.ModManager;
 import abstractgame.net.packet.NetEntityCreatePacket;
 import abstractgame.net.packet.NetEntityUpdatePacket;
 import abstractgame.net.packet.JoinPacket;
@@ -13,6 +14,7 @@ import abstractgame.net.packet.QueryPacket;
 import abstractgame.net.packet.QueryResponsePacket;
 import abstractgame.net.packet.SpawnTimerPacket;
 import abstractgame.security.GamePolicy;
+import abstractgame.time.Clock;
 import abstractgame.ui.GameScreen;
 import abstractgame.world.World;
 import abstractgame.world.entity.Player;
@@ -52,6 +54,8 @@ public class Common {
 		Packet.regesterPacket(NetEntityUpdatePacket.class);
 		
 		World.regesterNetworkEntity(Player.class);
+		
+		ModManager.loadHooks();
 	}
 
 	public static void setupSecurity() {
@@ -62,5 +66,9 @@ public class Common {
 	/** @return the {@link World} object, taking into accout whether the */
 	public static World getWorld() {
 		return Server.isSeverSide() ? Server.getWorld() : GameScreen.getWorld();
+	}
+
+	public static Clock getClock() {
+		return Server.isSeverSide() ? Server.SERVER_CLOCK : Client.GAME_CLOCK;
 	}
 }

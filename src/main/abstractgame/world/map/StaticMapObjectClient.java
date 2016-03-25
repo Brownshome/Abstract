@@ -47,7 +47,7 @@ public class StaticMapObjectClient extends RenderEntity implements MapObject {
 		
 		if(model == null || Server.isSeverSide()) {
 			/** A physics only object */
-			return new StaticMapObject(shape, p, q);
+			return new StaticMapObject(shape, p, q, o);
 		}
 	
 		return new StaticMapObjectClient(model, shape, p, q, o);
@@ -59,19 +59,18 @@ public class StaticMapObjectClient extends RenderEntity implements MapObject {
 	public StaticMapObjectClient(String modelName, CollisionShape shape, Vector3f position, Quat4f orientation, Vector3f offset) {
 		super(ModelLoader.loadModel(modelName), position, orientation);
 		
-		if(offset != null)
-			QuaternionUtil.quatRotate(orientation, offset, offset);
-		
 		body = new RigidBody(0, new MotionState() {
 			@Override
 			public Transform getWorldTransform(Transform out) {
-				out.basis.set(StaticMapObjectClient.super.getOrientation());
+				out.basis.set(getOrientation());
 				
 				if(offset == null)
-					out.origin.set(StaticMapObjectClient.super.getPosition());
-				else
-					out.origin.add(StaticMapObjectClient.super.getPosition(), offset);
-				
+					out.origin.set(getPosition());
+				else {
+					QuaternionUtil.quatRotate(getOrientation(), offset, out.origin);
+					out.origin.add(getPosition());
+				}
+					
 				return out;
 			}
 

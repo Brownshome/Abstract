@@ -1,5 +1,6 @@
 package abstractgame.ui;
 
+import java.util.List;
 import java.util.function.IntSupplier;
 
 import javax.vecmath.Color3f;
@@ -9,7 +10,6 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Keyboard;
 
-import abstractgame.Client;
 import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
 import abstractgame.net.ServerProxy;
@@ -18,8 +18,11 @@ import abstractgame.render.FreeCamera;
 import abstractgame.render.GLHandler;
 import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
+import abstractgame.ui.elements.ModuleHUDDisplay;
+import abstractgame.ui.elements.ProgressBar;
 import abstractgame.util.FloatSupplier;
 import abstractgame.world.World;
+import abstractgame.world.entity.Player;
 
 public class GameScreen extends Screen {
 	private static enum State {
@@ -34,9 +37,18 @@ public class GameScreen extends Screen {
 	static State state = State.WAIT_FOR_SERVER;
 	static World world;
 	
+	static ProgressBar heatBar = new ProgressBar(new Vector2f(-.6f, -.9f), new Vector2f(1.2f, .01f), UIRenderer.HIGHLIGHT_STRONG,
+			(FloatSupplier) () -> GameScreen.getPlayerEntity() == null ? 0 : GameScreen.getPlayerEntity().getHeat()
+	);
+	
+	static ModuleHUDDisplay modules;
+	
 	/** This gives the number of seconds until respawn, if it is null there
 	 * is no respawn in progress */
 	public static FloatSupplier respawnTimer;
+	
+	//only populated when the player first joins a server
+	static Player player;
 	
 	public static World getWorld() {
 		return world;
@@ -45,6 +57,15 @@ public class GameScreen extends Screen {
 	@Override
 	public void initialize() {
 		PerfIO.holdMouse(true);
+		UIRenderer.addElement(heatBar);
+	}
+	
+	@Override
+	public void destroy() {
+		UIRenderer.removeElement(heatBar);
+		
+		if(modules != null)
+			UIRenderer.removeElement(modules);
 	}
 	
 	@Override
@@ -76,6 +97,18 @@ public class GameScreen extends Screen {
 			
 			TextRenderer.addString(text, new Vector2f(-TextRenderer.getWidth(text) * size * .5f, -TextRenderer.getHeight(text) * size * .5f), size, colour, 0);
 		}
+	}
+
+	public static void setPlayerEntity(Player player) {
+		GameScreen.player = player;
+		assert modules == null;
+		
+		modules = new ModuleHUDDisplay(.1f, player);
+		UIRenderer.addElement(modules);
+	}
+
+	public static Player getPlayerEntity() {
+		return player;
 	}
 
 	public static void setWorld(World newWorld) {

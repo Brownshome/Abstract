@@ -61,5 +61,7 @@ public abstract class UIElement {
 	
 	public void fillTriangles(FloatBuffer buffer) {}
 	public int getTrianglesLength() { return 0; }
+	
+	/** This will be called before fill*** and get***Length */
 	public void tick() {}
 }

@@ -11,6 +11,7 @@ import abstractgame.render.TextRenderer;
 import abstractgame.render.UIRenderer;
 import abstractgame.ui.elements.ProgressBar;
 import abstractgame.ui.elements.QuadIcon;
+import abstractgame.util.FloatSupplier;
 
 public class TitleScreen extends Screen {
 	public static final TitleScreen INSTANCE = new TitleScreen();
@@ -41,7 +42,7 @@ public class TitleScreen extends Screen {
 			Screen.setScreen(TopMenu.INSTANCE);
 	}
 	
-	static Supplier<Float> nothingBar() {
+	static FloatSupplier nothingBar() {
 		long start = Client.GAME_CLOCK.getTickNo();
 		
 		return () -> {

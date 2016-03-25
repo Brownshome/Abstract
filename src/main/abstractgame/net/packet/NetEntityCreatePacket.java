@@ -8,6 +8,7 @@ import abstractgame.ui.GameScreen;
 import abstractgame.util.Util;
 import abstractgame.world.World;
 import abstractgame.world.entity.NetworkEntity;
+import abstractgame.world.entity.Player;
 
 /** Sent from the server to the client when an entity is created */
 public class NetEntityCreatePacket extends Packet {

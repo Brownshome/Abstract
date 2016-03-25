@@ -1,6 +1,6 @@
 format on next load: false
 logging:
-  level: 0
+  level: 1
   format: HH:mm:ss
 opengl:
   debug: true

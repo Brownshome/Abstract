@@ -28,6 +28,8 @@ public class UIRenderer implements Renderer {
 	public static final Color4f HIGHLIGHT = new Color4f(1, .64f, .41f, 1);
 	/** The background color */
 	public static final Color4f BACKGROUND = new Color4f(1, 1, 1, 1);
+	/** See-through */
+	public static final Color4f TRANSPARENT = new Color4f(0, 0, 0, 0);
 	
 	static Collection<UIElement> uiElements = new HashSet<>();
 	
@@ -77,9 +79,9 @@ public class UIRenderer implements Renderer {
 		int trianglesLength = 0;
 		
 		for(UIElement ui : uiElements) {
+			ui.tick();
 			linesLength += ui.getLinesLength();
 			trianglesLength += ui.getTrianglesLength();
-			ui.tick();
 		}
 		
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(linesLength + trianglesLength);
@@ -109,6 +111,6 @@ public class UIRenderer implements Renderer {
 
 	@Override
 	public float getPass() {
-		return -1;
+		return .7f;
 	}
 }

@@ -5,3 +5,4 @@
 *.db
 build/
 eclipse/
+src/resources/image/converterIn
