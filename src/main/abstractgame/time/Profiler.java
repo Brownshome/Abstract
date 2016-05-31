@@ -12,7 +12,7 @@ import abstractgame.io.user.PerfIO;
 public class Profiler {
 	static HashMap<String, Long> times =  new HashMap<>();
 	static String current = "";
-	static final float RES = 1000000;
+	static final long RES = 1000;
 	static long last = Clock.getABSTime(RES);
 	static long start = Clock.getABSTime(RES);
 

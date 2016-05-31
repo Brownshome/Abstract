@@ -37,10 +37,8 @@ public class Clock {
 	
 	PriorityQueue<TimedTask> tasks = new PriorityQueue<>();
 	
-	static final float RES = Sys.getTimerResolution();
-	
 	long frameNo = 0;
-	long startTime = getABSTime(1000f);
+	long startTime = getABSTime(1000);
 	long lastFrame = 0;
 	long lastDelta = 0;
 	
@@ -49,7 +47,7 @@ public class Clock {
 	int count = 0;
 
 	public void startTimer() {
-		startTime = getABSTime(1000f);
+		startTime = getABSTime(1000);
 		frameNo = 0;
 	}
 	
@@ -78,13 +76,13 @@ public class Clock {
 	}
 	
 	/** The time in 1 / resoloution of a second (Sys) */
-	public static long getABSTime(float resoloution) {
-		return (long) (getABSTime() * (resoloution / Sys.getTimerResolution()));
+	public static long getABSTime(long resoloution) {
+		return (getABSTime() * resoloution) / Sys.getTimerResolution();
 	}
 
 	/** The time since started, in ms */
 	public long getTime() {
-		return getABSTime(1000f) - startTime;
+		return getABSTime(1000) - startTime;
 	}
 
 	/** Returns the time of the last tick in millis */
@@ -105,7 +103,7 @@ public class Clock {
 		lastDelta = time - lastFrame;
 		lastFrame = time;
 		
-		if(time - lastAverage > RES) {
+		if(time - lastAverage > Sys.getTimerResolution()) {
 			lastAverage = lastFrame;
 			tps = count;
 			count = 0;
@@ -119,6 +117,6 @@ public class Clock {
 	/** returns the last frame delta in seconds, this returns 0 for the first
 	 * tick */
 	public float getDelta() {
-		return lastDelta / RES;
+		return (float) lastDelta / Sys.getTimerResolution();
 	}
 }
