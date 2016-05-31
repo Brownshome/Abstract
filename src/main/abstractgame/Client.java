@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
@@ -96,7 +97,6 @@ public class Client {
 			runnableList.forEach(Runnable::run);
 			runnableList.clear();
 		}
-		
 		
 		Screen.tickScreen();
 		GLHandler.tick();

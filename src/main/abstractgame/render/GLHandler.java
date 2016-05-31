@@ -54,7 +54,7 @@ public class GLHandler {
 	public static final boolean CHECK_GL = Client.GLOBAL_CONFIG.getProperty("opengl.debug", false);
 	public static final String SHADER_PATH = "resources/shaders/";
 	public static final String SHADER_EXT = ".glsl";
-	public static boolean vSync = false;
+	public static boolean vSync = true;
 	
 	private static final List<Renderer> RENDERERS = new ArrayList<>();
 	
@@ -247,7 +247,7 @@ public class GLHandler {
 				Display.setDisplayMode(new DisplayMode(Client.GLOBAL_CONFIG.getProperty("display.size.width", 800), Client.GLOBAL_CONFIG.getProperty("display.size.height", 600)));
 			}
 			
-			Display.setVSyncEnabled(true);
+			Display.setVSyncEnabled(vSync);
 			Display.create(new PixelFormat().withDepthBits(24).withBitsPerPixel(24)/*, new ContextAttribs(4, 5, 0, ContextAttribs.CONTEXT_CORE_PROFILE_BIT_ARB)*/);
 			//ARBDebugOutput.glDebugMessageCallbackARB(new ARBDebugOutputCallback());
 			
