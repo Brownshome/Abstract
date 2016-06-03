@@ -14,7 +14,7 @@ import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
 
-import abstractgame.Server;
+import abstractgame.Common;
 import abstractgame.io.model.ModelLoader;
 import abstractgame.net.Identity;
 import abstractgame.net.PlayerDataHandler;
@@ -56,7 +56,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	
 	@Override
 	public void initialize() {
-		if(!Server.isSeverSide())
+		if(!Common.isSeverSide())
 			renderEntity = new RenderEntity(ModelLoader.loadModel("box"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
 		
 		super.initialize();
@@ -72,7 +72,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	public Player(Identity id) {
 		super(playerShape, new Vector3f(), new Quat4f(0, 0, 0, 1), getModelOffset());
 		
-		if(!Server.isSeverSide())
+		if(!Common.isSeverSide())
 			renderEntity = new RenderEntity(ModelLoader.loadModel("box"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
 		
 		this.id = id;
@@ -85,13 +85,21 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	}
 	
 	@Override
-	public void tick() {
+	public void run() {
 		onTick.forEach(Runnable::run);
+		
+		if(!Common.isSeverSide() && Camera.host == this)
+			Camera.recalculate();
 	}
 
 	@Override
 	public void onTick(Runnable r) {
 		onTick.add(r);
+	}
+	
+	@Override
+	public void removeOnTick(Runnable r) {
+		onTick.remove(r);
 	}
 	
 	public void onHeat(Runnable r) {
@@ -118,19 +126,25 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		// TODO Unregester player keybinds?
 	}
 
+	private static final Vector3f OFFSET = new Vector3f(.5f, .5f, -5f);
+	@Override
+	public Vector3f getOffset() {
+		return OFFSET;
+	}
+	
 	@Override
 	public void onAddedToWorld(World world) {
-		if(!Server.isSeverSide())
+		if(!Common.isSeverSide())
 			ModelRenderer.addDynamicModel(renderEntity);
 		
 		super.onAddedToWorld(world);
 		
-		world.onTick(this::tick);
+		world.onTick(this);
 		
-		if(!Server.isSeverSide()) {
+		if(!Common.isSeverSide()) {
 			GameScreen.setPlayerEntity(this);
 			GameScreen.INSTANCE.respawnTimer = null;
-			//Camera.setCameraHost(this);
+			Camera.setCameraHost(this);
 		}
 	}
 	

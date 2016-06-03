@@ -21,6 +21,7 @@ import org.lwjgl.BufferUtils;
 import com.bulletphysics.linearmath.Transform;
 
 import abstractgame.Client;
+import abstractgame.Common;
 import abstractgame.Server;
 
 public class Util {
@@ -144,7 +145,7 @@ public class Util {
 
 	/** Runs the task on the main thread */
 	public static void queueOnMainThread(Runnable r) {
-		if(Server.isSeverSide())
+		if(Common.isSeverSide())
 			Server.addTask(r);
 		else
 			Client.addTask(r);

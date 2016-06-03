@@ -25,9 +25,6 @@ public class Camera implements Entity {
 		public Quat4f getOrientation() {
 			return orientation;
 		}
-
-		@Override
-		public void onCameraUnset() {}
 	};
 	
 	public static Matrix4f projectionMatrix = new Matrix4f();
@@ -39,7 +36,6 @@ public class Camera implements Entity {
 	
 	//primary quantities
 	public static CameraHost host = NULL_HOST;
-	public static Vector3f offset;
 	
 	//secondary quantities
 	public static Vector3f position = new Vector3f();
@@ -53,13 +49,15 @@ public class Camera implements Entity {
 		if(host == null)
 			return;
 		
-		position.add(host.getPosition(), offset);
-		
-		Vector3f vec = new Vector3f(position);
-		vec.negate();
 		Quat4f quat = new Quat4f(host.getOrientation());
-		quat.inverse();
+		Vector3f vec = new Vector3f(host.getOffset());
+		QuaternionUtil.quatRotate(quat, vec, vec);
+		position.add(host.getPosition(), vec);
 		
+		vec.set(position);
+		vec.negate();
+		
+		quat.inverse();
 		QuaternionUtil.quatRotate(quat, vec, vec);
 		Matrix4f tmp = new Matrix4f(quat, vec, 1);
 		
@@ -80,13 +78,19 @@ public class Camera implements Entity {
 		if(newHost == null)
 			host = NULL_HOST;
 		
+		if(newHost != FreeCamera.FREE_CAM &&FreeCamera.isActive()) {
+			FreeCamera.setOldHost(newHost);
+			return;
+		}
+			
 		if(host == newHost)
 			return;
 		
 		host.onCameraUnset();
 		
-		offset = new Vector3f();
 		host = newHost;
+		
+		host.onCameraSet();
 		
 		recalculate();
 	}

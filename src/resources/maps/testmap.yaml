@@ -5,19 +5,22 @@ size: [100, 100]
 script: 
     type: default
 
+global:
+    gravity: -1
+
 objects:
   - type: spawn
     ID: playerSpawn
     checkCollision: ALL
-    spawnInt: 50
-    position: [-.5, 6, -.5]
+    spawnInt: 5.2
+    position: [-.5, .6, -.5]
 
   - type: static
     model: box
     physics:
         file: box
         offset: [0.5, 0.5, 0.5]
-    position: [0, 5, 0]
+    position: [5, 5, 0]
     orientation: [0, 0.5, 0.5, 0.707]
   
   - type: static

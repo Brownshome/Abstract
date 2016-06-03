@@ -65,10 +65,19 @@ public class Common {
 
 	/** @return the {@link World} object, taking into accout whether the */
 	public static World getWorld() {
-		return Server.isSeverSide() ? Server.getWorld() : GameScreen.getWorld();
+		return Common.isSeverSide() ? Server.getWorld() : GameScreen.getWorld();
 	}
 
 	public static Clock getClock() {
-		return Server.isSeverSide() ? Server.SERVER_CLOCK : Client.GAME_CLOCK;
+		return Common.isSeverSide() ? Server.SERVER_CLOCK : Client.GAME_CLOCK;
+	}
+
+	/** Returns true if the current thread is a server thread */
+	public static boolean isSeverSide() {
+		if(!Server.isInternal)
+			return true;
+		
+		Thread current = Thread.currentThread();
+		return current == Server.serverNetThread || current == Server.mainServerThread;
 	}
 }

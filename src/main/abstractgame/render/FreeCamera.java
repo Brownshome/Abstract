@@ -2,11 +2,17 @@ package abstractgame.render;
 
 import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 
+import com.bulletphysics.linearmath.QuaternionUtil;
+
 import abstractgame.io.user.PerfIO;
+import abstractgame.ui.GameScreen;
+import abstractgame.util.ApplicationException;
 import abstractgame.util.Util;
 import abstractgame.world.TickableImpl;
+import abstractgame.world.World;
 
 /** Represents a physicsless player controled entity */
 public class FreeCamera extends TickableImpl implements CameraHost {
@@ -15,10 +21,70 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 	static final float DRAG = ACCEL / (15 + ACCEL);
 	static final float DRAG_SLOW = ACCEL / (5 + ACCEL);
 	
+	static final String FREECAM_STRING = "Freecam Active";
+	static final Vector3f COLOUR = new Vector3f(0, 0, 0);
+	
+	public static boolean slow = false;
+	private static CameraHost oldHost = null;
+	static final FreeCamera FREE_CAM = new FreeCamera(new Vector3f(), new Quat4f()) {
+		@Override
+		public void run() {
+			super.run();
+			
+			TextRenderer.addString(FREECAM_STRING, new Vector2f(-1, -1 + TextRenderer.getHeight(FREECAM_STRING) * .05f), .05f, UIRenderer.BASE_STRONG, 0);
+
+			if(PhysicsRenderer.INSTANCE.isActive()) {
+				Vector3f to = new Vector3f(oldHost.getOffset());
+				QuaternionUtil.quatRotate(oldHost.getOrientation(), to, to);
+				
+				Vector3f from = new Vector3f(oldHost.getPosition());
+				from.add(to);
+				
+				to.set(0, 0, 1);
+				QuaternionUtil.quatRotate(oldHost.getOrientation(), to, to);
+				to.add(from);
+				
+				PhysicsRenderer.INSTANCE.drawLine(from, to, COLOUR);
+				
+				from.x -= .1f;
+				from.y -= .1f;
+				from.z -= .1f;
+				
+				to.x = from.x + .2f;
+				to.y = from.y + .2f;
+				to.z = from.z + .2f;
+				
+				PhysicsRenderer.INSTANCE.drawAabb(from, to, COLOUR);
+			}
+		}
+	};
+	
 	public final Vector3f position;
 	public final Quat4f orientation;
 	public final Vector3f velocity = new Vector3f();
-	public boolean slow = false;
+	
+	World world;
+
+	/** Saves the old camera host and switches to a freecam. */
+	public static void toggle() {
+		if(oldHost == null) {
+			oldHost = Camera.host;
+			FREE_CAM.position.set(Camera.position);
+			FREE_CAM.orientation.set(oldHost.getOrientation());
+			FREE_CAM.velocity.set(0, 0, 0);
+			Camera.setCameraHost(FREE_CAM);
+		} else {
+			CameraHost tmp = oldHost;
+			oldHost = null;
+			Camera.setCameraHost(tmp);
+		}
+		
+		assert oldHost != FREE_CAM;
+	}
+	
+	public static boolean isActive() {
+		return oldHost != null;
+	}
 	
 	public FreeCamera(Vector3f position, Vector3f up, Vector3f forward) {
 		this.position = position;
@@ -38,9 +104,17 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 	public void backward() { velocity.scaleAdd(-ACCEL, Camera.forward, velocity); }
 	public void stop() { velocity.set(0, 0, 0); }
 	
+	public static void cameraUp() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).up(); }
+	public static void cameraDown() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).down(); }
+	public static void cameraLeft() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).left(); }
+	public static void cameraRight() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).right(); }
+	public static void cameraForward() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).forward(); }
+	public static void cameraBackward() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).backward(); }
+	public static void cameraStop() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).stop(); }
+	
 	@Override
-	public void tick() {
-		super.tick();
+	public void run() {
+		super.run();
 		
 		if(Camera.host != this)
 			return;
@@ -93,7 +167,19 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 
 	@Override
 	public void onCameraUnset() {
-		// TODO Auto-generated method stub
+		world.removeOnTick(this);
+	}
+	
+	@Override
+	public void onCameraSet() {
+		world = GameScreen.getWorld();
+		if(world == null)
+			throw new ApplicationException("There must be a world for the Free Camera to function.", "CAMERA");
 		
+		world.onTick(this);
+	}
+
+	public static void setOldHost(CameraHost newHost) {
+		oldHost = newHost;
 	}
 }

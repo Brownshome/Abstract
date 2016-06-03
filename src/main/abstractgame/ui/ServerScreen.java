@@ -17,6 +17,8 @@ import abstractgame.ui.elements.SingleLineTextEntry;
 import abstractgame.util.ApplicationException;
 
 public class ServerScreen extends Screen {
+	public static final String DEFAULT_CONFIG_FILE = "server";
+
 	public static ServerScreen INSTANCE = new ServerScreen();
 	
 	static SingleLineTextEntry portJoin = new LabeledSingleTextEntry(new Vector2f(-.9f, .35f), new Vector2f(-.3f, .45f), 0, "Port:    ");
@@ -46,12 +48,15 @@ public class ServerScreen extends Screen {
 	static void host() {
 		boolean connection = privateButton.getState();
 		
+		String config = configFileHost.getText();
+		if(config.isEmpty()) config = DEFAULT_CONFIG_FILE;
+		
 		if(connection) {
-			ServerProxy.startIntegratedServer(Integer.parseInt(portHost.getText()), configFileHost.getText());
+			ServerProxy.startIntegratedServer(Integer.parseInt(portHost.getText()), config);
 			portJoin.setText(portHost.getText());
 		} else {
 			portJoin.setText("Memory");
-			ServerProxy.startPrivateServer(configFileHost.getText());
+			ServerProxy.startPrivateServer(config);
 		}
 			
 		hostButton.disabled = true;
@@ -75,7 +80,7 @@ public class ServerScreen extends Screen {
 	}
 	
 	@Override
-	public void tick() {
+	public void run() {
 		TextRenderer.addString("Join Server", new Vector2f(-.9f, .6f), .15f, UIRenderer.BASE_STRONG, -1);
 		TextRenderer.addString("Host Server", new Vector2f(.1f, .6f), .15f, UIRenderer.BASE_STRONG, -1);
 	}

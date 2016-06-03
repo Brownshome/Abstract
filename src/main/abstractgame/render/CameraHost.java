@@ -16,9 +16,11 @@ public interface CameraHost extends Entity {
 		}
 	}
 	
-	default Vector3f getOffest() {
+	default Vector3f getOffset() {
 		return Util.ZERO_VEC3;
 	}
 	
-	void onCameraUnset();
+	default void onCameraUnset() {}
+
+	default void onCameraSet() {}
 }

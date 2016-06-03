@@ -62,7 +62,7 @@ public class Server {
 	
 	/** Starts the server threads and reads the config file */
 	public static void startServer(ConfigFile file) {
-		if(!Server.isSeverSide()) {
+		if(!Common.isSeverSide()) {
 			mainServerThread = new Thread(() -> {
 				startServer(file);
 				
@@ -146,7 +146,7 @@ public class Server {
 		}
 		
 		if(getWorld() != null)
-			world.tick();
+			world.run();
 		
 		doTimings();
 	}
@@ -177,15 +177,6 @@ public class Server {
 		return PLAYERS.computeIfAbsent(id, i -> new Player(i));
 	}
 	
-	/** Returns true if the current thread is a server thread */
-	public static boolean isSeverSide() {
-		if(!isInternal)
-			return true;
-		
-		Thread current = Thread.currentThread();
-		return current == serverNetThread || current == mainServerThread;
-	}
-
 	public static void addTask(Runnable r) {
 		runnableList.add(r);
 	}

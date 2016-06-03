@@ -13,6 +13,7 @@ import javax.vecmath.Vector3f;
 import com.bulletphysics.linearmath.QuaternionUtil;
 
 import abstractgame.Client;
+import abstractgame.Common;
 import abstractgame.Server;
 import abstractgame.io.user.Console;
 import abstractgame.time.Clock;
@@ -37,7 +38,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 		return new PlayerSpawn(
 				position, 
 				CheckCollision.valueOf(MapObject.validate("spawn", String.class, "checkCollision", data).toUpperCase(Locale.ROOT)), 
-				MapObject.validate("spawn", Integer.class, "spawnInt", data)
+				MapObject.validate("spawn", Number.class, "spawnInt", data).floatValue()
 		);
 	}
 	
@@ -48,14 +49,14 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	int spawnInt;
 	boolean hadFirstSpawn = false;
 	
-	public PlayerSpawn(Vector3f position, CheckCollision checks, int spawnInt) {
+	public PlayerSpawn(Vector3f position, CheckCollision checks, float spawnInt) {
 		super(position, new Quat4f(0, 0, 0, 1));
-		this.spawnInt = spawnInt;
+		this.spawnInt = (int) (spawnInt * Server.getTargetTPS());
 	}
 	
 	@Override
 	public void addToWorld(World world) {
-		if(Server.isSeverSide())
+		if(Common.isSeverSide())
 			world.onTick(() -> {
 				if(spawnList.isEmpty())
 					return;
@@ -72,7 +73,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	/** Spawns the player now, this method is also used internally
 	 * so this is the one to override for custom spawning logic */
 	public void spawnNow(Player player) {
-		if(!Server.isSeverSide())
+		if(!Common.isSeverSide())
 			throw new ApplicationException("This method should not be called on the client", "CLIENT");
 		
 		player.getPosWritable().set(getPosition());
@@ -83,7 +84,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	/** Adds the player to the spawn queue, returning the time left until
 	 * the player is spawned again in server ticks. */
 	public int spawn(Player player) {
-		if(!Server.isSeverSide())
+		if(!Common.isSeverSide())
 			throw new ApplicationException("This method should not be called on the client", "CLIENT");
 		
 		spawnList.add(player);

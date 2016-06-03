@@ -61,7 +61,7 @@ public class TopMenu extends Screen {
 	}
 
 	@Override
-	public void tick() {
+	public void run() {
 		IconRenderer.addIcon(settings);
 		IconRenderer.addIcon(server);
 		IconRenderer.addIcon(create);

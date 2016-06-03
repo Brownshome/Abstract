@@ -11,6 +11,8 @@ import java.security.Policy;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.vecmath.Vector3f;
+
 import abstractgame.Server;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
@@ -87,6 +89,12 @@ public interface MapLogicProxy {
 	 * loadout at the spawn with ID: playerSpawn */
 	default void initialize(World world) {
 		PlayerSpawn spawn;
+		
+		try {
+		world.physicsWorld.setGravity(new Vector3f(0, -world.getMapFile().getPropertyNoDefault("global.gravity", Number.class).floatValue(), 0));
+		} catch(NullPointerException npe) {
+			throw new ApplicationException("The loaded map does not provide custom logic and has no \'global.gravity\' value set.", npe, "WORLD");
+		}
 		
 		try {
 			spawn = (PlayerSpawn) world.getNamedObject("playerSpawn");

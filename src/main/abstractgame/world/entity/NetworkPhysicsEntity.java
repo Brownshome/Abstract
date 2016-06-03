@@ -10,7 +10,6 @@ import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.linearmath.Transform;
 
 import abstractgame.Common;
-import abstractgame.Server;
 import abstractgame.net.ClientNetHandler;
 import abstractgame.net.Connection;
 import abstractgame.net.Identity;
@@ -116,7 +115,7 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 		super.onAddedToWorld(world);
 
 		if(!isSlave) {
-			if(Server.isSeverSide()) {
+			if(Common.isSeverSide()) {
 				ServerNetHandler.createNetworkEntity(this);
 			} else {
 				ClientNetHandler.createNetworkEntity(this);

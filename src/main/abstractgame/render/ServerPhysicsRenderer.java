@@ -12,10 +12,12 @@ import com.bulletphysics.linearmath.IDebugDraw;
 public class ServerPhysicsRenderer extends PhysicsRenderer {
 	public static ServerPhysicsRenderer INSTANCE = new ServerPhysicsRenderer();
 	
+	/** Does nothing as PhysicsRenderer is statically initialized */
 	@Override
 	public void initialize() {}
 	
-	public void reset() {
+	/** Removes all elements in the draw buffer */
+	public synchronized void reset() {
 		batches.forEach((c, l) -> l.clear());
 	}
 	

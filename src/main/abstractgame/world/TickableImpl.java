@@ -8,12 +8,17 @@ public class TickableImpl implements Tickable {
 	protected final List<Runnable> onTick = new CopyOnWriteArrayList<>(); //TODO might be too costly?
 	
 	@Override
-	public void tick() {
+	public void run() {
 		onTick.forEach(Runnable::run);
 	}
 
 	@Override
 	public void onTick(Runnable r) {
 		onTick.add(r);
+	}
+
+	@Override
+	public void removeOnTick(Runnable r) {
+		onTick.remove(r);
 	}
 }

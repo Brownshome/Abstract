@@ -32,8 +32,8 @@ public class TitleScreen extends Screen {
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
+	public void run() {
+		super.run();
 		
 		TextRenderer.addString(Client.NAME, new Vector2f(-0.85f, -0.25f), 0.5f, new Color4f(0, 0, 0, 1), 0);
 		TextRenderer.addString("Loading...", new Vector2f(-.4f, -.35f), 0.12f, new Color4f(0, 0, 0, 1), 0);

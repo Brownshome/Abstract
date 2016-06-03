@@ -12,7 +12,7 @@ import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.QuaternionUtil;
 import com.bulletphysics.linearmath.Transform;
 
-import abstractgame.Server;
+import abstractgame.Common;
 import abstractgame.io.model.ModelLoader;
 import abstractgame.io.model.PhysicsMeshLoader;
 import abstractgame.render.ModelRenderer;
@@ -45,7 +45,7 @@ public class StaticMapObjectClient extends RenderEntity implements MapObject {
 		Vector3f p = new Vector3f(position.get(0).floatValue(), position.get(1).floatValue(), position.get(2).floatValue());
 		Quat4f q = new Quat4f(orientation.get(0).floatValue(), orientation.get(1).floatValue(), orientation.get(2).floatValue(), orientation.get(3).floatValue());
 		
-		if(model == null || Server.isSeverSide()) {
+		if(model == null || Common.isSeverSide()) {
 			/** A physics only object */
 			return new StaticMapObject(shape, p, q, o);
 		}

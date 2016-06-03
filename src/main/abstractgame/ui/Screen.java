@@ -32,9 +32,9 @@ public abstract class Screen extends TickableImpl {
 	
 	public static void tickScreen() {
 		if(baseScreen != null)
-			baseScreen.tick();
+			baseScreen.run();
 		
-		overlays.forEach(Screen::tick);
+		overlays.forEach(Screen::run);
 	}
 	
 	public static void addOverlay(Screen overlay) {

@@ -64,7 +64,7 @@ public class World extends TickableImpl {
 	
 	/** This method returns null if there is no entity regestered to that ID */
 	public static NetworkEntity getNetworkEntity(int id) {
-		if(Server.isSeverSide()) {
+		if(Common.isSeverSide()) {
 			return ServerNetHandler.getNetworkEntity(id);
 		} else {
 			return ClientNetHandler.getNetworkEntity(id);
@@ -124,12 +124,10 @@ public class World extends TickableImpl {
 		//TODO tune these paramaters
 		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), new DbvtBroadphase(), null, new DefaultCollisionConfiguration());
 		
-		if(!Server.isSeverSide())
+		if(!Common.isSeverSide())
 			physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
 		else if(Server.isInternal())
 			physicsWorld.setDebugDrawer(ServerPhysicsRenderer.INSTANCE);
-		
-		physicsWorld.setGravity(new Vector3f(0, -3, 0));
 		
 		String[] split = identifier.split(":");
 		
@@ -179,14 +177,14 @@ public class World extends TickableImpl {
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
+	public void run() {
+		physicsWorld.stepSimulation(Common.getClock().getDelta(), Common.isSeverSide() ? 15 : 7);
 		
-		physicsWorld.stepSimulation(Common.getClock().getDelta(), Server.isSeverSide() ? 15 : 7);
-		
-		if(Server.isSeverSide()) {
+		if(Common.isSeverSide()) {
 			ServerPhysicsRenderer.INSTANCE.reset();
 		}
+		
+		super.run();
 		
 		physicsWorld.debugDrawWorld();
 		
@@ -194,11 +192,15 @@ public class World extends TickableImpl {
 	}
 	
 	void sync() {
-		if(Server.isSeverSide()) {
+		if(Common.isSeverSide()) {
 			ServerNetHandler.syncEntities();
 		} else {
 			ClientNetHandler.syncEntities();
 		}
+	}
+	
+	public ConfigFile getMapFile() {
+		return mapFile;
 	}
 	
 	public MapObject getNamedObject(String ID) {
