@@ -8,7 +8,8 @@ import abstractgame.util.Indexable;
 
 /** Indicates an object that should have it's physical state synced across the network.
  * The implementer NEEDS to define &lt<init&gt>(ByteBuffer) making sure it does
- * not access sensitive state as it will be called on the net thread. */
+ * not access sensitive state as it will be called on the net thread. The initialize method
+ * will be called on the main thread and thread sensitive code should be placed here */
 public interface NetworkEntity extends Indexable {
 	/** States which client has control of this entity, returning null indicates
 	 * that the server has control of the entity
@@ -27,7 +28,7 @@ public interface NetworkEntity extends Indexable {
 	void updateState(ByteBuffer buffer);
 	/** Fills the data needed to create this object */
 	void fillCreateData(ByteBuffer buffer);
-	/** Called on the main server thread once the entity has populated */
+	/** Called on the main thread once the entity has populated */
 	void initialize();
 
 	boolean needsSyncTo(Identity id);

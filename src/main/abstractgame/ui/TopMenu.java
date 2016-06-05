@@ -15,6 +15,7 @@ import abstractgame.ui.elements.NamedCheckBox;
 import abstractgame.ui.elements.Quad;
 import abstractgame.ui.elements.QuadIcon;
 import abstractgame.ui.elements.UIElement;
+import abstractgame.util.Language;
 
 public class TopMenu extends Screen {
 	public static TopMenu INSTANCE = new TopMenu();
@@ -25,8 +26,8 @@ public class TopMenu extends Screen {
 	static int ID_EXIT = UIElement.getNewID();
 	static int ID_CREDITS = UIElement.getNewID();
 
-	static Button exitButton = new Button.Weak(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), "Exit", Client::close, 0, ID_EXIT);
-	static Button creditsButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), "Show Credits", () -> Screen.setScreen(CreditScreen.INSTANCE), 0, ID_CREDITS);
+	static Button exitButton = new Button.Weak(new Vector2f(-.6f, -.8f), new Vector2f(-.1f, -.7f), Language.get("top.exit"), Client::close, 0, ID_EXIT);
+	static Button creditsButton = new Button.Weak(new Vector2f(.1f, -.8f), new Vector2f(.6f, -.7f), Language.get("top.credits"), () -> Screen.setScreen(CreditScreen.INSTANCE), 0, ID_CREDITS);
 
 	static QuadIcon settings = new QuadIcon(UIRenderer.BASE, new Vector2f(-1.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(-.5f * GLHandler.xCorrectionScalar, .5f), "settings", ID_SETTINGS);
 	static QuadIcon server = new QuadIcon(UIRenderer.BASE, new Vector2f(-.5f * GLHandler.xCorrectionScalar, -.5f), new Vector2f(.5f * GLHandler.xCorrectionScalar, .5f), "server", ID_SERVER);

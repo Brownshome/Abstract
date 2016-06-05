@@ -5,6 +5,7 @@ import abstractgame.ui.elements.ModuleElement;
 import abstractgame.ui.elements.ModuleElement.State;
 import abstractgame.world.entity.Player;
 
+/** At the present time these modules only exist on the client */
 public abstract class UpgradeModule {
 	public final Player owner;
 	

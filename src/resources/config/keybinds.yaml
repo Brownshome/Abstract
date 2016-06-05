@@ -1,11 +1,13 @@
 format on next load: false
-game:
+debug:
+  toggle physics display: F4
+  toggle debug display: F3
+graphics:
   vsync: V
+global:
+  toggle freecam: F2
   exit: ESCAPE
   free mouse: F
-debug:
-  toggle debug display: F3
-  toggle physics display: F4
 free camera:
   up: SPACE
   down: LSHIFT
@@ -15,4 +17,10 @@ free camera:
   right: D
   slow: LMENU
   stop: X
-  toggle: F2
+player:
+  forward: W
+  backward: S
+  left: A
+  right: D
+  crouch: RSHIFT
+  jump: SPACE

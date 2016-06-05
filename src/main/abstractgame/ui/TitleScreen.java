@@ -12,6 +12,7 @@ import abstractgame.render.UIRenderer;
 import abstractgame.ui.elements.ProgressBar;
 import abstractgame.ui.elements.QuadIcon;
 import abstractgame.util.FloatSupplier;
+import abstractgame.util.Language;
 
 public class TitleScreen extends Screen {
 	public static final TitleScreen INSTANCE = new TitleScreen();
@@ -36,7 +37,7 @@ public class TitleScreen extends Screen {
 		super.run();
 		
 		TextRenderer.addString(Client.NAME, new Vector2f(-0.85f, -0.25f), 0.5f, new Color4f(0, 0, 0, 1), 0);
-		TextRenderer.addString("Loading...", new Vector2f(-.4f, -.35f), 0.12f, new Color4f(0, 0, 0, 1), 0);
+		TextRenderer.addString(Language.get("title.loading"), new Vector2f(-.4f, -.35f), 0.12f, new Color4f(0, 0, 0, 1), 0);
 		
 		if(done)
 			Screen.setScreen(TopMenu.INSTANCE);

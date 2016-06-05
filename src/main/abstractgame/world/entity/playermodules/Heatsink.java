@@ -1,5 +1,6 @@
 package abstractgame.world.entity.playermodules;
 
+import abstractgame.util.Language;
 import abstractgame.world.entity.Player;
 
 public class Heatsink extends UpgradeModule {
@@ -9,8 +10,10 @@ public class Heatsink extends UpgradeModule {
 	float heatLastTick;
 	
 	public Heatsink(Player owner) {
-		super(owner, new Slider("Coolant Rate", "How quickly the module removes heat", 0, 10, 0));
+		super(owner, new Slider(Language.get("module.heatsink.coolant rate.name"), Language.get("module.heatsink.coolant rate.desc"), 0, 10, 0));
 		coolantRate = (Slider) getCustomizations()[0];
+		
+		coolantRate.value = 0.5f;
 		
 		owner.onHeat(() -> {
 			ticksSinceInc = 0;
@@ -33,7 +36,6 @@ public class Heatsink extends UpgradeModule {
 
 	@Override
 	public String getDescription() {
-		return "Decreaces your heat level after 5 seconds of not increacing."
-			 + " Stacking this module decreaces the wait time and increaces the cooling rate";
+		return Language.get("module.heatsink.desc");
 	}
 }

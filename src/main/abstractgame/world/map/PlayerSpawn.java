@@ -56,6 +56,9 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	
 	@Override
 	public void addToWorld(World world) {
+		if(spawnInt == 0)
+			return;
+		
 		if(Common.isSeverSide())
 			world.onTick(() -> {
 				if(spawnList.isEmpty())
@@ -86,6 +89,11 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	public int spawn(Player player) {
 		if(!Common.isSeverSide())
 			throw new ApplicationException("This method should not be called on the client", "CLIENT");
+		
+		if(spawnInt == 0) {
+			spawnNow(player);
+			return 0;
+		}
 		
 		spawnList.add(player);
 		return spawnInt - (int) (Server.SERVER_CLOCK.getTickNo() % spawnInt);

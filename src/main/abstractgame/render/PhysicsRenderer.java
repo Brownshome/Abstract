@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.vecmath.Color4f;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
@@ -19,13 +18,13 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import abstractgame.io.user.Console;
-import abstractgame.io.user.KeyBinds;
-import abstractgame.io.user.PerfIO;
-import abstractgame.util.Util;
-
 import com.bulletphysics.linearmath.DebugDrawModes;
 import com.bulletphysics.linearmath.IDebugDraw;
+
+import abstractgame.Client;
+import abstractgame.io.user.Console;
+import abstractgame.io.user.PerfIO;
+import abstractgame.util.Util;
 
 /** This is the debug renderer for the world physics */
 public class PhysicsRenderer extends IDebugDraw implements Renderer {
@@ -52,7 +51,7 @@ public class PhysicsRenderer extends IDebugDraw implements Renderer {
 	
 	@Override
 	public void initialize() {
-		KeyBinds.add(PhysicsRenderer::toggle, Keyboard.KEY_F4, PerfIO.BUTTON_PRESSED, "debug.toggle physics display");
+		Client.DEBUG_BINDS.add(PhysicsRenderer::toggle, Keyboard.KEY_F4, PerfIO.BUTTON_PRESSED, "toggle physics display");
 		
 		int fragment = GLHandler.createShader("physics-fragment", GL20.GL_FRAGMENT_SHADER);
 		int vertex = GLHandler.createShader("physics-vertex", GL20.GL_VERTEX_SHADER);

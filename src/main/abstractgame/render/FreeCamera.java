@@ -5,9 +5,12 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 
+import org.lwjgl.input.Keyboard;
+
 import com.bulletphysics.linearmath.QuaternionUtil;
 
 import abstractgame.io.user.PerfIO;
+import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.ui.GameScreen;
 import abstractgame.util.ApplicationException;
 import abstractgame.util.Util;
@@ -20,6 +23,19 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 	static final float ACCEL = .3f;
 	static final float DRAG = ACCEL / (15 + ACCEL);
 	static final float DRAG_SLOW = ACCEL / (5 + ACCEL);
+	
+	static final BindGroup CAMERA_BINDS = new BindGroup("free camera");
+	static {
+		CAMERA_BINDS.add(FreeCamera::cameraUp, Keyboard.KEY_SPACE, PerfIO.BUTTON_DOWN, "up");
+		CAMERA_BINDS.add(FreeCamera::cameraDown, Keyboard.KEY_LSHIFT, PerfIO.BUTTON_DOWN, "down");
+		CAMERA_BINDS.add(FreeCamera::cameraForward, Keyboard.KEY_W, PerfIO.BUTTON_DOWN, "forward");
+		CAMERA_BINDS.add(FreeCamera::cameraBackward, Keyboard.KEY_S, PerfIO.BUTTON_DOWN, "backward");
+		CAMERA_BINDS.add(FreeCamera::cameraLeft, Keyboard.KEY_A, PerfIO.BUTTON_DOWN, "left");
+		CAMERA_BINDS.add(FreeCamera::cameraRight, Keyboard.KEY_D, PerfIO.BUTTON_DOWN, "right");
+		CAMERA_BINDS.add(() -> { FreeCamera.slow = true; }, Keyboard.KEY_LMENU, PerfIO.BUTTON_DOWN, "slow");
+		CAMERA_BINDS.add(() -> { FreeCamera.slow = false; }, Keyboard.KEY_LMENU, PerfIO.BUTTON_UP, "slow");
+		CAMERA_BINDS.add(FreeCamera::cameraStop, Keyboard.KEY_X, PerfIO.BUTTON_PRESSED, "stop");
+	}
 	
 	static final String FREECAM_STRING = "Freecam Active";
 	static final Vector3f COLOUR = new Vector3f(0, 0, 0);
@@ -65,6 +81,10 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 	
 	World world;
 
+	public static void enable() {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+	
 	/** Saves the old camera host and switches to a freecam. */
 	public static void toggle() {
 		if(oldHost == null) {
@@ -104,13 +124,13 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 	public void backward() { velocity.scaleAdd(-ACCEL, Camera.forward, velocity); }
 	public void stop() { velocity.set(0, 0, 0); }
 	
-	public static void cameraUp() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).up(); }
-	public static void cameraDown() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).down(); }
-	public static void cameraLeft() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).left(); }
-	public static void cameraRight() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).right(); }
-	public static void cameraForward() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).forward(); }
-	public static void cameraBackward() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).backward(); }
-	public static void cameraStop() { if(Camera.host instanceof FreeCamera) ((FreeCamera) Camera.host).stop(); }
+	public static void cameraUp() { ((FreeCamera) Camera.host).up(); }
+	public static void cameraDown() { ((FreeCamera) Camera.host).down(); }
+	public static void cameraLeft() { ((FreeCamera) Camera.host).left(); }
+	public static void cameraRight() { ((FreeCamera) Camera.host).right(); }
+	public static void cameraForward() { ((FreeCamera) Camera.host).forward(); }
+	public static void cameraBackward() { ((FreeCamera) Camera.host).backward(); }
+	public static void cameraStop() { ((FreeCamera) Camera.host).stop(); }
 	
 	@Override
 	public void run() {
@@ -167,6 +187,7 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 
 	@Override
 	public void onCameraUnset() {
+		CAMERA_BINDS.deactivate();
 		world.removeOnTick(this);
 	}
 	
@@ -176,6 +197,7 @@ public class FreeCamera extends TickableImpl implements CameraHost {
 		if(world == null)
 			throw new ApplicationException("There must be a world for the Free Camera to function.", "CAMERA");
 		
+		CAMERA_BINDS.activate();
 		world.onTick(this);
 	}
 

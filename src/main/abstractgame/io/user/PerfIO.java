@@ -1,9 +1,6 @@
 package abstractgame.io.user;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
@@ -13,21 +10,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
+import abstractgame.io.user.keybinds.KeyBind;
 import abstractgame.util.ApplicationException;
 
 public class PerfIO {
-	private static class KeyListener {
-		int code;
-		int flags;
-		Runnable action;
-
-		public KeyListener(Runnable action, int code, int flags) {
-			this.action = action;
-			this.code = code;
-			this.flags = flags;
-		}
-	}
-
 	private static class MouseListener {
 		int code;
 		int flags;
@@ -58,7 +44,7 @@ public class PerfIO {
 	public static final int BUTTON_UP = 1;
 
 	private static Map<Integer, MouseListener> mouseClickListeners = new HashMap<>();
-	private static Map<Integer, KeyListener> keyListeners = new HashMap<>();
+	private static Set<KeyBind> keyListeners = new HashSet<>();
 
 	/** Used in typing requests */
 	private static Map<Integer, int[]> down = new HashMap<>();
@@ -116,13 +102,11 @@ public class PerfIO {
 		mouseClickListeners.remove(id);
 	}
 
-	public static void removeKeyListener(int id) {
-		if(isPolling) {
-			afterPoll.add(() -> removeKeyListener(id));
-			return;
-		}
-
-		keyListeners.remove(id);
+	public static void removeKeyListener(KeyBind bind) {
+		if(isPolling)
+			afterPoll.add(() -> removeKeyListener(bind));
+		else
+			keyListeners.remove(bind);
 	}
 
 	public static int addMouseListener(Runnable action, int button, int flags) {
@@ -151,25 +135,11 @@ public class PerfIO {
 		return id++;
 	}
 
-	public static int addKeyListener(Runnable action, int code, int flags) {
-		if(isPolling) {
-			int i = id;
-			
-			afterPoll.add(() -> {
-				if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
-					throw new ApplicationException("Invalid Flag", "KEYBINDS");
-
-				keyListeners.put(i, new KeyListener(action, code, flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)));
-			});
-			return id++;
-		}
-
-		if ((flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)) == 0)
-			throw new ApplicationException("Invalid Flag", "KEYBINDS");
-
-		keyListeners.put(id, new KeyListener(action, code, flags & (BUTTON_UP | BUTTON_DOWN | BUTTON_RELEASED | BUTTON_PRESSED)));
-
-		return id++;
+	public static void addKeyListener(KeyBind bind) {
+		if(isPolling)
+			afterPoll.add(() -> addKeyListener(bind));
+		else
+			keyListeners.add(bind);
 	}
 
 
@@ -200,11 +170,14 @@ public class PerfIO {
 				l.action.accept(getPos(Mouse.getX(), Mouse.getY()));
 		}
 
-		for (KeyListener l : keyListeners.values()) {
-			if ((l.flags & BUTTON_DOWN) != 0 && Keyboard.isKeyDown(l.code))
+		for (KeyBind l : keyListeners) {
+			if(!l.isBound())
+				continue; //check for concurrent modification
+			
+			if ((l.keyFlags & BUTTON_DOWN) != 0 && Keyboard.isKeyDown(l.keyCode))
 				l.action.run();
 
-			if ((l.flags & BUTTON_UP) != 0 && !Keyboard.isKeyDown(l.code))
+			if ((l.keyFlags & BUTTON_UP) != 0 && !Keyboard.isKeyDown(l.keyCode))
 				l.action.run();
 		}
 
@@ -224,16 +197,19 @@ public class PerfIO {
 			if(request != null && request.blockOtherKeyEvents) 
 				continue;
 
-			for (KeyListener l : keyListeners.values()) {
-				if (key != l.code && l.code != ALL_KEYS) 
+			for (KeyBind l : keyListeners) {
+				if(!l.isBound())
+					continue; //check for concurrent modification
+				
+				if (key != l.keyCode && l.keyCode != ALL_KEYS) 
 					continue;
 
-				if ((l.flags & BUTTON_PRESSED) != 0 && Keyboard.getEventKeyState()) {
+				if ((l.keyFlags & BUTTON_PRESSED) != 0 && Keyboard.getEventKeyState()) {
 					l.action.run();
 					continue;
 				}
 
-				if ((l.flags & BUTTON_RELEASED) != 0 && !Keyboard.getEventKeyState()) {
+				if ((l.keyFlags & BUTTON_RELEASED) != 0 && !Keyboard.getEventKeyState()) {
 					l.action.run();
 					continue;
 				}

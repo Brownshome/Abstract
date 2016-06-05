@@ -15,45 +15,32 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Color4f;
-import javax.vecmath.Vector2f;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.ARBDebugOutput;
-import org.lwjgl.opengl.ARBDebugOutputCallback;
 import org.lwjgl.opengl.ARBTextureMultisample;
-import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL32;
-import org.lwjgl.opengl.GL41;
-import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
-import org.lwjgl.opengl.GL45;
 import org.lwjgl.opengl.PixelFormat;
 
 import abstractgame.Client;
 import abstractgame.io.FileIO;
 import abstractgame.io.user.Console;
-import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
+import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.util.ApplicationException;
 
 public class GLHandler {
 	public static final boolean CHECK_GL = Client.GLOBAL_CONFIG.getProperty("opengl.debug", false);
 	public static final String SHADER_PATH = "resources/shaders/";
 	public static final String SHADER_EXT = ".glsl";
+	public static final BindGroup GRAPHICS_BINDS = new BindGroup("graphics");
 	public static boolean vSync = true;
 	
 	private static final List<Renderer> RENDERERS = new ArrayList<>();
@@ -90,7 +77,7 @@ public class GLHandler {
 		
 		createFramebuffer();
 		
-		KeyBinds.add(GLHandler::toggleVsync, Keyboard.KEY_V, PerfIO.BUTTON_PRESSED, "game.vsync");
+		GRAPHICS_BINDS.add(GLHandler::toggleVsync, Keyboard.KEY_V, PerfIO.BUTTON_PRESSED, "vsync");
 		
 		checkGL();
 	}

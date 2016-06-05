@@ -1,26 +1,13 @@
 package abstractgame.ui;
 
-import java.util.List;
-import java.util.function.IntSupplier;
-
-import javax.vecmath.Color3f;
-import javax.vecmath.Color4f;
-import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3f;
+import javax.vecmath.*;
 
 import org.lwjgl.input.Keyboard;
 
-import abstractgame.io.user.KeyBinds;
 import abstractgame.io.user.PerfIO;
-import abstractgame.net.ServerProxy;
-import abstractgame.render.Camera;
-import abstractgame.render.FreeCamera;
-import abstractgame.render.GLHandler;
-import abstractgame.render.TextRenderer;
-import abstractgame.render.UIRenderer;
-import abstractgame.ui.elements.ModuleHUDDisplay;
-import abstractgame.ui.elements.ProgressBar;
-import abstractgame.util.FloatSupplier;
+import abstractgame.render.*;
+import abstractgame.ui.elements.*;
+import abstractgame.util.*;
 import abstractgame.world.World;
 import abstractgame.world.entity.Player;
 
@@ -88,7 +75,7 @@ public class GameScreen extends Screen {
 				
 			float lerp = Math.min(Math.max(0, timeLeft * .2f), 1);
 			
-			String text = timeLeft < 0 ? "Spawning..." : String.format("Spawning in %3.1fs", timeLeft);
+			String text = timeLeft < 0 ? Language.get("spawn.spawning") : String.format(Language.get("language.spawning in"), timeLeft);
 			
 			float size = min * lerp + max * (1 - lerp);
 			
@@ -118,17 +105,6 @@ public class GameScreen extends Screen {
 		world = newWorld;
 		
 		FreeCamera camera = new FreeCamera(new Vector3f(0, 0, -5), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
-		KeyBinds.add(FreeCamera::toggle, Keyboard.KEY_F2, PerfIO.BUTTON_PRESSED, "free camera.toggle");
-		KeyBinds.add(FreeCamera::cameraUp, Keyboard.KEY_SPACE, PerfIO.BUTTON_DOWN, "free camera.up");
-		KeyBinds.add(FreeCamera::cameraDown, Keyboard.KEY_LSHIFT, PerfIO.BUTTON_DOWN, "free camera.down");
-		KeyBinds.add(FreeCamera::cameraForward, Keyboard.KEY_W, PerfIO.BUTTON_DOWN, "free camera.forward");
-		KeyBinds.add(FreeCamera::cameraBackward, Keyboard.KEY_S, PerfIO.BUTTON_DOWN, "free camera.backward");
-		KeyBinds.add(FreeCamera::cameraLeft, Keyboard.KEY_A, PerfIO.BUTTON_DOWN, "free camera.left");
-		KeyBinds.add(FreeCamera::cameraRight, Keyboard.KEY_D, PerfIO.BUTTON_DOWN, "free camera.right");
-		KeyBinds.add(() -> { FreeCamera.slow = true; }, Keyboard.KEY_LMENU, PerfIO.BUTTON_DOWN, "free camera.slow");
-		KeyBinds.add(() -> { FreeCamera.slow = false; }, Keyboard.KEY_LMENU, PerfIO.BUTTON_UP, "free camera.slow");
-		KeyBinds.add(FreeCamera::cameraStop, Keyboard.KEY_X, PerfIO.BUTTON_PRESSED, "free camera.stop");
-		
 		Camera.setCameraHost(camera);
 	}
 }
