@@ -62,7 +62,7 @@ public class Server {
 	
 	/** Starts the server threads and reads the config file */
 	public static void startServer(ConfigFile file) {
-		if(!Common.isSeverSide()) {
+		if(Common.isClientSide()) {
 			mainServerThread = new Thread(() -> {
 				startServer(file);
 				

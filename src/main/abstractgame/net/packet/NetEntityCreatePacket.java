@@ -40,7 +40,7 @@ public class NetEntityCreatePacket extends Packet {
 	public void handleClient() {
 		Util.queueOnMainThread(() -> {
 			ClientNetHandler.populateID(entityID, entity);
-			entity.initialize();
+			entity.initializeSlave();
 		});
 	}
 	

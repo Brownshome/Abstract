@@ -145,7 +145,7 @@ public class Util {
 
 	/** Runs the task on the main thread */
 	public static void queueOnMainThread(Runnable r) {
-		if(Common.isSeverSide())
+		if(Common.isServerSide())
 			Server.addTask(r);
 		else
 			Client.addTask(r);

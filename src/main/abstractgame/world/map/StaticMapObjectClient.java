@@ -45,7 +45,7 @@ public class StaticMapObjectClient extends RenderEntity implements MapObject {
 		Vector3f p = new Vector3f(position.get(0).floatValue(), position.get(1).floatValue(), position.get(2).floatValue());
 		Quat4f q = new Quat4f(orientation.get(0).floatValue(), orientation.get(1).floatValue(), orientation.get(2).floatValue(), orientation.get(3).floatValue());
 		
-		if(model == null || Common.isSeverSide()) {
+		if(model == null || Common.isServerSide()) {
 			/** A physics only object */
 			return new StaticMapObject(shape, p, q, o);
 		}

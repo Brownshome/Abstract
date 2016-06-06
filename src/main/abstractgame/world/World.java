@@ -39,8 +39,7 @@ import abstractgame.world.map.MapLogicProxy;
 import abstractgame.world.map.MapObject;
 
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;
-import com.bulletphysics.collision.dispatch.CollisionDispatcher;
-import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
+import com.bulletphysics.collision.dispatch.*;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 
 public class World extends TickableImpl {
@@ -64,7 +63,7 @@ public class World extends TickableImpl {
 	
 	/** This method returns null if there is no entity regestered to that ID */
 	public static NetworkEntity getNetworkEntity(int id) {
-		if(Common.isSeverSide()) {
+		if(Common.isServerSide()) {
 			return ServerNetHandler.getNetworkEntity(id);
 		} else {
 			return ClientNetHandler.getNetworkEntity(id);
@@ -123,8 +122,9 @@ public class World extends TickableImpl {
 	public World(String identifier) {
 		//TODO tune these paramaters
 		physicsWorld = new DiscreteDynamicsWorld(new CollisionDispatcher(new DefaultCollisionConfiguration()), new DbvtBroadphase(), null, new DefaultCollisionConfiguration());
+		physicsWorld.getPairCache().setInternalGhostPairCallback(new GhostPairCallback());
 		
-		if(!Common.isSeverSide())
+		if(Common.isClientSide())
 			physicsWorld.setDebugDrawer(PhysicsRenderer.INSTANCE);
 		else if(Server.isInternal())
 			physicsWorld.setDebugDrawer(ServerPhysicsRenderer.INSTANCE);
@@ -178,9 +178,9 @@ public class World extends TickableImpl {
 	
 	@Override
 	public void run() {
-		physicsWorld.stepSimulation(Common.getClock().getDelta(), Common.isSeverSide() ? 15 : 7);
+		physicsWorld.stepSimulation(Common.getClock().getDelta(), Common.isServerSide() ? 15 : 7);
 		
-		if(Common.isSeverSide()) {
+		if(Common.isServerSide()) {
 			ServerPhysicsRenderer.INSTANCE.reset();
 		}
 		
@@ -192,7 +192,7 @@ public class World extends TickableImpl {
 	}
 	
 	void sync() {
-		if(Common.isSeverSide()) {
+		if(Common.isServerSide()) {
 			ServerNetHandler.syncEntities();
 		} else {
 			ClientNetHandler.syncEntities();

@@ -15,7 +15,7 @@ public class ServerNetHandler {
 
 	/** Adds networkEntity to the internal pool of entities and sends the creation message to all clients */
 	public static void createNetworkEntity(NetworkEntity networkEntity) {
-		assert Common.isSeverSide();
+		assert Common.isServerSide();
 
 		index.add(networkEntity);
 		Connection.sendToAll(new NetEntityCreatePacket(networkEntity), Server.getConnections());
@@ -24,7 +24,7 @@ public class ServerNetHandler {
 	/** Adds networkEntity to the internal pool of entities and sends the creation message to all clients
 	 * baring the one that created it */
 	public static void createNetworkEntity(NetworkEntity entity, Identity id) {
-		assert Common.isSeverSide();
+		assert Common.isServerSide();
 		
 		index.add(entity);
 		Connection.sendToAll(new NetEntityCreatePacket(entity), Server.CONNECTIONS.entrySet()

@@ -59,7 +59,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 		if(spawnInt == 0)
 			return;
 		
-		if(Common.isSeverSide())
+		if(Common.isServerSide())
 			world.onTick(() -> {
 				if(spawnList.isEmpty())
 					return;
@@ -76,8 +76,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	/** Spawns the player now, this method is also used internally
 	 * so this is the one to override for custom spawning logic */
 	public void spawnNow(Player player) {
-		if(!Common.isSeverSide())
-			throw new ApplicationException("This method should not be called on the client", "CLIENT");
+		assert Common.isServerSide();
 		
 		player.getPosWritable().set(getPosition());
 		player.flushChanges();
@@ -87,8 +86,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	/** Adds the player to the spawn queue, returning the time left until
 	 * the player is spawned again in server ticks. */
 	public int spawn(Player player) {
-		if(!Common.isSeverSide())
-			throw new ApplicationException("This method should not be called on the client", "CLIENT");
+		assert Common.isServerSide();
 		
 		if(spawnInt == 0) {
 			spawnNow(player);

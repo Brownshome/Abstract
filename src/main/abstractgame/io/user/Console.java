@@ -52,7 +52,7 @@ public class Console {
 	}
 
 	static String getFormatString(String level, String name) {
-		return "[" + new SimpleDateFormat(format).format(new Date()) + "][" + (Common.isSeverSide() ? "SERVER" : "CLIENT") + "][" + name + "][" + level + "]";
+		return "[" + new SimpleDateFormat(format).format(new Date()) + "][" + (Common.isServerSide() ? "SERVER" : "CLIENT") + "][" + name + "][" + level + "]";
 	}
 
 	/**Please use Console.error(Throwable t, String name) instead */

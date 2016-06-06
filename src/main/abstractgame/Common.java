@@ -6,6 +6,7 @@ import abstractgame.io.model.PhysicsMeshLoader;
 import abstractgame.mod.ModManager;
 import abstractgame.net.packet.NetEntityCreatePacket;
 import abstractgame.net.packet.NetEntityUpdatePacket;
+import abstractgame.net.Identity;
 import abstractgame.net.packet.JoinPacket;
 import abstractgame.net.packet.NetEntityCreateAck;
 import abstractgame.net.packet.NetEntityCreateClientRequest;
@@ -65,19 +66,28 @@ public class Common {
 
 	/** @return the {@link World} object, taking into accout whether the */
 	public static World getWorld() {
-		return Common.isSeverSide() ? Server.getWorld() : GameScreen.getWorld();
+		return Common.isServerSide() ? Server.getWorld() : GameScreen.getWorld();
 	}
 
 	public static Clock getClock() {
-		return Common.isSeverSide() ? Server.SERVER_CLOCK : Client.GAME_CLOCK;
+		return Common.isServerSide() ? Server.SERVER_CLOCK : Client.GAME_CLOCK;
 	}
 
 	/** Returns true if the current thread is a server thread */
-	public static boolean isSeverSide() {
+	public static boolean isServerSide() {
 		if(!Server.isInternal)
 			return true;
 		
 		Thread current = Thread.currentThread();
 		return current == Server.serverNetThread || current == Server.mainServerThread;
+	}
+	
+	/** Returns true if the current thread is not a server thread */
+	public static boolean isClientSide() {
+		return !isServerSide();
+	}
+
+	public static Identity getIdentity() {
+		return isServerSide() ? null : Client.getIdentity();
 	}
 }
