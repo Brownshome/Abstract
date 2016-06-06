@@ -22,5 +22,5 @@ player:
   backward: S
   left: A
   right: D
-  crouch: RSHIFT
+  crouch: LSHIFT
   jump: SPACE

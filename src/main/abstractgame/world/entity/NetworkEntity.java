@@ -28,8 +28,11 @@ public interface NetworkEntity extends Indexable {
 	void updateState(ByteBuffer buffer);
 	/** Fills the data needed to create this object */
 	void fillCreateData(ByteBuffer buffer);
-	/** Called on the main thread once the entity has populated */
-	void initialize();
+	/** This is called on the slave side on the main thread */
+	void initializeSlave();
+	/** This is called on both sides on the main thread, the calling of this method is
+	 * left to implementors */
+	void initializeCommon();
 
 	boolean needsSyncTo(Identity id);
 

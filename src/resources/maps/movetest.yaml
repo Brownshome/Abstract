@@ -21,7 +21,7 @@ objects:
         file: box
         offset: [0.5, 0.5, 0.5]
     position: [0, 0, 0]
-    orientation: [0, 0, 0, 1]
+    orientation: [.087, 0, 0, 0.996]
   
   - type: static
     physics:

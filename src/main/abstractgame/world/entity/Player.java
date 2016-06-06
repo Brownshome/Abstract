@@ -9,15 +9,17 @@ import java.util.function.Consumer;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import com.bulletphysics.collision.shapes.BoxShape;
-import com.bulletphysics.collision.shapes.CollisionShape;
-import com.bulletphysics.collision.shapes.SphereShape;
-import com.bulletphysics.linearmath.DefaultMotionState;
-import com.bulletphysics.linearmath.Transform;
+import com.bulletphysics.collision.broadphase.*;
+import com.bulletphysics.collision.dispatch.*;
+import com.bulletphysics.collision.narrowphase.*;
+import com.bulletphysics.collision.shapes.*;
+import com.bulletphysics.linearmath.*;
+import com.bulletphysics.util.ObjectArrayList;
 
 import abstractgame.Client;
 import abstractgame.Common;
 import abstractgame.io.model.ModelLoader;
+import abstractgame.io.user.Console;
 import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.net.Identity;
 import abstractgame.net.PlayerDataHandler;
@@ -35,45 +37,102 @@ import abstractgame.world.entity.playermodules.UpgradeModule;
 
 /** This class represents a player object */
 public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable, Destroyable, Destroyer, NetworkEntity {
-	static CollisionShape playerShape = new SphereShape(1f);
+	static CollisionShape playerShape = new CylinderShape(new Vector3f(.25f, .25f, 1f));
+	static CollisionShape sensorShape = new CylinderShape(new Vector3f(.3f, .3f, 1.25f));
 	
 	protected final List<Runnable> onTick = new ArrayList<>();
+	protected final List<Runnable> onHeat = new ArrayList<>();
 	
 	BindGroup keybinds;
 	float heat = .5f;
-	
-	protected List<Runnable> onHeat = new ArrayList<>();
-	
 	Identity id;
 	List<UpgradeModule> modules = new ArrayList<>();
 	RenderEntity renderEntity;
-
-	public Player(Identity id) {
-		super(playerShape, new Vector3f(), new Quat4f(0, 0, 0, 1), getModelOffset());
+	PairCachingGhostObject sensorObject;
+	BasicMovement movementHandler;
+	Vector3f lookDirection;
+	
+	Player(Identity id, boolean isSlave) {
+		super(playerShape, new Vector3f(), new Quat4f(0, 0, 0, 1), getModelOffset(), isSlave);
+		
+		DefaultMotionState oldMotionState = (DefaultMotionState) getRigidBody().getMotionState();
+		
+		DefaultMotionState newState = new DefaultMotionState(oldMotionState.startWorldTrans, oldMotionState.centerOfMassOffset);
+		getRigidBody().setMotionState(newState);
+		transform = newState.graphicsWorldTrans;
 		
 		this.id = id;
+		
+		useCustomMask(CollisionFilterGroups.CHARACTER_FILTER, (short) (CollisionFilterGroups.ALL_FILTER & ~CollisionFilterGroups.SENSOR_TRIGGER));
+		
+		getRigidBody().setActivationState(CollisionObject.DISABLE_DEACTIVATION);
+	}
+
+	/** The constructor to be called on the master side */
+	public Player(Identity id) {
+		this(id, false);
 	}
 	
+	/** The constructor to be called on the slave side */
 	public Player(ByteBuffer buffer) {
-		this(PlayerDataHandler.getIdentity(buffer.getInt()));
+		this(PlayerDataHandler.getIdentity(buffer.getInt()), true);
 		
 		updateState(buffer);
 	}
 	
+	public BasicMovement getMovementHandler() {
+		return movementHandler;
+	}
+	
 	@Override
-	public void initialize() {
-		if(!Common.isSeverSide()) {
+	public void initializeSlave() {
+		if(Common.isClientSide()) {
 			renderEntity = new RenderEntity(ModelLoader.loadModel("monkey"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
+			
 			if(Client.getIdentity().equals(id)) {
 				GameScreen.setPlayerEntity(this);
 				keybinds = new BindGroup("player");
 				keybinds.deactivate();
-				
-				modules.add(new BasicMovement(this));
+				modules.add(movementHandler);
 			}
 		}
 			
-		super.initialize();
+		super.initializeSlave();
+	}
+	
+	@Override
+	public void fillStateUpdate(ByteBuffer buffer) {
+		//position
+		Vector3f tmp = body.getCenterOfMassPosition(new Vector3f());
+		buffer.putFloat(tmp.x).putFloat(tmp.y).putFloat(tmp.z);
+
+		//velocity
+		body.getLinearVelocity(tmp);
+		buffer.putFloat(tmp.x).putFloat(tmp.y).putFloat(tmp.z);
+
+		//orientation
+		buffer.putFloat(0).putFloat(0).putFloat(0).putFloat(1);
+
+		//angularVelocity
+		body.getAngularVelocity(tmp);
+		buffer.putFloat(tmp.x).putFloat(tmp.y).putFloat(tmp.z);
+	}
+	
+	/** This method regesters the ghost object for this player */
+	@Override
+	public void initializeCommon() {
+		movementHandler = new BasicMovement(this);
+		
+		sensorObject = new PairCachingGhostObject();
+		sensorObject.setCollisionShape(sensorShape);
+		sensorObject.setCollisionFlags(CollisionFlags.NO_CONTACT_RESPONSE);
+		
+		Common.getWorld().physicsWorld.addCollisionObject(sensorObject, CollisionFilterGroups.SENSOR_TRIGGER, (short) (CollisionFilterGroups.ALL_FILTER & ~CollisionFilterGroups.CHARACTER_FILTER));
+	}
+	
+	@Override
+	public void flushChanges() {
+		body.setWorldTransform(getRigidBody().getMotionState().getWorldTransform(new Transform()));
 	}
 	
 	private static Transform getModelOffset() {
@@ -91,9 +150,40 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	
 	@Override
 	public void run() {
+		ObjectArrayList<BroadphasePair> pairs = sensorObject.getOverlappingPairCache().getOverlappingPairArray();
+		ObjectArrayList<PersistentManifold> manifoldArray = new ObjectArrayList<>();
+		
+		movementHandler.isOnGround = false;
+		
+		loop:
+		for(BroadphasePair pair : pairs) {
+			BroadphasePair worldPair = Common.getWorld().physicsWorld.getPairCache().findPair(pair.pProxy0, pair.pProxy1);
+			if(worldPair == null)
+				continue;
+			
+			worldPair.algorithm.getAllContactManifolds(manifoldArray);
+			
+			for(PersistentManifold pm : manifoldArray) {
+				for(int i = 0; i < pm.getNumContacts(); i++) {
+					ManifoldPoint mp = pm.getContactPoint(i);
+					if(mp.getDistance() < 0) {
+						movementHandler.isOnGround = true;
+						break loop;
+					}
+				}
+			}
+			
+			manifoldArray.clear();
+		}
+		
+		//TODO move this to motionstate
+		Transform trans = new Transform();
+		getRigidBody().getWorldTransform(trans);
+		sensorObject.setWorldTransform(trans);
+		
 		onTick.forEach(Runnable::run);
 		
-		if(!Common.isSeverSide() && Camera.host == this)
+		if(Common.isClientSide() && Camera.host == this)
 			Camera.recalculate();
 		
 		if(heat < 0)
@@ -156,7 +246,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		super.onAddedToWorld(world);
 		world.onTick(this);
 		
-		if(!Common.isSeverSide()) {
+		if(Common.isClientSide()) {
 			if(id.equals(Client.getIdentity())) {
 				//we are spawning in
 				//Removes the 'Spawning...' message
@@ -181,7 +271,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	public void destroy(Destroyer destroyer) {
 		onDestroy.forEach(a -> a.accept(this, destroyer));
 		
-		if(!Common.isSeverSide()) {
+		if(Common.isClientSide()) {
 			keybinds.deactivate();
 			
 			if(id.equals(Client.getIdentity())) {
@@ -209,6 +299,8 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	}
 
 	public BindGroup getKeybinds() {
+		assert Common.isClientSide();
+		
 		return keybinds;
 	}
 }

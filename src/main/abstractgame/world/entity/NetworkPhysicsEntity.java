@@ -29,10 +29,16 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 	/** Whether this entity has been created due to packets */
 	boolean isSlave = false;
 	
-	public NetworkPhysicsEntity(CollisionShape shape, Vector3f position, Quat4f orientation, Transform physicsOffset) {
+	public NetworkPhysicsEntity(CollisionShape shape, Vector3f position, Quat4f orientation, Transform physicsOffset, boolean isSlave) {
 		super(shape, position, orientation, physicsOffset);
+		
+		this.isSlave = isSlave;
+		if(!isSlave) {
+			//we are on the main thread and can call sensitive code
+			initializeCommon();
+		}
 	}
-
+	
 	@Override
 	public int getID() {
 		return id;
@@ -103,10 +109,13 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 		tmp.z = buffer.getFloat();
 		body.setAngularVelocity(tmp);
 	}
-
+	
 	@Override
-	public void initialize() {
+	public void initializeSlave() {
 		isSlave = true;
+		
+		initializeCommon();
+		
 		Common.getWorld().addEntity(this);
 	}
 
@@ -115,7 +124,7 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 		super.onAddedToWorld(world);
 
 		if(!isSlave) {
-			if(Common.isSeverSide()) {
+			if(Common.isServerSide()) {
 				ServerNetHandler.createNetworkEntity(this);
 			} else {
 				ClientNetHandler.createNetworkEntity(this);

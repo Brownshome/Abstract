@@ -15,6 +15,7 @@ import abstractgame.world.Tickable;
 import abstractgame.world.TickableImpl;
 import abstractgame.world.World;
 
+import com.bulletphysics.collision.broadphase.CollisionFilterGroups;
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.DefaultMotionState;
@@ -28,9 +29,13 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 	protected boolean movePhysBody = false;
 	protected final Transform physicsOffset;
 	
+	protected boolean useCustomMask = false;
+	short group = CollisionFilterGroups.DEFAULT_FILTER;
+	short mask = CollisionFilterGroups.ALL_FILTER;
+	
 	//secondary
-	private final Transform transform;
-	private final Quat4f orientation;
+	protected Transform transform;
+	protected Quat4f orientation;
 	
 	public PhysicsEntity(CollisionShape shape, Vector3f position, Quat4f orientation, Transform physicsOffset) {
 		Transform tmp = new Transform();
@@ -62,6 +67,12 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 		return body;
 	}
 	
+	protected void useCustomMask(short group, short mask) {
+		this.group = group;
+		this.mask = mask;
+		useCustomMask = true;
+	}
+	
 	/**The returned transformation should not be set, use {@link MovableEntity.getOrientWritable()} and
 	 * {@link MovableEntity.getPosWritable()} to change this. 
 	 * 
@@ -88,6 +99,9 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 	
 	@Override
 	public void onAddedToWorld(World world) {
-		world.physicsWorld.addRigidBody(getRigidBody());
+		if(useCustomMask)
+			world.physicsWorld.addRigidBody(getRigidBody(), group, mask);
+		else
+			world.physicsWorld.addRigidBody(getRigidBody());
 	}
 }
