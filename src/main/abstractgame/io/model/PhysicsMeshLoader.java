@@ -39,7 +39,12 @@ public class PhysicsMeshLoader {
 		return null;
 	}
 	
-	/** No check is made for loops in the recursion so don't be stupid pls */
+	/** No check is made for loops in the recursion so don't be stupid pls
+	 * 
+	 *  @param data The config data to decode
+	 *  @return The created {@link CollisionShape}
+	 *
+	 **/
 	public static CollisionShape decodeExternal(Map<String, Object> data) {
 		return getShape((String) data.get("file"));
 	}

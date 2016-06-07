@@ -20,7 +20,9 @@ public class SlaveIndex<T extends Indexable> implements Iterable<T> {
 		list.set(id, e);
 	}
 	
-	/** @return null if the id is not bound to anything */
+	/** @return null if the id is not bound to anything
+	 * 
+	 *  @param id The id to query */
 	public T get(int id) {
 		assert id < list.size() && list.get(id) != null;
 		

@@ -78,7 +78,12 @@ public interface MapLogicProxy {
 	
 	/** Allows the map to load add custom decoders, this is checked first so can
 	 * be used to override exising decoders, returning null will use the existing
-	 * decoder */
+	 * decoder 
+	 * 
+	 * @param type The identifier for the decoder
+	 * @return The {@link Decoder} to be used, or {@code null} if the existing decoder is to be used
+	 * 
+	 * */
 	default Decoder<MapObject> getDecoder(String type) {
 		return null;
 	}
@@ -86,7 +91,10 @@ public interface MapLogicProxy {
 	/** Called after the creation of the world so that complex logic
 	 * can be added. Note that hooks such as decoders cannot be added
 	 * here. The default implementation spawns the player with the default
-	 * loadout at the spawn with ID: playerSpawn */
+	 * loadout at the spawn with ID: playerSpawn
+	 * 
+	 *  @param world The {@link World} object 
+	 **/
 	default void initialize(World world) {
 		PlayerSpawn spawn;
 		
@@ -110,6 +118,8 @@ public interface MapLogicProxy {
 		});
 	}
 	
-	/** Called when the map is unloaded so the map can clean up after itself */
+	/** Called when the map is unloaded so the map can clean up after itself 
+	 * @param world The current {@link World} object 
+	 **/
 	default void destroy(World world) {}
 }

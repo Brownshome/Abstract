@@ -146,7 +146,24 @@ public class TextRenderer implements Renderer {
 		addString(text, position, size, colour, font, -1);
 	}
 	
-	/** Data is font, character index, x, y, colour (rgba), size, ID */
+	/** Encodes text data into a bytebuffer as follows:
+	 * <ul>
+	 * <li> font
+	 * <li> character index
+	 * <li> (xy)
+	 * <li> (rgba)
+	 * <li> size
+	 * <li> ID
+	 * </ul>
+	 *  @param text The text to display
+	 *  @param position The position of the text in opengl screenspace
+	 *  @param size The size of the text in opengl screenspace
+	 *  @param colour The colour of the text
+	 *  @param font The identifier for the font used
+	 *  @param ID An id used for click detection
+	 *  
+	 *  @return The buffer with the encoded data
+	 **/
 	public static ByteBuffer encode(String text, Vector2f position, float size, Color4f colour, int font, int ID) {
 		ByteBuffer data = ByteBuffer.wrap(new byte[text.length() * BYTES_PER_LETTER]).order(ByteOrder.nativeOrder());
 
@@ -230,12 +247,18 @@ public class TextRenderer implements Renderer {
 		return 1;
 	}
 
-	/** Does not support multi line strings */
+	/** Does not support multi line strings
+	 * 
+	 *  @return The width of the chacter
+	 *  
+	 *  @param c The character to measure */
 	public static float getWidth(char c) {
 		return (c == '\t' ? TAB_WIDTH : TEXT_WIDTH_MOD) * GLHandler.xCorrectionScalar;
 	}
 	
-	/** Returns the width of the text if it was at 1 size, Does not support multi line strings */
+	/** @return the width of the text if it was at 1 size, Does not support multi line strings 
+	 * 
+	 * @param text The string to measure */
 	public static float getWidth(String text) {
 		float acc = 0;
 		for(int i = 0; i < text.length(); i++) {
@@ -244,7 +267,8 @@ public class TextRenderer implements Renderer {
 		return acc;
 	}
 
-	/** Returns the height of the text as if it was at 1 size */
+	/** @return the height of the text as if it was at 1 size
+	 * @param text The text to measure */
 	public static float getHeight(String text) {
 		return text.length() - text.replace("\n", "").length() + 1;
 	}

@@ -7,8 +7,9 @@ import abstractgame.net.Side;
 import abstractgame.util.Indexable;
 
 /** Indicates an object that should have it's physical state synced across the network.
- * The implementer NEEDS to define &lt<init&gt>(ByteBuffer) making sure it does
- * not access sensitive state as it will be called on the net thread. The initialize method
+ * The implementer NEEDS to define {@code <init>(ByteBuffer)} making sure it does
+ * not access sensitive state as it will be called on the net thread. The initialize methods; 
+ * {@link #initializeCommon()} and {@link #initializeSlave()}
  * will be called on the main thread and thread sensitive code should be placed here */
 public interface NetworkEntity extends Indexable {
 	/** States which client has control of this entity, returning null indicates

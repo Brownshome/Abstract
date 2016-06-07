@@ -60,7 +60,9 @@ public class Server {
 		Server.startServer(args[0]);
 	}
 	
-	/** Starts the server threads and reads the config file */
+	/** Starts the server threads and reads the config file
+	 * 
+	 *  @param file The server {@link ConfigFile}*/
 	public static void startServer(ConfigFile file) {
 		if(Common.isClientSide()) {
 			mainServerThread = new Thread(() -> {
@@ -108,14 +110,16 @@ public class Server {
 		return CONNECTIONS.values();
 	}
 	
-	/** creates a new connection */
+	/** creates a new connection
+	 * 
+	 *  @param id The client to connect to */
 	public static Connection createConnection(Identity id) {
 		return Server.isInternal()
 				? new MemoryConnection(Client.getInboundQueue(), false)
 				: new UDPConnection(id);
 	}
 	
-	/** returns true if the server is running on the same jvm
+	/** @return true if the server is running on the same jvm
 	 * as the client */
 	public static boolean isInternal() {
 		return isInternal;

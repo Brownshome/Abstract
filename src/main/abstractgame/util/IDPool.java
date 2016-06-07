@@ -26,14 +26,17 @@ public class IDPool {
 		this(Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 
-	/** gets a new ID from the pool */
+	/** @return a new ID from the pool */
 	public int get() {
 		int next = stack.isEmpty() ? counter++ : stack.pop();
 		if(next > max) throw new OutOfIDsException();
 		return next;
 	}
 	
-	/** Returns this ID to the pool */
+	/** Returns this ID to the pool
+	 * 
+	 *  @param id The ID to release
+	 **/
 	public void release(int id) {
 		assert counter >= id && !stack.contains(id);
 		stack.add(id);

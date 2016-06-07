@@ -47,7 +47,10 @@ public class IconRenderer implements Renderer {
 		length += icon.getLength();
 	}
 	
-	/** This must be called before IconRenderer.initialize() */
+	/** This must be called before {@link IconRenderer#initialize()} 
+	 *
+	 * @param name The identifier for the icon
+	 **/
 	public static void regesterIcon(String name) {
 		int i = iconNames.size();
 		iconNames.add(name);

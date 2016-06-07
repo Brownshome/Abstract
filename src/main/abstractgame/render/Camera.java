@@ -104,7 +104,9 @@ public class Camera implements Entity {
 		return host.getOrientation();
 	}
 	
-	/** moves a point from world space to view space */
+	/** moves a point from world space to view space
+	 * 
+	 *  @param v The point to transform */
 	public static void transform(Vector3f v) {	
 		v.sub(position);
 		
@@ -133,7 +135,15 @@ public class Camera implements Entity {
 		projectionMatrix.m00 = projectionMatrix.m11 * aspectRatio;
 	}
 	
-	/** The vectors are all normalized and crossed, so feel free to put in whatever you want */
+	/**Creates a {@link Matrix4f} representing the transformation from worldspace to cameraspace.
+	 * <p> 
+	 * The vectors are all normalized and orthoganalized, so feel free to put in whatever you want.
+	 * 
+	 *  @param position The position of the camera
+	 *  @param forward A unit vector pointing forward
+	 *  @param up A unit vector pointing up
+	 *  @return The matrix
+	 **/
 	public static Matrix4f lookAt(Vector3f position, Vector3f forward, Vector3f up) {
 		Vector3f z = new Vector3f();
 		z.normalize(forward);

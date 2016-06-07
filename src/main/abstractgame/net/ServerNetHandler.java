@@ -13,7 +13,9 @@ import abstractgame.world.entity.NetworkEntity;
 public class ServerNetHandler {
 	static Index<NetworkEntity> index = new Index<>();
 
-	/** Adds networkEntity to the internal pool of entities and sends the creation message to all clients */
+	/** Adds networkEntity to the internal pool of entities and sends the creation message to all clients 
+	 * 
+	 * @param networkEntity The {@link NetworkEntity} to add */
 	public static void createNetworkEntity(NetworkEntity networkEntity) {
 		assert Common.isServerSide();
 
@@ -22,7 +24,10 @@ public class ServerNetHandler {
 	}
 	
 	/** Adds networkEntity to the internal pool of entities and sends the creation message to all clients
-	 * baring the one that created it */
+	 * baring the one that created it 
+	 * 
+	 * @param entity The {@link NetworkEntity} to add
+	 * @param id The client not to send the entity to */
 	public static void createNetworkEntity(NetworkEntity entity, Identity id) {
 		assert Common.isServerSide();
 		

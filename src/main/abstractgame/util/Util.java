@@ -30,7 +30,11 @@ public class Util {
 	public static final Vector3f ZERO_VEC3 = new Vector3f(0, 0, 0);
 	
 	/** This reads UTF-8 strings terminated by 0xFF, this allows NUL to occur in
-	 * the string without weirdness happening. This will throw  */
+	 * the string without weirdness happening. This will throw {@link ApplicationException}
+	 * if the string is malformed
+	 * 
+	 *  @return The retrieved {@link String}
+	 *  @param buffer The input data */
 	public static String readTerminatedString(ByteBuffer buffer) {
 		buffer.mark();
 		
@@ -50,7 +54,12 @@ public class Util {
 	}
 	
 	/** This writes UTF-8 strings terminated by 0xFF, this allows NUL to occur in
-	 * the string without weirdness happening */
+	 * the string without weirdness happening
+	 * 
+	 *  @param buffer The buffer to put the data into
+	 *  @param string The string to encode
+	 *
+	 **/
 	public static void writeTerminatedString(ByteBuffer buffer, String string) {
 		buffer.put(string.getBytes(StandardCharsets.UTF_8));
 		buffer.put((byte) -1); //0xff
@@ -76,7 +85,12 @@ public class Util {
 	}
 
 	/** Note that this method re-uses the buffer returned, so use the buffer
-	 * before the next call to this method */
+	 * before the next call to this method 
+	 * 
+	 * @return A buffer containing the matrix
+	 * @param m The matrix to encode
+	 * 
+	 **/
 	public static FloatBuffer toFloatBuffer(Matrix4f m) {
 		MAT_BUFFER.clear();
 		
@@ -91,7 +105,12 @@ public class Util {
 	}
 
 	/** Note that this method re-uses the buffer returned, so use the buffer
-	 * before the next call to this method */
+	 * before the next call to this method 
+	 * 
+	 * @return A buffer containing the matrix
+	 * @param m The matrix to encode
+	 * 
+	 **/
 	public static FloatBuffer toFloatBuffer(Matrix3f m) {
 		MAT_BUFFER.clear();
 		
@@ -106,7 +125,13 @@ public class Util {
 
 	/** Makes a quat the transforms (0, 1, 0) to up and (0, 0, 1) to forward.
 	 * <br>
-	 * NB: up and forward are normalized and orthogalized prior to use */
+	 * NB: up and forward are normalized and orthogalized prior to use 
+	 * 
+	 * @return The new quaternion
+	 * @param up The up basis vector
+	 * @param forward The forward basis vector
+	 * 
+	 **/
 	public static Quat4f getQuat(Vector3f up, Vector3f forward) {
 		Vector3f z = new Vector3f();
 		z.normalize(forward);
@@ -143,7 +168,11 @@ public class Util {
 		mat.set(quat);
 	}
 
-	/** Runs the task on the main thread */
+	/** Runs the task on the main thread 
+	 * 
+	 * @param r The task to queue on the main thread
+	 * 
+	 **/
 	public static void queueOnMainThread(Runnable r) {
 		if(Common.isServerSide())
 			Server.addTask(r);
@@ -151,24 +180,42 @@ public class Util {
 			Client.addTask(r);
 	}
 
-	/** fills vec with 3 floats from data, reading only the first 3 values */
+	/** fills vec with 3 floats from data, reading only the first 3 values
+	 * 
+	 * @return vec
+	 * @param vec The ouput vector
+	 * @param data The input list */
 	public static Vector3f toVector3f(List<? extends Number> data, Vector3f vec) {
 		vec.set(data.get(0).floatValue(), data.get(1).floatValue(), data.get(2).floatValue());
 		return vec;
 	}
 	
-	/** fills vec with 3 floats from data, reading only the first 3 values */
+	/** fills vec with 3 floats from data, reading only the first 3 values 
+	 * 
+	 * @return The new vector
+	 * @param data The input list 
+	 *
+	 **/
 	public static Vector3f toVector3f(List<? extends Number> data) {
 		return toVector3f(data, new Vector3f());
 	}
 	
-	/** fills quat with 4 floats from data, reading only the first 4 values */
+	/** fills quat with 4 floats from data, reading only the first 4 values
+	 * 
+	 * @return quat
+	 * @param quat The ouput quaternion
+	 * @param data The input list */
 	public static Quat4f toQuat4f(List<? extends Number> data, Quat4f quat) {
 		quat.set(data.get(0).floatValue(), data.get(1).floatValue(), data.get(2).floatValue(), data.get(3).floatValue());
 		return quat;
 	}
 	
-	/** fills quat with 4 floats from data, reading only the first 4 values */
+	/** fills quat with 4 floats from data, reading only the first 4 values 
+	 * 
+	 * @param data The input list
+	 * @return A new quaternion
+	 *
+	 **/
 	public static Quat4f toQuat4f(List<? extends Number> data) {
 		return toQuat4f(data);
 	}

@@ -27,7 +27,9 @@ public class Index<T extends Indexable> implements Iterable<T> {
 			lookup.set(i, e);
 	}
 	
-	/** @return null if there is no entity regestered to that ID */
+	/** @return null if there is no entity regestered to that ID
+	 * 
+	 *  @param i The index to get */
 	public T get(int i) {
 		try {
 			return lookup.get(i);
@@ -36,7 +38,9 @@ public class Index<T extends Indexable> implements Iterable<T> {
 		}
 	}
 	
-	/** NB this will not set e's ID to anything */
+	/** NB this will not set e's ID to anything
+	 * 
+	 *  @param e The element to remove from the index */
 	public void remove(T e) {
 		assert lookup.get(e.getID()) == e;
 		

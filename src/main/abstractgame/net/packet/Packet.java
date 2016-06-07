@@ -14,7 +14,7 @@ import abstractgame.net.Side;
 import abstractgame.util.ApplicationException;
 
 /** Represents and data sent between the client and server, implementers of this class
- * MUST define {@link Packet.&ltinit&gt(ByteBuffer)} and call {@link Packet.regesterPacket(Class)} */
+ * MUST define {@code <innit>(ByteBuffer)} and call {@link Packet#regesterPacket(Class)} */
 public abstract class Packet {
 	public static final List<Function<ByteBuffer, Packet>> PACKET_READERS = new ArrayList<>();
 	public static final Map<Class<? extends Packet>, Integer> IDS = new HashMap<>();
@@ -39,7 +39,9 @@ public abstract class Packet {
 	}
 	/** Runs the handler for this packet, id will only be populated on the serverSide,
 	 * on the client it will be null, this can be used as a test for whether the packet
-	 * is on the server or the client. */
+	 * is on the server or the client. 
+	 * 
+	 * @param id The id representing the sender of the packet */
 	public void handle(Identity id) {
 		if(id == null)
 			handleClient();
@@ -57,6 +59,6 @@ public abstract class Packet {
 
 	public abstract void fill(ByteBuffer output);
 	
-	/** Returns the maximum size of the packet payload in bytes */
+	/** @return The maximum size of the packet payload in bytes */
 	public abstract int getPayloadSize();
 }

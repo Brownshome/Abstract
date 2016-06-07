@@ -92,8 +92,7 @@ public class FileIO {
 	}
 	
 	/** Shuts down the IO thread waiting for already running opperations to complete, if harsh all queued opperations that are not
-	 * started are dropped. 
-	 * @throws InterruptedException */
+	 * started are dropped. */
 	public static void close(boolean harsh) {
 		if(harsh)
 			IO_THREAD.shutdownNow();

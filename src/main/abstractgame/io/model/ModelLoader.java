@@ -23,7 +23,9 @@ public class ModelLoader {
 	
 	static final Map<String, Future<Model>> MODEL_FUTURES = new HashMap<>();
 	
-	/** This method does nothing if the model is already loading */
+	/** This method does nothing if the model is already loading
+	 * 
+	 * @param name The identifier of the model to load */
 	public static void preLoadModel(String name) {
 		MODEL_FUTURES.putIfAbsent(name, FileIO.IO_THREAD.submit(() -> {
 			List<String> lines = Files.readAllLines(Paths.get(MODEL_DIR + name + OBJ_EXT));
@@ -32,7 +34,11 @@ public class ModelLoader {
 	}
 
 	/** Loads a model, this method will block until the model is loaded
-	 * if the model was not preloaded by a prior call to preLoadModel */
+	 * if the model was not preloaded by a prior call to preLoadModel 
+	 * 
+	 * @param name The identifier of the model to load
+	 * @return The loaded model
+	 **/
 	public static Model loadModel(String name) {
 		Future<Model> task = MODEL_FUTURES.get(name);
 		if(task != null) {

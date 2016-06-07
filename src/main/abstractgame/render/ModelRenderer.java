@@ -30,7 +30,10 @@ public class ModelRenderer implements Renderer {
 	
 	/** This will cause a rebuild of the static mesh next frame, try to keep all calls to this
 	 * within one frame. NB this model will be fixed in the position it is now, it will not respect
-	 * updates. Updating the entity and then invalidating the static mesh will move the model. */
+	 * updates. Updating the entity and then invalidating the static mesh will move the model.
+	 *
+	 * @param entity The render object to add
+	 **/
 	public static void addStaticModel(RenderEntity entity) {
 		addDynamicModel(entity);
 		

@@ -73,8 +73,8 @@ public abstract class PhysicsEntity implements MovableEntity, Collidable {
 		useCustomMask = true;
 	}
 	
-	/**The returned transformation should not be set, use {@link MovableEntity.getOrientWritable()} and
-	 * {@link MovableEntity.getPosWritable()} to change this. 
+	/**The returned transformation should not be set, use {@link MovableEntity#getOrientWritable()} and
+	 * {@link MovableEntity#getPosWritable()} to change this. 
 	 * 
 	 * @return the transform of the model in worldspace. */
 	public Transform getTransform() {

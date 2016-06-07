@@ -47,17 +47,25 @@ public interface Connection {
 	 * end of the connection on the correct thread. */
 	void send(Packet packet);
 	
-	/** Similar to {@link send(Packet)} but is used in bulk sending methods
+	/** Similar to {@link #send(Packet)} but is used in bulk sending methods
 	 * when the packet needs to be pre-encoded */
 	void send(Class<? extends Packet> type, byte[] data);
 	
 	/** Sends a packet along this conenction, this method should not block if possible.
 	 * This method will attempt to cause the packet's handler to be called on the other
-	 * end of the connection on the correct thread. The Ack returned is used to wait for
-	 * the packet, there is no gurantee this will ever happen. */
+	 * end of the connection on the correct thread. The {@link Ack} returned is used to wait for
+	 * the packet, there is no gurantee this will ever happen. 
+	 * 
+	 * @param packet The {@link Packet} to send
+	 * 
+	 * @return The object used to wait on*/
 	Ack sendWithAck(Packet packet);
 	
-	/** Similar to {@link sendWithAck(Packet)} but is used in bulk sending methods
-	 * when the packet needs to be pre-encoded */
+	/** Similar to {@link #sendWithAck(Packet)} but is used in bulk sending methods
+	 * when the packet needs to be pre-encoded.
+	 * 	
+	 * @param type The class object representing the type of packet
+	 * @param data An array containing the already compiled packet data
+	 * @return The object used to wait on*/
 	Ack sendWithAck(Class<? extends Packet> type, byte[] data);
 }

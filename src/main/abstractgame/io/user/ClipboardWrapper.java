@@ -14,8 +14,10 @@ public final class ClipboardWrapper {
 	public final static ClipboardOwner NULL_OWNER = (clipboard, contents) -> {};
 
 	/**
-	 * Place a String on the clipboard, and make this class the
-	 * owner of the Clipboard's contents.
+	 * Place a String on the clipboard
+	 * 
+	 * @param owner The owner of the Clipboard's contents.
+	 * @param aString The string to place on the clipboard
 	 */
 	public static void setClipboardContents(String aString, ClipboardOwner owner){
 		StringSelection stringSelection = new StringSelection(aString);
@@ -25,6 +27,8 @@ public final class ClipboardWrapper {
 
 	/**
 	 * Place a String on the clipboard.
+	 * 
+	 * @param aString The string to place on the clipboard
 	 */
 	public static void setClipboardContents(String aString){
 		setClipboardContents(aString, null);

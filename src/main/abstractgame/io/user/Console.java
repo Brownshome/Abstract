@@ -23,7 +23,12 @@ public class Console {
 		error(Thread.currentThread(), throwable);
 	}
 	
-	/** Don't use this, throw ApplicationException instead */
+	/** Don't use this, throw ApplicationException instead
+	 * 
+	 * @param thread The thread the error was thrown from
+	 * @param throwable The error itself
+	 * 
+	 **/
 	public synchronized static void error(Thread thread, Throwable throwable) {
 		if(level <= 3)
 			if(throwable instanceof ApplicationException) {
