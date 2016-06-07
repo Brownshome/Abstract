@@ -75,7 +75,7 @@ public class GameScreen extends Screen {
 				
 			float lerp = Math.min(Math.max(0, timeLeft * .2f), 1);
 			
-			String text = timeLeft < 0 ? Language.get("spawn.spawning") : String.format(Language.get("language.spawning in"), timeLeft);
+			String text = timeLeft < 0 ? Language.get("spawn.spawning") : String.format(Language.get("spawn.spawning in"), timeLeft);
 			
 			float size = min * lerp + max * (1 - lerp);
 			

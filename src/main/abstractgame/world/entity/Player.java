@@ -165,10 +165,17 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 			
 			for(PersistentManifold pm : manifoldArray) {
 				for(int i = 0; i < pm.getNumContacts(); i++) {
+					float sign = pm.getBody0() ==  sensorObject ? 1.0f : -1.0f;
+					
 					ManifoldPoint mp = pm.getContactPoint(i);
 					if(mp.getDistance() < 0) {
-						movementHandler.isOnGround = true;
-						break loop;
+						if(mp.normalWorldOnB.y * sign > 0.707) {
+							movementHandler.isOnGround = true;
+							movementHandler.surfaceNormal.set(mp.normalWorldOnB);
+							movementHandler.surfaceNormal.scale(sign);
+							movementHandler.surfaceNormal.normalize();
+							break loop;
+						}
 					}
 				}
 			}

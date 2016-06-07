@@ -6,13 +6,13 @@ script:
     type: default
 
 global:
-    gravity: 3
+    gravity: 10
 
 objects:
   - type: spawn
     ID: playerSpawn
     checkCollision: ALL
-    spawnInt: 0
+    spawnInt: 5
     position: [0, 5, 0]
 
   - type: static

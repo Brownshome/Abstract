@@ -21,6 +21,9 @@ server:
 module:
   heatsink:
     coolant rate:
-      name: "Coolant Rate"
-      desc: "How quickly the module removes heat"
-    desc: "Decreaces your heat level after 5 seconds of not increacing. Stacking this module decreaces the wait time and increaces the cooling rate."
+      name: Coolant Rate
+      desc: How quickly the module removes heat
+    desc: Decreaces your heat level after 5 seconds of not increacing. Stacking this module decreaces the wait time and increaces the cooling rate.
+spawn:
+  spawning: Spawning...
+  spawning in: Spawning in %.1fs
