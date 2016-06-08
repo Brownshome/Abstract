@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import abstractgame.Client;
-import abstractgame.io.model.Model;
+import abstractgame.io.model.*;
 import abstractgame.util.Util;
 import abstractgame.world.entity.BasicEntity;
 import abstractgame.world.entity.Entity;
@@ -21,25 +21,21 @@ import com.bulletphysics.linearmath.QuaternionUtil;
 public class RenderEntity extends BasicEntity {
 	/** If this is null it means that the RenderEntity is in world coordinates */
 	Entity parent;
-	Model model;
+	GPUModel model;
 	
 	long lastFrame = -1;
 	Quat4f orientationCashe = new Quat4f();
 	Vector3f positionCashe = new Vector3f();
 	
-	public RenderEntity(Model model, Entity parent, Vector3f offset, Quat4f orientation) {
+	public RenderEntity(RawModel model, Entity parent, Vector3f offset, Quat4f orientation) {
 		super(offset, orientation);
 		
-		this.model = model;
+		this.model = model.getGPUModel();
 		this.parent = parent;
-		model.buildOpenGLBuffers();
 	}
 	
-	public RenderEntity(Model model, Vector3f offset, Quat4f orientation) {
-		super(offset, orientation);
-		
-		this.model = model;
-		model.buildOpenGLBuffers();
+	public RenderEntity(RawModel model, Vector3f offset, Quat4f orientation) {
+		this(model, null, offset, orientation);
 	}
 	
 	void render() {

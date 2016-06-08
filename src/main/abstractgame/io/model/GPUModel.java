@@ -1,56 +1,29 @@
+/**
+ * 
+ */
 package abstractgame.io.model;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.nio.*;
+import java.util.*;
 import java.util.Map.Entry;
 
-import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3f;
-
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
 
-import abstractgame.render.Renderer;
-
-public class Model {
-	//GPU variables
-	int VAO = -1;
+/** A lightweight class representing a handle to a model already uploaded
+ * to the GPU */
+public class GPUModel {
+	int VAO;
 	int VBO;
-	int indexs;
-
+	int IBO;
 	int length;
+
+	public GPUModel(RawModel inputModel) {
+		buildOpenGLBuffers(inputModel);
+	}
 	
-	public FloatBuffer vertexBuffer;
-	public IntBuffer indexBuffer;
-
-	Vector3f[] vertexs;
-	Vector3f[] normals;
-	Face[] faces;
-
-	public Model(Vector3f[] vertexs, Vector3f[] normals, Face[] faces) {
-		this.vertexs = vertexs;
-		this.normals = normals;
-		this.faces = faces;
-	}
-
-	public int getVAO() {
-		return VAO;
-	}
-
-	public int getLength() {
-		return length;
-	}
-
 	/** This method does nothing if the opengl buffers have already been populated */
-	public void buildOpenGLBuffers() {
-		if(VAO != -1)
-			return;
-
+	void buildOpenGLBuffers(RawModel inputModel) {
 		class WrappedIntArray {
 			int[] array;
 
@@ -90,13 +63,16 @@ public class Model {
 			}
 		}
 
-		indexBuffer = BufferUtils.createIntBuffer(faces.length * 3);
+		IntBuffer indexBuffer;
+		FloatBuffer vertexBuffer;
+		
+		indexBuffer = BufferUtils.createIntBuffer(inputModel.faces.length * 3);
 		int index = 0;
 
 		//int[2] representing [vertex id, normal id]
 		HashMap<WrappedIntArray, Integer> glVertexs = new HashMap<>();
 
-		for(Face face : faces) {
+		for(Face face : inputModel.faces) {
 			//1
 			Integer vertexID;
 			int[] vertex = new int[] {face.v1, face.n1};
@@ -132,33 +108,46 @@ public class Model {
 			int[] v = entry.getKey().array;
 
 			vertexBuffer.position(entry.getValue() * 6);
-			vertexBuffer.put(vertexs[v[0] - 1].x).put(vertexs[v[0] - 1].y).put(vertexs[v[0] - 1].z)
-			.put(normals[v[1] - 1].x).put(normals[v[1] - 1].y).put(normals[v[1] - 1].z);
+			vertexBuffer.put(inputModel.vertexs[v[0] - 1].x).put(inputModel.vertexs[v[0] - 1].y).put(inputModel.vertexs[v[0] - 1].z)
+			.put(inputModel.normals[v[1] - 1].x).put(inputModel.normals[v[1] - 1].y).put(inputModel.normals[v[1] - 1].z);
 		}
 
 		vertexBuffer.position(0);
 
-		uploadBuffers();
+		uploadBuffers(indexBuffer, vertexBuffer);
 	}
 
-	void uploadBuffers() {
-		VBO = GL15.glGenBuffers();
-		VAO = GL30.glGenVertexArrays();
-		indexs = GL15.glGenBuffers();
+	void uploadBuffers(IntBuffer indexBuffer, FloatBuffer vertexBuffer) {
+		int VBO = GL15.glGenBuffers();
+		int VAO = GL30.glGenVertexArrays();
+		int indexs = GL15.glGenBuffers();
 
+		indexBuffer.flip();
+		int length = indexBuffer.remaining();
+		
 		GL30.glBindVertexArray(VAO);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, indexs);
 
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
-
-		indexBuffer.flip();
-		length = indexBuffer.remaining();
 		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL15.GL_STATIC_DRAW);
 
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 24, 0);  //position
 		GL20.glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 24, 12); //normal
+		
+		this.VAO = VAO;
+		this.VBO = VBO;
+		this.IBO = indexs;
+		this.length = length;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public int getVAO() {
+		return VAO;
 	}
 }

@@ -16,12 +16,11 @@ objects:
     position: [0, 5, 0]
 
   - type: static
-    model: box
+    model: movetestMap
     physics:
-        file: box
-        offset: [0.5, 0.5, 0.5]
+        file: movetestMap
     position: [0, 0, 0]
-    orientation: [.087, 0, 0, 0.996]
+    orientation: [0, 0, 0, 1]
   
   - type: static
     physics:

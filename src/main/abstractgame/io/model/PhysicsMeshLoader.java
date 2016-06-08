@@ -35,8 +35,9 @@ public class PhysicsMeshLoader {
 	}
 
 	public static BvhTriangleMeshShape decodeStaticMesh(Map<String, Object> data) {
-		assert false : "not implemented";
-		return null;
+		PhysicsModel model = ModelLoader.loadModel((String) data.get("model")).getPhysicsModel();
+		
+		return new BvhTriangleMeshShape(model, true /* TODO IDK what this does yet */);
 	}
 	
 	/** No check is made for loops in the recursion so don't be stupid pls

@@ -15,13 +15,14 @@ import javax.vecmath.Vector3f;
 
 import abstractgame.Client;
 import abstractgame.io.FileIO;
+import abstractgame.io.user.Console;
 import abstractgame.util.ApplicationException;
 
 public class ModelLoader {
 	static final String MODEL_DIR = "resources/model/";
 	static final String OBJ_EXT = ".obj";
 	
-	static final Map<String, Future<Model>> MODEL_FUTURES = new HashMap<>();
+	static final Map<String, Future<RawModel>> MODEL_FUTURES = new HashMap<>();
 	
 	/** This method does nothing if the model is already loading
 	 * 
@@ -39,8 +40,8 @@ public class ModelLoader {
 	 * @param name The identifier of the model to load
 	 * @return The loaded model
 	 **/
-	public static Model loadModel(String name) {
-		Future<Model> task = MODEL_FUTURES.get(name);
+	public static RawModel loadModel(String name) {
+		Future<RawModel> task = MODEL_FUTURES.get(name);
 		if(task != null) {
 			try {
 				return task.get();
@@ -55,7 +56,7 @@ public class ModelLoader {
 		return loadModel(name);
 	}
 
-	static Model decodeOBJ(List<String> lines) {
+	static RawModel decodeOBJ(List<String> lines) {
 		List<Vector3f> vs = new ArrayList<>();
 		List<Vector3f> ns = new ArrayList<>();
 		List<Face> fs = new ArrayList<>();
@@ -72,9 +73,6 @@ public class ModelLoader {
 				case "vn":
 					ns.add(decodeVec3(elements));
 					break;
-				case "vt":
-					//uvs.add(decodeVec2(elements));
-					break;
 				case "f":
 					fs.add(new Face(elements, vs.size(), ns.size()));
 					break;
@@ -82,11 +80,11 @@ public class ModelLoader {
 				case "":
 					break;
 				default:
-					throw new ApplicationException("Error reading line '" + s + "'", "MODEL IO");
+					Console.warn("Unimplemented .obj tag found " + elements[0], "MODEL IO");
 			}
 		}
 		
-		return new Model(vs.toArray(new Vector3f[vs.size()]), ns.toArray(new Vector3f[ns.size()]), fs.toArray(new Face[fs.size()]));
+		return new RawModel(vs.toArray(new Vector3f[vs.size()]), ns.toArray(new Vector3f[ns.size()]), fs.toArray(new Face[fs.size()]));
 	}
 
 	private static Vector2f decodeVec2(String[] elements) {
