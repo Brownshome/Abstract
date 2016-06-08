@@ -121,7 +121,7 @@ public class BasicMovement extends UpgradeModule {
 	}
 	
 	protected void moveOrientation() {
-		if(!PerfIO.holdMouse)
+		if(Camera.host != owner || !PerfIO.holdMouse)
 			return;
 		
 		AxisAngle4f tmp = new AxisAngle4f(Camera.right, -PerfIO.dy * 0.001f);
