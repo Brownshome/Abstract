@@ -23,6 +23,13 @@ objects:
     orientation: [0, 0, 0, 1]
   
   - type: static
+    model: cup
+    physics:
+        file: cup
+    position: [0, 1, 0]
+    orientation: [0, 0, 0, 1]
+  
+  - type: static
     physics:
         file: plane
     position: [0, 0, 0]

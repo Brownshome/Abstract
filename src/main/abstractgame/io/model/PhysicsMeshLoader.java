@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import abstractgame.Common;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.Decoder;
 import abstractgame.util.Util;
@@ -28,10 +29,12 @@ public class PhysicsMeshLoader {
 	public static final String PHYSICS_DIR = "../../" + ModelLoader.MODEL_DIR + "physics/";
 	
 	public static final Map<String, Decoder<CollisionShape>> DECODERS = new HashMap<>();
-	static final Map<String, CollisionShape> CASHE = new HashMap<>();
+	
+	static final Map<String, CollisionShape> CASHE_SERVER = new HashMap<>();
+	static final Map<String, CollisionShape> CASHE_CLIENT = new HashMap<>();
 	
 	public static CollisionShape getShape(String shape) {
-		return CASHE.computeIfAbsent(shape, s -> decodeShape(ConfigFile.getFile(PHYSICS_DIR + s + "_phys")));
+		return (Common.isServerSide() ? CASHE_SERVER : CASHE_CLIENT).computeIfAbsent(shape, s -> decodeShape(ConfigFile.getFile(PHYSICS_DIR + s + "_phys")));
 	}
 
 	public static BvhTriangleMeshShape decodeStaticMesh(Map<String, Object> data) {
