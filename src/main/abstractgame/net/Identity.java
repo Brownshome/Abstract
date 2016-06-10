@@ -14,10 +14,6 @@ import abstractgame.util.Util;
 
 /** Represents a player in the global state */
 public class Identity {
-	/** This field is only populated on the server */
-	public InetAddress ip;
-	/** This field is only populated on the server */
-	public int port;
 	/** This is used for displayname and other such things */
 	public String username;
 	/** This is used for login verification and stat tracking */
@@ -26,11 +22,6 @@ public class Identity {
 	public Identity(String username, int uuid) {
 		this.username = username;
 		this.uuid = uuid;
-	}
-
-	public void updateConnection(InetAddress ip, int port) {
-		this.ip	= ip;
-		this.port = port;
 	}
 	
 	@Override

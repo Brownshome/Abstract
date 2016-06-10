@@ -133,11 +133,6 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 	}
 
 	@Override
-	public boolean needsSyncTo(Identity id) {
-		return id != getController();
-	}
-
-	@Override
 	public boolean needsSync() {
 		return true;
 	}

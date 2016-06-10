@@ -224,6 +224,9 @@ public class World extends TickableImpl {
 	public void join(Identity id) {
 		Console.inform("Player " + id.username + " ( " + id + " ) joined the game", "WORLD");
 		
+		if(Common.isServerSide())
+			ServerNetHandler.sendEntities(id);
+		
 		connectionHandler.accept(id);
 	}
 	

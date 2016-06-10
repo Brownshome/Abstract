@@ -1,8 +1,6 @@
 package abstractgame.util;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Index<T extends Indexable> implements Iterable<T> {
 	IDPool pool;
@@ -49,7 +47,7 @@ public class Index<T extends Indexable> implements Iterable<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		return lookup.stream().filter(o -> o != null).iterator();
+		return lookup.stream().filter(Objects::nonNull).iterator();
 	}
 
 	public int getID(T ne) {

@@ -75,11 +75,14 @@ public class Common {
 
 	/** Returns true if the current thread is a server thread */
 	public static boolean isServerSide() {
+		if(!Server.isRunning())
+			return false;
+		
 		if(!Server.isInternal)
 			return true;
 		
 		Thread current = Thread.currentThread();
-		return current == Server.serverNetThread || current == Server.mainServerThread;
+		return Server.getThreads().contains(current);
 	}
 	
 	/** Returns true if the current thread is not a server thread */

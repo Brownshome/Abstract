@@ -4,16 +4,25 @@ import java.nio.ByteBuffer;
 import java.util.stream.Stream;
 
 import abstractgame.Server;
+import abstractgame.io.user.Console;
 import abstractgame.net.packet.Packet;
 
 public interface Connection {	
-	public static void sendToAll(Packet packet, Iterable<Connection> connections) {
+	static void sendToAll(Packet packet, Iterable<Connection> connections) {
 		byte[] data = new byte[packet.getPayloadSize()];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		packet.fill(buffer);
 		for(Connection c : connections) {
 			c.send(packet.getClass(), data);
 		}
+	}
+	
+	static void handle(int type, ByteBuffer buffer, Identity identity) {
+		Packet reconstructed = Packet.PACKET_READERS.get(type).apply(buffer);
+		
+		Console.fine("Recieved " + reconstructed.getClass().getSimpleName() + (identity == null ? "" : " from " + identity), "NET");
+		
+		reconstructed.handle(identity);
 	}
 	
 	/** This object will be notified when the packet reaches the other end */

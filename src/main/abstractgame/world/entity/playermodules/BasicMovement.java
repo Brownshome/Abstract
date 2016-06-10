@@ -7,7 +7,7 @@ import org.lwjgl.input.Keyboard;
 import com.bulletphysics.BulletGlobals;
 import com.bulletphysics.linearmath.QuaternionUtil;
 
-import abstractgame.Common;
+import abstractgame.*;
 import abstractgame.io.user.PerfIO;
 import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.render.Camera;
@@ -34,7 +34,7 @@ public class BasicMovement extends UpgradeModule {
 	public BasicMovement(Player owner) {
 		super(owner);
 		
-		if(Common.isClientSide()) {
+		if(Common.isClientSide() && Client.getIdentity() == owner.getController()) {
 			BindGroup group = owner.getKeybinds();
 			group.add(() -> forward = true, Keyboard.KEY_W, PerfIO.BUTTON_DOWN, "forward");
 			group.add(() -> backward = true, Keyboard.KEY_S, PerfIO.BUTTON_DOWN, "backward");

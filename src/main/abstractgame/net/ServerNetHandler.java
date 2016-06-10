@@ -38,9 +38,16 @@ public class ServerNetHandler {
 				.map(Entry::getValue)::iterator);
 	}
 	
+	/** Sends a {@link NetEntityCreatePacket} for every entity in the map */
+	public static void sendEntities(Identity id) {
+		for(NetworkEntity ne : index) {
+			Server.getConnection(id).send(new NetEntityCreatePacket(ne));
+		}
+	}
+	
 	public static void syncEntities() {
 		for(NetworkEntity ne : index) {
-			if(ne.getController() != null || !ne.needsSync())
+			if(!ne.needsSync())
 				continue;
 
 			NetEntityUpdatePacket packet = new NetEntityUpdatePacket(ne);

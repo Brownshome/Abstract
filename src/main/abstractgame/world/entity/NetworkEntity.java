@@ -35,7 +35,9 @@ public interface NetworkEntity extends Indexable {
 	 * left to implementors */
 	void initializeCommon();
 
-	boolean needsSyncTo(Identity id);
+	default boolean needsSyncTo(Identity id) {
+		return getController() != id;
+	}
 
 	boolean needsSync();
 }

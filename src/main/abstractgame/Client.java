@@ -126,8 +126,9 @@ public class Client {
 		Console.setFormat(GLOBAL_CONFIG.getProperty("logging.format", "HH:mm:ss"));
 	}
 
+	static int random = (int) (Math.random() * 20000);
 	public static Identity getIdentity() {
-		return PlayerDataHandler.getIdentity(11257);
+		return PlayerDataHandler.getIdentity(random);
 	}
 
 	public static BlockingQueue<Runnable> getInboundQueue() {

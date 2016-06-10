@@ -3,8 +3,7 @@ package abstractgame.net;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 
-import abstractgame.Client;
-import abstractgame.Server;
+import abstractgame.*;
 import abstractgame.io.user.Console;
 import abstractgame.net.packet.Packet;
 
@@ -13,43 +12,50 @@ public class MemoryConnection implements Connection {
 	static int counter = 0;
 	
 	BlockingQueue<Runnable> threadQueue;
-	/** Whether the sending side of this connection is serverside */
-	boolean isServerSide;
 	
-	public MemoryConnection(BlockingQueue<Runnable> threadQueue, boolean isServerSide) {
+	public MemoryConnection(BlockingQueue<Runnable> threadQueue) {
 		this.threadQueue = threadQueue;
-		this.isServerSide = isServerSide;
 	}
 	
 	@Override
 	public void send(Class<? extends Packet> type, byte[] data) {
+		assert Server.isInternal();
+		
 		Console.fine("Sending " + type.getSimpleName(), "NET");
 
 		ByteBuffer buffer = ByteBuffer.wrap(data); 
-
+		Identity identity = Common.getIdentity();
+		BlockingQueue<Runnable> clientQueue = Common.isClientSide() && !Server.getConnectedIds().contains(identity) ? Client.getInboundQueue() : null;
+		
 		try {
 			threadQueue.put(() -> {
-				int id = Packet.IDS.get(type);
-				Packet reconstructed = Packet.PACKET_READERS.get(id).apply(buffer);
-				reconstructed.handle(isServerSide ? Client.getIdentity() : null);
+				if(clientQueue != null)
+					Server.createConnection(identity, new MemoryConnection(clientQueue));
+				
+				Connection.handle(Packet.IDS.get(type), buffer, identity); 
 			});
 		} catch (InterruptedException e) {}
 	}
 	
 	@Override
 	public void send(Packet packet) {
+		assert Server.isInternal();
+		
 		Console.fine("Sending " + packet.getClass().getSimpleName(), "NET");
 		
 		ByteBuffer buffer = ByteBuffer.allocate(packet.getPayloadSize()); 
 		packet.fill(buffer);
-		
 		buffer.flip();
+		
+		Identity id = Common.getIdentity();
+		BlockingQueue<Runnable> clientQueue = Common.isClientSide() && !Server.getConnectedIds().contains(id) ? Client.getInboundQueue() : null;
 		
 		try {
 			threadQueue.put(() -> {
-				int id = Packet.IDS.get(packet.getClass());
-				Packet reconstructed = Packet.PACKET_READERS.get(id).apply(buffer);
-				reconstructed.handle(isServerSide ? Client.getIdentity() : null);
+				if(clientQueue != null)
+					Server.createConnection(id, new MemoryConnection(clientQueue));
+				
+				Connection.handle(Packet.IDS.get(packet.getClass()), buffer, id);
 			});
 		} catch (InterruptedException e) {}
 	}
@@ -61,11 +67,15 @@ public class MemoryConnection implements Connection {
 		Ack ack = new Ack();
 		ByteBuffer buffer = ByteBuffer.wrap(data); 
 
+		Identity id = Common.getIdentity();
+		BlockingQueue<Runnable> clientQueue = Common.isClientSide() && !Server.getConnectedIds().contains(id) ? Client.getInboundQueue() : null;
+		
 		try {
 			threadQueue.put(() -> {
-				int id = Packet.IDS.get(type);
-				Packet reconstructed = Packet.PACKET_READERS.get(id).apply(buffer);
-				reconstructed.handle(isServerSide ? Client.getIdentity() : null);
+				if(clientQueue != null)
+					Server.createConnection(id, new MemoryConnection(clientQueue));
+				
+				Connection.handle(Packet.IDS.get(type), buffer, id);
 
 				ack.trigger();
 			});
@@ -85,12 +95,15 @@ public class MemoryConnection implements Connection {
 		
 		buffer.flip();
 		
+		Identity id = Common.getIdentity();
+		BlockingQueue<Runnable> clientQueue = Common.isClientSide() && !Server.getConnectedIds().contains(id) ? Client.getInboundQueue() : null;
+		
 		try {
 			threadQueue.put(() -> {
-				int id = Packet.IDS.get(packet.getClass());
-				Packet reconstructed = Packet.PACKET_READERS.get(id).apply(buffer);
-				reconstructed.handle(isServerSide ? Client.getIdentity() : null);
+				if(clientQueue != null)
+					Server.createConnection(id, new MemoryConnection(clientQueue));
 				
+				Connection.handle(Packet.IDS.get(packet.getClass()), buffer, id);
 				ack.trigger();
 			});
 		} catch (InterruptedException e) {}

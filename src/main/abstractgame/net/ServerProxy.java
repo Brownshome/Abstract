@@ -24,17 +24,19 @@ public abstract class ServerProxy {
 	public static void startPrivateServer(String config) {
 		checkNoServerRunning();
 		
-		INSTANCE = new InternalServerProxy(config);
+		INSTANCE = new InternalServerProxy(config, false);
 	}
 	
 	public static void startIntegratedServer(int port, String config) {
 		checkNoServerRunning();
 		
-		assert false : "Not yet implemented";
+		INSTANCE = new InternalServerProxy(config, port);
 	}
 	
 	public static void connectToServer(InetAddress address, int port) {
-		assert false : "Not yet implemented";
+		checkNoServerRunning();
+		
+		INSTANCE = new NetServerProxy(address, port);
 	}
 	
 	public static ServerProxy getCurrentServerProxy() {

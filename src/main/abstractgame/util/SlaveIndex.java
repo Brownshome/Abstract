@@ -1,8 +1,6 @@
 package abstractgame.util;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import abstractgame.world.entity.NetworkEntity;
 
@@ -24,13 +22,12 @@ public class SlaveIndex<T extends Indexable> implements Iterable<T> {
 	 * 
 	 *  @param id The id to query */
 	public T get(int id) {
-		assert id < list.size() && list.get(id) != null;
+		assert id >= 0;
 		
-		try {
-			return list.get(id);
-		} catch(IndexOutOfBoundsException ioobe) {
+		if(id >= list.size())
 			return null;
-		}
+		
+		return list.get(id);
 	}
 	
 	public int get(T t) {
@@ -39,6 +36,6 @@ public class SlaveIndex<T extends Indexable> implements Iterable<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		return list.iterator();
+		return list.stream().filter(Objects::nonNull).iterator();
 	}
 }

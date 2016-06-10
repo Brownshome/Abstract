@@ -51,7 +51,7 @@ public class PlayerSpawn extends BasicEntity implements MapObject {
 	
 	public PlayerSpawn(Vector3f position, CheckCollision checks, float spawnInt) {
 		super(position, new Quat4f(0, 0, 0, 1));
-		this.spawnInt = (int) (spawnInt * Server.getTargetTPS());
+		if(Common.isServerSide()) this.spawnInt = (int) (spawnInt * Server.getTargetTPS());
 	}
 	
 	@Override
