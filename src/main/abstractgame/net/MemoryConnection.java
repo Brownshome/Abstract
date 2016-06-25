@@ -3,7 +3,10 @@ package abstractgame.net;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 
-import abstractgame.*;
+import abstractgame.Client;
+import abstractgame.Common;
+import abstractgame.Server;
+import abstractgame.io.config.ConfigFile.Policy;
 import abstractgame.io.user.Console;
 import abstractgame.net.packet.Packet;
 
@@ -16,6 +19,9 @@ public class MemoryConnection implements Connection {
 	public MemoryConnection(BlockingQueue<Runnable> threadQueue) {
 		this.threadQueue = threadQueue;
 	}
+	
+	@Override
+	public void setTransmissionPolicy(Policy policy) { /* Do nothing as the memory connection is very simple */ }
 	
 	@Override
 	public void send(Class<? extends Packet> type, byte[] data) {
@@ -61,7 +67,7 @@ public class MemoryConnection implements Connection {
 	}
 
 	@Override
-	public Ack sendWithAck(Class<? extends Packet> type, byte[] data) {
+	public Ack sendReliably(Class<? extends Packet> type, byte[] data) {
 		Console.fine("Sending with ack " + type.getSimpleName(), "NET");
 
 		Ack ack = new Ack();
@@ -85,7 +91,7 @@ public class MemoryConnection implements Connection {
 	}
 	
 	@Override
-	public Ack sendWithAck(Packet packet) {
+	public Ack sendReliably(Packet packet) {
 		Console.fine("Sending with ack " + packet.getClass().getSimpleName(), "NET");
 		
 		Ack ack = new Ack();

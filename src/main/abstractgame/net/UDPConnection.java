@@ -1,10 +1,14 @@
 package abstractgame.net;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import abstractgame.*;
+import abstractgame.Common;
+import abstractgame.Server;
 import abstractgame.io.user.Console;
 import abstractgame.net.packet.Packet;
 import abstractgame.util.ApplicationException;
@@ -19,6 +23,7 @@ public class UDPConnection implements Connection {
 	
 	int port;
 	InetAddress address;
+	TransmissionPolicy policy;
 	
 	public UDPConnection(InetAddress address, int port) {
 		this.port = port;
@@ -26,7 +31,12 @@ public class UDPConnection implements Connection {
 	}
 
 	@Override
-	public Ack sendWithAck(Packet packet) {
+	public void setTransmissionPolicy(TransmissionPolicy policy) {
+		this.policy = policy;
+	}
+	
+	@Override
+	public Ack sendReliably(Packet packet) {
 		assert false : "not implemented";
 		return null;
 	}
@@ -80,7 +90,7 @@ public class UDPConnection implements Connection {
 	}
 
 	@Override
-	public Ack sendWithAck(Class<? extends Packet> type, byte[] data) {
+	public Ack sendReliably(Class<? extends Packet> type, byte[] data) {
 		assert false : "not implemented";
 		return null;
 	}

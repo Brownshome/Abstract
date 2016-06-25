@@ -1,9 +1,7 @@
 package abstractgame.net;
 
 import java.nio.ByteBuffer;
-import java.util.stream.Stream;
 
-import abstractgame.Server;
 import abstractgame.io.user.Console;
 import abstractgame.net.packet.Packet;
 
@@ -38,7 +36,7 @@ public interface Connection {
 				this.wait();
 		}
 		
-		/** This method simply exits on interupt */
+		/** This method simply exits on interrupt */
 		public void waitForSafe() {
 			try {
 				waitFor();
@@ -51,7 +49,15 @@ public interface Connection {
 		}
 	}
 	
-	/** Sends a packet along this conenction, this method should not block if possible.
+	enum TransmissionPolicy {
+		DATA_RATE,
+		LATENCY
+	}
+	
+	/** Sets the aspect of the transmission to optimize for. This may or may not have any effect depending on the transmission. */
+	void setTransmissionPolicy(TransmissionPolicy policy);
+	
+	/** Sends a packet along this connection, this method should not block if possible.
 	 * This method will attempt to cause the packet's handler to be called on the other
 	 * end of the connection on the correct thread. */
 	void send(Packet packet);
@@ -60,21 +66,21 @@ public interface Connection {
 	 * when the packet needs to be pre-encoded */
 	void send(Class<? extends Packet> type, byte[] data);
 	
-	/** Sends a packet along this conenction, this method should not block if possible.
+	/** Sends a packet along this connection, this method should not block if possible.
 	 * This method will attempt to cause the packet's handler to be called on the other
 	 * end of the connection on the correct thread. The {@link Ack} returned is used to wait for
-	 * the packet, there is no gurantee this will ever happen. 
+	 * the packet, this is guaranteed to happen. 
 	 * 
 	 * @param packet The {@link Packet} to send
 	 * 
 	 * @return The object used to wait on*/
-	Ack sendWithAck(Packet packet);
+	Ack sendReliably(Packet packet);
 	
-	/** Similar to {@link #sendWithAck(Packet)} but is used in bulk sending methods
+	/** Similar to {@link #sendReliably(Packet)} but is used in bulk sending methods
 	 * when the packet needs to be pre-encoded.
 	 * 	
 	 * @param type The class object representing the type of packet
 	 * @param data An array containing the already compiled packet data
 	 * @return The object used to wait on*/
-	Ack sendWithAck(Class<? extends Packet> type, byte[] data);
+	Ack sendReliably(Class<? extends Packet> type, byte[] data);
 }
