@@ -21,7 +21,7 @@ public class MemoryConnection implements Connection {
 	}
 	
 	@Override
-	public void setTransmissionPolicy(Policy policy) { /* Do nothing as the memory connection is very simple */ }
+	public void setTransmissionPolicy(TransmissionPolicy policy) { /* Do nothing as the memory connection is very simple */ }
 	
 	@Override
 	public void send(Class<? extends Packet> type, byte[] data) {
