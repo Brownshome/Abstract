@@ -11,9 +11,9 @@ import java.util.BitSet;
 import abstractgame.Common;
 import abstractgame.Server;
 import abstractgame.io.user.Console;
-import abstractgame.net.packet.*;
+import abstractgame.net.packet.FragmentPacket;
+import abstractgame.net.packet.Packet;
 import abstractgame.util.ApplicationException;
-import sun.misc.Unsafe;
 
 /* int uuid -> not populated if the packet if from the server
  * int packetId
@@ -32,18 +32,18 @@ public class UDPConnection implements Connection {
 	public final FragmentHandler fragmentHandler = new FragmentHandler();
 	
 	/** This is a subclass built to handle packet fragmentation. There are 8 fragment groups, the assembler discards any
-	 * fragment older than the currently recieving packet */
+	 * fragment older than the currently receiving packet */
 	public class FragmentHandler {
 		static final int FRAGMENT_GROUP_MASK = -1 >>> Integer.SIZE - FragmentPacket.GROUP_BITS;
 		
 		/** This is a {@value FragmentPacket#GROUP_BITS} bit value */
 		int fragmentGroup = 0;
 		
-		int latestRecieveGroup = 0;
+		int latestRecieveGroup = -1;
 		
 		BitSet recievedFragments = new BitSet();
 		byte[] fragmentGroupData = new byte[FragmentPacket.MAX_SIZE];
-		int lastFragment = -1; //-1 is a sentinal that indicates that the last fragment has not yet arrived
+		int lastFragment = -1; //-1 is a sentinel that indicates that the last fragment has not yet arrived
 		int lastFragmentSize = 0;
 		
 		void sendPacket(ByteBuffer buffer) {
@@ -64,12 +64,16 @@ public class UDPConnection implements Connection {
 		}
 		
 		public void reassembleFragmentedPacket(FragmentPacket packet) {
-			//this acts as a circular adding system.
-			if(latestRecieveGroup == -1 || (packet.fragmentGroup - latestRecieveGroup & (1 << FragmentPacket.GROUP_BITS)) != 0) {
-				//reset the fragment system as a later packet has arrived
-				latestRecieveGroup = packet.fragmentGroup;
-				recievedFragments.clear();
-				lastFragment = -1;
+			if(packet.fragmentGroup != latestRecieveGroup) {
+				//this acts as a circular adding system.
+				if(latestRecieveGroup == -1 || (packet.fragmentGroup - latestRecieveGroup & (1 << FragmentPacket.GROUP_BITS - 1)) == 0) {
+					//reset the fragment system as a later packet has arrived
+					latestRecieveGroup = packet.fragmentGroup;
+					recievedFragments.clear();
+					lastFragment = -1;
+				} else {
+					return; //old fragment, discard
+				}
 			}
 			
 			//not using packet.isLastFragment to avoid the possibility of malicious packets crashing the fragmenter
@@ -78,7 +82,7 @@ public class UDPConnection implements Connection {
 			
 			if(packet.isLastFragment) {
 				if(lastFragment != -1 && lastFragment != packet.fragmentNumber) {
-					//something has gone seriously wrong here, drop the entier packet.
+					//something has gone seriously wrong here, drop the entire packet.
 					lastFragment = -1;
 					recievedFragments.clear();
 					
