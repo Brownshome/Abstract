@@ -6,12 +6,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import abstractgame.Common;
 import abstractgame.Server;
 import abstractgame.io.user.Console;
-import abstractgame.net.packet.Packet;
+import abstractgame.net.packet.*;
 import abstractgame.util.ApplicationException;
+import sun.misc.Unsafe;
 
 /* int uuid -> not populated if the packet if from the server
  * int packetId
@@ -19,11 +21,97 @@ import abstractgame.util.ApplicationException;
 
 //TODO close the socket
 public class UDPConnection implements Connection {
+	static final int MTU = 1200;
+	
 	static DatagramSocket socket;
 	
 	int port;
 	InetAddress address;
 	TransmissionPolicy policy;
+	
+	public final FragmentHandler fragmentHandler = new FragmentHandler();
+	
+	/** This is a subclass built to handle packet fragmentation. There are 8 fragment groups, the assembler discards any
+	 * fragment older than the currently recieving packet */
+	public class FragmentHandler {
+		static final int FRAGMENT_GROUP_MASK = -1 >>> Integer.SIZE - FragmentPacket.GROUP_BITS;
+		
+		/** This is a {@value FragmentPacket#GROUP_BITS} bit value */
+		int fragmentGroup = 0;
+		
+		int latestRecieveGroup = 0;
+		
+		BitSet recievedFragments = new BitSet();
+		byte[] fragmentGroupData = new byte[FragmentPacket.MAX_SIZE];
+		int lastFragment = -1; //-1 is a sentinal that indicates that the last fragment has not yet arrived
+		int lastFragmentSize = 0;
+		
+		void sendPacket(ByteBuffer buffer) {
+			assert buffer.remaining() > MTU;
+			
+			if(buffer.remaining() > FragmentPacket.MAX_SIZE)
+				throw new ApplicationException("Excessive packet size", "NET");
+			
+			FragmentPacket packet;
+			
+			int packetNo = 0;
+			do {
+				packet = new FragmentPacket(buffer, fragmentGroup, packetNo++);
+				send(packet);
+			} while(!packet.isLastFragment);
+			
+			nextFragmentGroup();
+		}
+		
+		public void reassembleFragmentedPacket(FragmentPacket packet) {
+			//this acts as a circular adding system.
+			if(latestRecieveGroup == -1 || (packet.fragmentGroup - latestRecieveGroup & (1 << FragmentPacket.GROUP_BITS)) != 0) {
+				//reset the fragment system as a later packet has arrived
+				latestRecieveGroup = packet.fragmentGroup;
+				recievedFragments.clear();
+				lastFragment = -1;
+			}
+			
+			//not using packet.isLastFragment to avoid the possibility of malicious packets crashing the fragmenter
+			int size = packet.data.remaining();
+			packet.data.get(fragmentGroupData, packet.fragmentNumber * FragmentPacket.FRAGMENT_SIZE, Math.min(size, FragmentPacket.FRAGMENT_SIZE));
+			
+			if(packet.isLastFragment) {
+				if(lastFragment != -1 && lastFragment != packet.fragmentNumber) {
+					//something has gone seriously wrong here, drop the entier packet.
+					lastFragment = -1;
+					recievedFragments.clear();
+					
+					Console.warn("Duplicate last fragment packets of different indexs", "NET");
+					return;
+				}
+				
+				lastFragment = packet.fragmentNumber;
+				lastFragmentSize = size;
+			}
+			
+			recievedFragments.set(packet.fragmentNumber);
+			
+			if(lastFragment != -1 && recievedFragments.nextClearBit(0) > lastFragment) {
+				//all fragments recieved
+				ByteBuffer buffer = ByteBuffer.wrap(fragmentGroupData, 0, lastFragment * FragmentPacket.FRAGMENT_SIZE + lastFragmentSize);
+				
+				if(Common.isServerSide()) {
+					Identity id = PlayerDataHandler.getIdentity(buffer.getInt());
+					
+					Connection.handle(buffer.getInt(), buffer, id);
+				} else {
+					Connection.handle(buffer.getInt(), buffer, null);
+				}
+				
+				latestRecieveGroup = -1;
+			}
+		}
+		
+		void nextFragmentGroup() {
+			fragmentGroup = (fragmentGroup + 1) & FRAGMENT_GROUP_MASK;
+		}
+	}
 	
 	public UDPConnection(InetAddress address, int port) {
 		this.port = port;
@@ -56,7 +144,12 @@ public class UDPConnection implements Connection {
 		buffer.flip();
 		
 		try {
-			socket.send(new DatagramPacket(buffer.array(), buffer.remaining(), address, port));
+			if(buffer.remaining() > MTU) {
+				//fragment packet
+				fragmentHandler.sendPacket(buffer);
+			} else {
+				socket.send(new DatagramPacket(buffer.array(), buffer.remaining(), address, port));
+			}
 		} catch (IOException e) {
 			throw new ApplicationException("Unable to send packet", e, "NET");
 		}
@@ -82,11 +175,15 @@ public class UDPConnection implements Connection {
 		buffer.flip();
 		
 		try {
-			socket.send(new DatagramPacket(buffer.array(), buffer.remaining(), address, port));
+			if(buffer.remaining() > MTU) {
+				//fragment packet
+				fragmentHandler.sendPacket(buffer);
+			} else {
+				socket.send(new DatagramPacket(buffer.array(), buffer.remaining(), address, port));
+			}
 		} catch (IOException e) {
 			throw new ApplicationException("Unable to send packet", e, "NET");
 		}
-		
 	}
 
 	@Override

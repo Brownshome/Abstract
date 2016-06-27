@@ -21,12 +21,12 @@ public class BitUnpacker {
 		bitsWritten += Byte.SIZE;
 	}
 	
-	void byteAllign() {
+	public void byteAllign() {
 		bitsWritten = 0;
 		scratch = 0;
 	}
 	
-	int read(int bits) {
+	public int read(int bits) {
 		assert bits <= 32 && bits > 0;
 		
 		while(bitsWritten < bits) fillScratch();
@@ -35,5 +35,9 @@ public class BitUnpacker {
 		scratch >>= bits;
 		bitsWritten -= bits;
 		return value;
+	}
+
+	public boolean readBoolean() {
+		return read(1) == 1;
 	}
 }

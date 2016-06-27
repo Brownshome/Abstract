@@ -4,16 +4,8 @@ import java.security.Policy;
 
 import abstractgame.io.model.PhysicsMeshLoader;
 import abstractgame.mod.ModManager;
-import abstractgame.net.packet.NetEntityCreatePacket;
-import abstractgame.net.packet.NetEntityUpdatePacket;
 import abstractgame.net.Identity;
-import abstractgame.net.packet.JoinPacket;
-import abstractgame.net.packet.NetEntityCreateAck;
-import abstractgame.net.packet.NetEntityCreateClientRequest;
-import abstractgame.net.packet.Packet;
-import abstractgame.net.packet.QueryPacket;
-import abstractgame.net.packet.QueryResponsePacket;
-import abstractgame.net.packet.SpawnTimerPacket;
+import abstractgame.net.packet.*;
 import abstractgame.security.GamePolicy;
 import abstractgame.time.Clock;
 import abstractgame.ui.GameScreen;
@@ -53,6 +45,7 @@ public class Common {
 		Packet.regesterPacket(NetEntityCreateAck.class);
 		Packet.regesterPacket(NetEntityCreateClientRequest.class);
 		Packet.regesterPacket(NetEntityUpdatePacket.class);
+		Packet.regesterPacket(FragmentPacket.class);
 		
 		World.regesterNetworkEntity(Player.class);
 		

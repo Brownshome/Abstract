@@ -35,4 +35,8 @@ public class BitPacker {
 		
 		while(bitsWritten >= 8) write();
 	}
+
+	public void putBoolean(boolean bool) {
+		put(bool ? 1 : 0, 1);
+	}
 }
