@@ -37,11 +37,7 @@ public class FragmentationTest {
 		
 		boolean errored = false;
 		try {
-			IntStream required = r.ints(0, sentPackets.size()).distinct();
-			IntStream random = r.ints(100, 0, sentPackets.size());
-			IntStream combined = IntStream.concat(random, required);
-			
-			combined.mapToObj(sentPackets::get).forEach(testConnection.fragmentHandler::reassembleFragmentedPacket);
+			r.ints(0, sentPackets.size()).distinct().mapToObj(sentPackets::get).forEach(testConnection.fragmentHandler::reassembleFragmentedPacket);
 		} catch(IndexOutOfBoundsException aiooe) { errored = true; }
 		
 		Assert.assertTrue(errored);
