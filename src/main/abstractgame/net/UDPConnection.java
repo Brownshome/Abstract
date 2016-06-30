@@ -7,12 +7,13 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.util.concurrent.atomic.*;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
-import abstractgame.Common;
-import abstractgame.Server;
+import abstractgame.*;
 import abstractgame.io.user.Console;
-import abstractgame.net.packet.FragmentPacket;
-import abstractgame.net.packet.Packet;
+import abstractgame.net.packet.*;
 import abstractgame.util.ApplicationException;
 
 /* int uuid -> not populated if the packet if from the server
@@ -29,7 +30,11 @@ public class UDPConnection implements Connection {
 	InetAddress address;
 	TransmissionPolicy policy;
 	
-	public final FragmentHandler fragmentHandler = new FragmentHandler();
+	final FragmentHandler fragmentHandler = new FragmentHandler();
+	
+	public FragmentHandler getFragmentHandler() {
+		return fragmentHandler;
+	}
 	
 	/** This is a subclass built to handle packet fragmentation. There are 8 fragment groups, the assembler discards any
 	 * fragment older than the currently receiving packet */
@@ -37,7 +42,7 @@ public class UDPConnection implements Connection {
 		static final int FRAGMENT_GROUP_MASK = -1 >>> Integer.SIZE - FragmentPacket.GROUP_BITS;
 		
 		/** This is a {@value FragmentPacket#GROUP_BITS} bit value */
-		int fragmentGroup = 0;
+		AtomicInteger fragmentGroup = new AtomicInteger();
 		
 		int latestRecieveGroup = -1;
 		
@@ -53,14 +58,13 @@ public class UDPConnection implements Connection {
 				throw new ApplicationException("Excessive packet size", "NET");
 			
 			FragmentPacket packet;
+			int localFragmentGroup = fragmentGroup.getAndUpdate(this::nextFragmentGroup);
 			
 			int packetNo = 0;
 			do {
-				packet = new FragmentPacket(buffer, fragmentGroup, packetNo++);
+				packet = new FragmentPacket(buffer, fragmentGroup.get(), packetNo++);
 				send(packet);
 			} while(!packet.isLastFragment);
-			
-			nextFragmentGroup();
 		}
 		
 		public void reassembleFragmentedPacket(FragmentPacket packet) {
@@ -100,20 +104,115 @@ public class UDPConnection implements Connection {
 				//all fragments recieved
 				ByteBuffer buffer = ByteBuffer.wrap(fragmentGroupData, 0, lastFragment * FragmentPacket.FRAGMENT_SIZE + lastFragmentSize);
 				
-				if(Common.isServerSide()) {
-					Identity id = PlayerDataHandler.getIdentity(buffer.getInt());
-					
-					Connection.handle(buffer.getInt(), buffer, id);
-				} else {
-					Connection.handle(buffer.getInt(), buffer, null);
-				}
+				UDPHeader header = readHeader(buffer, Common.isServerSide());
+				Connection.handle(header.reader.apply(buffer), header.id);
 				
 				latestRecieveGroup = -1;
 			}
 		}
 		
-		void nextFragmentGroup() {
-			fragmentGroup = (fragmentGroup + 1) & FRAGMENT_GROUP_MASK;
+		int nextFragmentGroup(int old) {
+			return (old + 1) & FRAGMENT_GROUP_MASK;
+		}
+	}
+	
+	final AckHandler ackHandler = new AckHandler();
+	
+	public AckHandler getAckHandler() {
+		return ackHandler;
+	}
+	
+	/** This is a subclass built to handle the sending and receiving of acks */
+	public class AckHandler {
+		static final int SEQUENCE_NUMBERS = 1 << AckPacket.BITS;
+		static final int COMP_BIT = 1 << AckPacket.BITS - 1;
+		static final int NUMBER_OF_BLOCKS = SEQUENCE_NUMBERS / Long.SIZE;
+		
+		BitSet ackedPackets = new BitSet(SEQUENCE_NUMBERS);
+		int lastBlockClearedAck = SEQUENCE_NUMBERS / Long.SIZE - 1; //block 1023 was the last one moved
+		
+		BitSet receivedPackets = new BitSet(SEQUENCE_NUMBERS);
+		int lastBlockClearedRec = SEQUENCE_NUMBERS / Long.SIZE - 1; //block 1023 was the last one moved
+		
+		int blockNo(int seqNo) {
+			return seqNo / Long.SIZE;
+		}
+		
+		public void receivedPacket(short sequenceNumber) {
+			int seqNo = Short.toUnsignedInt(sequenceNumber);
+			int blockNo = blockNo(seqNo) ^ NUMBER_OF_BLOCKS;
+			if((blockNo - lastBlockClearedRec & COMP_BIT) == 0) {
+				//clear new block
+				receivedPackets.clear(blockNo * Long.SIZE, (blockNo + 1) * Long.SIZE);
+				lastBlockClearedRec = blockNo;
+			}
+			
+			receivedPackets.set(seqNo);
+			
+			//can be optimized, but who cares
+			short bitfield = 0;
+			for(int i = seqNo - AckPacket.BITS - 1; i <= seqNo; i++)
+				if(receivedPackets.get(i)) 
+					bitfield |= 1 << i;
+			
+			send(new AckPacket((short) (seqNo - AckPacket.BITS - 1), (short) bitfield));
+		}
+
+		public synchronized void processAck(short startSequence, short bitfield) {
+			int startNo = Short.toUnsignedInt(startSequence);
+			int blockNo = blockNo(startNo) ^ NUMBER_OF_BLOCKS / 2;
+			if((blockNo - lastBlockClearedRec & COMP_BIT) == 0) {
+				//clear new block
+				ackedPackets.clear(blockNo * Long.SIZE, (blockNo + 1) * Long.SIZE);
+				lastBlockClearedAck = blockNo;
+			}
+			
+			//again could be optimized
+			for(int i = 0; i < AckPacket.BITS; i++)
+				if((bitfield & 1 << i) != 0)  {
+					ackedPackets.set(startNo + i);
+					
+					packetArray[startNo + i] = null;
+					ackArray[startNo + i].trigger();
+					
+					if(startNo + i == oldestPacket)
+						oldestPacket++;
+				}
+		}
+
+		int sequenceNumber;
+		int oldestPacket;
+		
+		Ack[] ackArray = new Ack[SEQUENCE_NUMBERS];
+		ReliablePacket[] packetArray = new ReliablePacket[SEQUENCE_NUMBERS];
+		long[] lastSend = new long[SEQUENCE_NUMBERS];
+		
+		int waitTime = 100;
+		
+		//TODO call this somehow
+		/** Ticks the connection, resending packets if need be */
+		public synchronized void tick() {
+			for(int i = oldestPacket; i < sequenceNumber; i++) {
+				if(Common.getClock().getTime() - lastSend[i] - waitTime < 0)
+					break;
+				
+				if(packetArray[i] != null)
+					send(packetArray[i]);
+			}
+		}
+		
+		public synchronized Ack sendPacket(Packet packet) {
+			sequenceNumber++;
+			
+			ReliablePacket wrappedPacket = new ReliablePacket(sequenceNumber, packet);
+			
+			lastSend[sequenceNumber] = Common.getClock().getTime();
+			ackArray[sequenceNumber] = new Ack();
+			packetArray[sequenceNumber] = wrappedPacket;
+			
+			send(wrappedPacket);
+			
+			return ackArray[sequenceNumber];
 		}
 	}
 	
@@ -129,15 +228,15 @@ public class UDPConnection implements Connection {
 	
 	@Override
 	public Ack sendReliably(Packet packet) {
-		assert false : "not implemented";
-		return null;
+		return getAckHandler().sendPacket(packet);
 	}
 
+	/** This method may be called by multiple threads, the netthread and the mainthread */
 	@Override
-	public void send(Class<? extends Packet> type, byte[] data) {
+	public void send(Class<? extends Packet> type, ByteBuffer data) {
 		Console.fine("Sending " + type.getSimpleName(), "NET");
 
-		ByteBuffer buffer = ByteBuffer.allocate(data.length + getHeaderSize()); 
+		ByteBuffer buffer = ByteBuffer.allocate(data.remaining() + getHeaderSize()); 
 		Identity identity = Common.getIdentity();
 		
 		if(identity != null)
@@ -160,22 +259,88 @@ public class UDPConnection implements Connection {
 	}
 	
 	/** @return the size of the header in bytes of packets sent from this machine */
-	private int getHeaderSize() {
+	public static int getHeaderSize() {
 		return Integer.BYTES * (Common.isClientSide() ? 2 : 1);
 	}
 
+	public static int getHeaderSizeWithoutID() {
+		return Integer.BYTES;
+	}
+	
+	/** Writes the packet data to the specified buffer.
+	 * <p>
+	 * The data is written as follows:
+	 * <ul>
+	 * <li> [ 4B ] identity
+	 * <li> [ 4B ] packet type
+	 * <li> [ nB ] packet data
+	 * </ul><p>
+	 * NB: These methods do not flip the buffer after writing
+	 * @see #writePacket(Packet)
+	 * @see #writePacketNoIdentity(Packet, ByteBuffer)
+	 * 
+	 * @param packet the packet to write to the buffer
+	 * @param buffer the buffer to write the data to
+	 *  */
+	public static void writePacket(Packet packet, ByteBuffer buffer) {
+		writeHeader(Common.getIdentity(), Packet.IDS.get(packet.getClass()), buffer);
+		packet.fill(buffer);
+	}
+
+	/**
+	 * Creates and fills a new buffer of packet data 
+	 * @see #writePacket(Packet, ByteBuffer) 
+	 * */
+	public static ByteBuffer writePacket(Packet packet) {
+		ByteBuffer buffer = ByteBuffer.allocate(packet.getPayloadSize() + getHeaderSize()); 
+		writePacket(packet, buffer);
+		
+		return buffer;
+	}
+	
+	/** Writes the UDP Header.
+	 * 
+	 * @param buffer the buffer to write the header to
+	 * @param type the packet id to write to the buffer
+	 * @param id the uuid to write to the buffer, if this is null to uuid is written
+	 */
+	public static void writeHeader(Identity id, int type, ByteBuffer buffer) {
+		if(id != null)
+			buffer.putInt(id.uuid);
+		buffer.putInt(type);
+	}
+	
+	public static UDPHeader readHeaderClient(ByteBuffer buffer) {
+		return new UDPHeader(buffer, false);
+	}
+	
+	public static UDPHeader readHeaderServer(ByteBuffer buffer) {
+		return new UDPHeader(buffer, true);
+	}
+	
+	public static UDPHeader readHeader(ByteBuffer buffer, boolean hasIdentity) {
+		return new UDPHeader(buffer, hasIdentity);
+	}
+	
+	public static class UDPHeader {
+		public final Identity id;
+		public final Function<ByteBuffer, Packet> reader;
+		
+		public UDPHeader(Identity id, int reader) {
+			this.id = id;
+			this.reader = Packet.PACKET_READERS.get(reader);
+		}
+		
+		public UDPHeader(ByteBuffer buffer, boolean hasIdentity) {
+			this(hasIdentity ? PlayerDataHandler.getIdentity(buffer.getInt()) : null, buffer.getInt());
+		}
+	}
+	
 	@Override
 	public void send(Packet packet) {
 		Console.fine("Sending " + packet.getClass().getSimpleName(), "NET");
 		
-		ByteBuffer buffer = ByteBuffer.allocate(packet.getPayloadSize() + getHeaderSize()); 
-		
-		Identity identity = Common.getIdentity();
-		if(identity != null)
-			buffer.putInt(identity.uuid);
-		
-		buffer.putInt(Packet.IDS.get(packet.getClass()));
-		packet.fill(buffer);
+		ByteBuffer buffer = writePacket(packet);
 		buffer.flip();
 		
 		try {
@@ -183,6 +348,7 @@ public class UDPConnection implements Connection {
 				//fragment packet
 				fragmentHandler.sendPacket(buffer);
 			} else {
+				//synchronized by the OS?
 				socket.send(new DatagramPacket(buffer.array(), buffer.remaining(), address, port));
 			}
 		} catch (IOException e) {
@@ -191,7 +357,7 @@ public class UDPConnection implements Connection {
 	}
 
 	@Override
-	public Ack sendReliably(Class<? extends Packet> type, byte[] data) {
+	public Ack sendReliably(Class<? extends Packet> type, ByteBuffer data) {
 		assert false : "not implemented";
 		return null;
 	}
@@ -215,13 +381,12 @@ public class UDPConnection implements Connection {
 					
 					ByteBuffer buffer = ByteBuffer.wrap(packet.getData(), packet.getOffset(), packet.getLength());
 					
-					Identity identity = PlayerDataHandler.getIdentity(buffer.getInt());
-					int id = buffer.getInt();
+					UDPHeader header = readHeaderServer(buffer);
 					
-					if(!Server.getConnectedIds().contains(identity))
-						Server.createConnection(identity, new UDPConnection(packet.getAddress(), packet.getPort()));
+					if(!Server.getConnectedIds().contains(header.id))
+						Server.createConnection(header.id, new UDPConnection(packet.getAddress(), packet.getPort()));
 					
-					Connection.handle(id, buffer, identity);
+					Connection.handle(header.reader.apply(buffer), header.id);
 				} catch (IOException e) {
 					Console.warn("Error in net thread wait, re-queuing." + e.getMessage(), "NET");
 				}
@@ -249,8 +414,10 @@ public class UDPConnection implements Connection {
 				try {
 					socket.receive(packet);
 					ByteBuffer buffer = ByteBuffer.wrap(packet.getData(), packet.getOffset(), packet.getLength());
-					int id = buffer.getInt();
-					Connection.handle(id, buffer, null);
+
+					UDPHeader header = readHeaderClient(buffer);
+
+					Connection.handle(header.reader.apply(buffer), null);
 				} catch (IOException e) {
 					Console.warn("Error in net thread wait, re-queuing." + e.getMessage(), "NET");
 				}
@@ -259,5 +426,9 @@ public class UDPConnection implements Connection {
 		
 		clientListenThread.setDaemon(true);
 		clientListenThread.start();
+	}
+
+	public void tick() {
+		getAckHandler().tick();
 	}
 }

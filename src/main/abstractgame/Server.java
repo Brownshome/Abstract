@@ -176,6 +176,10 @@ public class Server {
 		if(getWorld() != null)
 			world.run();
 		
+		for(Connection c : getConnections())
+			if(c instanceof UDPConnection)
+				((UDPConnection) c).tick();
+		
 		doTimings();
 	}
 	

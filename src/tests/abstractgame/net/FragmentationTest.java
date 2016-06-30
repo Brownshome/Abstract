@@ -33,7 +33,7 @@ public class FragmentationTest {
 		byte[] testData = new byte[testDataSize];
 		Random r = new Random();
 		r.nextBytes(testData);
-		testConnection.fragmentHandler.sendPacket(ByteBuffer.wrap(testData));
+		testConnection.getFragmentHandler().sendPacket(ByteBuffer.wrap(testData));
 		
 		boolean errored = false;
 		try {

@@ -63,14 +63,14 @@ public class FragmentPacket extends Packet {
 	public void handleClient() {
 		assert ServerProxy.getCurrentServerProxy().getConnection() instanceof UDPConnection;
 		
-		((UDPConnection) ServerProxy.getCurrentServerProxy().getConnection()).fragmentHandler.reassembleFragmentedPacket(this);
+		((UDPConnection) ServerProxy.getCurrentServerProxy().getConnection()).getFragmentHandler().reassembleFragmentedPacket(this);
 	}
 	
 	@Override
 	public void handleServer(Identity id) {
 		assert Server.getConnection(id) instanceof UDPConnection;
 		
-		((UDPConnection) Server.getConnection(id)).fragmentHandler.reassembleFragmentedPacket(this);
+		((UDPConnection) Server.getConnection(id)).getFragmentHandler().reassembleFragmentedPacket(this);
 	}
 	
 	@Override

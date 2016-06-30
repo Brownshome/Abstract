@@ -22,4 +22,9 @@ public class NetServerProxy extends ServerProxy {
 	public Connection getConnection() {
 		return connection;
 	}
+
+	@Override
+	public void tick() {
+		connection.tick();
+	}
 }

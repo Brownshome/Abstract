@@ -7,20 +7,20 @@ import abstractgame.net.packet.Packet;
 
 public interface Connection {	
 	static void sendToAll(Packet packet, Iterable<Connection> connections) {
-		byte[] data = new byte[packet.getPayloadSize()];
-		ByteBuffer buffer = ByteBuffer.wrap(data);
+		ByteBuffer buffer = ByteBuffer.allocate(packet.getPayloadSize());
 		packet.fill(buffer);
+		buffer.flip();
+		
 		for(Connection c : connections) {
-			c.send(packet.getClass(), data);
+			c.send(packet.getClass(), buffer);
+			buffer.rewind();
 		}
 	}
 	
-	static void handle(int type, ByteBuffer buffer, Identity identity) {
-		Packet reconstructed = Packet.PACKET_READERS.get(type).apply(buffer);
+	static void handle(Packet packet, Identity identity) {
+		Console.fine("Recieved " + packet.getClass().getSimpleName() + (identity == null ? "" : " from " + identity), "NET");
 		
-		Console.fine("Recieved " + reconstructed.getClass().getSimpleName() + (identity == null ? "" : " from " + identity), "NET");
-		
-		reconstructed.handle(identity);
+		packet.handle(identity);
 	}
 	
 	/** This object will be notified when the packet reaches the other end */
@@ -45,7 +45,7 @@ public interface Connection {
 		
 		public synchronized void trigger() {
 			done = true;
-			this.notify();
+			this.notifyAll();
 		}
 	}
 	
@@ -64,7 +64,7 @@ public interface Connection {
 	
 	/** Similar to {@link #send(Packet)} but is used in bulk sending methods
 	 * when the packet needs to be pre-encoded */
-	void send(Class<? extends Packet> type, byte[] data);
+	void send(Class<? extends Packet> type, ByteBuffer buffer);
 	
 	/** Sends a packet along this connection, this method should not block if possible.
 	 * This method will attempt to cause the packet's handler to be called on the other
@@ -82,5 +82,5 @@ public interface Connection {
 	 * @param type The class object representing the type of packet
 	 * @param data An array containing the already compiled packet data
 	 * @return The object used to wait on*/
-	Ack sendReliably(Class<? extends Packet> type, byte[] data);
+	Ack sendReliably(Class<? extends Packet> type, ByteBuffer data);
 }

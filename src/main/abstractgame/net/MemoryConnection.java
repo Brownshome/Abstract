@@ -24,12 +24,11 @@ public class MemoryConnection implements Connection {
 	public void setTransmissionPolicy(TransmissionPolicy policy) { /* Do nothing as the memory connection is very simple */ }
 	
 	@Override
-	public void send(Class<? extends Packet> type, byte[] data) {
+	public void send(Class<? extends Packet> type, ByteBuffer data) {
 		assert Server.isInternal();
 		
+		ByteBuffer safeData = data.duplicate(); //to avoid concurrent modification of position and mark for dual connection types
 		Console.fine("Sending " + type.getSimpleName(), "NET");
-
-		ByteBuffer buffer = ByteBuffer.wrap(data); 
 		Identity identity = Common.getIdentity();
 		BlockingQueue<Runnable> clientQueue = Common.isClientSide() && !Server.getConnectedIds().contains(identity) ? Client.getInboundQueue() : null;
 		
@@ -38,7 +37,7 @@ public class MemoryConnection implements Connection {
 				if(clientQueue != null)
 					Server.createConnection(identity, new MemoryConnection(clientQueue));
 				
-				Connection.handle(Packet.IDS.get(type), buffer, identity); 
+				Connection.handle(Packet.PACKET_READERS.get(Packet.IDS.get(type)).apply(safeData), identity); 
 			});
 		} catch (InterruptedException e) {}
 	}
@@ -61,17 +60,18 @@ public class MemoryConnection implements Connection {
 				if(clientQueue != null)
 					Server.createConnection(id, new MemoryConnection(clientQueue));
 				
-				Connection.handle(Packet.IDS.get(packet.getClass()), buffer, id);
+				// It would be easier to just pass the packet, but that might not be safe in all situations
+				Connection.handle(Packet.PACKET_READERS.get(Packet.IDS.get(packet.getClass())).apply(buffer), id);
 			});
 		} catch (InterruptedException e) {}
 	}
 
 	@Override
-	public Ack sendReliably(Class<? extends Packet> type, byte[] data) {
+	public Ack sendReliably(Class<? extends Packet> type, ByteBuffer data) {
 		Console.fine("Sending with ack " + type.getSimpleName(), "NET");
 
 		Ack ack = new Ack();
-		ByteBuffer buffer = ByteBuffer.wrap(data); 
+		ByteBuffer safeData = data.duplicate();
 
 		Identity id = Common.getIdentity();
 		BlockingQueue<Runnable> clientQueue = Common.isClientSide() && !Server.getConnectedIds().contains(id) ? Client.getInboundQueue() : null;
@@ -81,7 +81,8 @@ public class MemoryConnection implements Connection {
 				if(clientQueue != null)
 					Server.createConnection(id, new MemoryConnection(clientQueue));
 				
-				Connection.handle(Packet.IDS.get(type), buffer, id);
+				//instantiating the packet on the othe side in case it is sensitive to which side it is on
+				Connection.handle(Packet.PACKET_READERS.get(Packet.IDS.get(type)).apply(safeData), id);
 
 				ack.trigger();
 			});
@@ -109,7 +110,7 @@ public class MemoryConnection implements Connection {
 				if(clientQueue != null)
 					Server.createConnection(id, new MemoryConnection(clientQueue));
 				
-				Connection.handle(Packet.IDS.get(packet.getClass()), buffer, id);
+				Connection.handle(Packet.PACKET_READERS.get(Packet.IDS.get(packet.getClass())).apply(buffer), id);
 				ack.trigger();
 			});
 		} catch (InterruptedException e) {}

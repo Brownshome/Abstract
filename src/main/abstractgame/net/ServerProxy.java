@@ -59,4 +59,5 @@ public abstract class ServerProxy {
 	
 	public abstract String getName();
 	public abstract Connection getConnection();
+	public void tick() {}
 }

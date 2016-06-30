@@ -86,6 +86,8 @@ public class Client {
 		GLHandler.tick();
 		PerfIO.tick();
 		GLHandler.checkGL();
+		if(ServerProxy.getCurrentServerProxy() != null)
+			ServerProxy.getCurrentServerProxy().tick();
 		
 		GAME_CLOCK.tick();
 	}
