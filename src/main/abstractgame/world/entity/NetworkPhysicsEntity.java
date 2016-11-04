@@ -111,7 +111,7 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 	}
 	
 	@Override
-	public void initializeSlave() {
+	public void initializeClient() {
 		isSlave = true;
 		
 		initializeCommon();
@@ -124,11 +124,7 @@ public abstract class NetworkPhysicsEntity extends PhysicsEntity implements Netw
 		super.onAddedToWorld(world);
 
 		if(!isSlave) {
-			if(Common.isServerSide()) {
-				ServerNetHandler.createNetworkEntity(this);
-			} else {
-				ClientNetHandler.createNetworkEntity(this);
-			}
+			ServerNetHandler.createNetworkEntity(this);
 		}
 	}
 

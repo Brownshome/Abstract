@@ -3,12 +3,14 @@ package abstractgame.net.packet;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import abstractgame.Server;
+import abstractgame.*;
 import abstractgame.net.Identity;
 import abstractgame.net.ServerProxy;
 import abstractgame.net.Side;
+import abstractgame.ui.GameScreen;
 import abstractgame.util.Util;
 import abstractgame.world.World;
+import abstractgame.world.entity.Player;
 
 /** Sends information about the server to the client */
 public class QueryResponsePacket extends Packet {

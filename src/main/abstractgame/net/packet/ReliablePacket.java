@@ -12,8 +12,24 @@ import abstractgame.net.UDPConnection.UDPHeader;
 
 /** This is a wrapper packet that uses a sequence number */
 public class ReliablePacket extends Packet {
-	Packet packet;
+	//either
+	Packet packet = null;
+	//or
+	ByteBuffer data = null;
+	int type = 0;
+	
 	short sequenceNumber;
+	
+	public ReliablePacket(int sequenceNumber, Class<? extends Packet> type, ByteBuffer buffer) {
+		this(sequenceNumber, Packet.IDS.get(type.getClass()), buffer);
+	}
+	
+	public ReliablePacket(int sequenceNumber, int type, ByteBuffer buffer) {
+		assert sequenceNumber < 1 << 16;
+		this.data = buffer.duplicate();
+		this.type = type;
+		this.sequenceNumber = (short) sequenceNumber;
+	}
 	
 	public ReliablePacket(int sequenceNumber, Packet packet) {
 		assert sequenceNumber < 1 << 16;
@@ -30,13 +46,19 @@ public class ReliablePacket extends Packet {
 	@Override
 	public void fill(ByteBuffer output) {
 		output.putShort(sequenceNumber);
-		UDPConnection.writeHeader(null, Packet.IDS.get(packet.getClass()), output);
-		packet.fill(output);
+		
+		if(packet != null) {
+			UDPConnection.writeHeader(null, Packet.IDS.get(packet.getClass()), output);
+			packet.fill(output);
+		} else {
+			UDPConnection.writeHeader(null, type, output);
+			output.put(data);
+		}
 	}
 
 	@Override
 	public int getPayloadSize() {
-		return packet.getPayloadSize() + Short.BYTES + UDPConnection.getHeaderSizeWithoutID();
+		return (packet == null ? data.remaining() : packet.getPayloadSize()) + Short.BYTES + UDPConnection.getHeaderSizeWithoutID();
 	}
 	
 	@Override

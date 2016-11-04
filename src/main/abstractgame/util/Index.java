@@ -2,6 +2,7 @@ package abstractgame.util;
 
 import java.util.*;
 
+/** Represents an ID index that allocates IDs for new objects added */
 public class Index<T extends Indexable> implements Iterable<T> {
 	IDPool pool;
 	List<T> lookup = new ArrayList<>();
@@ -47,7 +48,7 @@ public class Index<T extends Indexable> implements Iterable<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		return lookup.stream().filter(Objects::nonNull).iterator();
+		return new ListIteratorNonNull<>(lookup);
 	}
 
 	public int getID(T ne) {

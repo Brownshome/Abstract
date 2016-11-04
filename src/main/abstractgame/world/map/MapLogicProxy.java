@@ -99,7 +99,7 @@ public interface MapLogicProxy {
 		PlayerSpawn spawn;
 		
 		try {
-		world.physicsWorld.setGravity(new Vector3f(0, -world.getMapFile().getPropertyNoDefault("global.gravity", Number.class).floatValue(), 0));
+			world.physicsWorld.setGravity(new Vector3f(0, -world.getMapFile().getPropertyNoDefault("global.gravity", Number.class).floatValue(), 0));
 		} catch(NullPointerException npe) {
 			throw new ApplicationException("The loaded map does not provide custom logic and has no \'global.gravity\' value set.", npe, "WORLD");
 		}

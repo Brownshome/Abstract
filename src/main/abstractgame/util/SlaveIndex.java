@@ -4,6 +4,7 @@ import java.util.*;
 
 import abstractgame.world.entity.NetworkEntity;
 
+/** Represents an ID index that doesn't allocate IDs */
 public class SlaveIndex<T extends Indexable> implements Iterable<T> {
 	ArrayList<T> list = new ArrayList<>();
 	
@@ -36,6 +37,6 @@ public class SlaveIndex<T extends Indexable> implements Iterable<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		return list.stream().filter(Objects::nonNull).iterator();
+		return new ListIteratorNonNull<>(list);
 	}
 }

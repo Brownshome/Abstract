@@ -23,6 +23,7 @@ import abstractgame.io.user.Console;
 import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.net.Identity;
 import abstractgame.net.PlayerDataHandler;
+import abstractgame.net.packet.Packet;
 import abstractgame.render.*;
 import abstractgame.ui.GameScreen;
 import abstractgame.util.FloatSupplier;
@@ -68,12 +69,12 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		getRigidBody().setActivationState(CollisionObject.DISABLE_DEACTIVATION);
 	}
 
-	/** The constructor to be called on the master side */
+	/** The constructor to be called on the server side */
 	public Player(Identity id) {
 		this(id, false);
 	}
 	
-	/** The constructor to be called on the slave side */
+	/** The constructor to be called on the client side */
 	public Player(ByteBuffer buffer) {
 		this(PlayerDataHandler.getIdentity(buffer.getInt()), true);
 		
@@ -85,19 +86,17 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	}
 	
 	@Override
-	public void initializeSlave() {
-		if(Common.isClientSide()) {
-			renderEntity = new RenderEntity(ModelLoader.loadModel("monkey"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
+	public void initializeClient() {
+		renderEntity = new RenderEntity(ModelLoader.loadModel("monkey"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
 			
-			if(Client.getIdentity().equals(id)) {
-				GameScreen.setPlayerEntity(this);
-				keybinds = new BindGroup("player");
-				keybinds.deactivate();
-				modules.add(movementHandler);
-			}
+		if(Client.getIdentity().equals(id)) {
+			GameScreen.setPlayerEntity(this);
+			keybinds = new BindGroup("player");
+			keybinds.deactivate();
+			modules.add(movementHandler);
 		}
 			
-		super.initializeSlave();
+		super.initializeClient();
 	}
 	
 	@Override
@@ -290,11 +289,6 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	}
 
 	@Override
-	public Identity getController() {
-		return id;
-	}
-
-	@Override
 	public int getCreateLength() {
 		return super.getStateUpdateLength() + Integer.BYTES;
 	}
@@ -309,5 +303,35 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 		assert Common.isClientSide();
 		
 		return keybinds;
+	}
+
+	/** This class is static so as to not break the packet reflection systems */
+	public static class UserInputPacket extends Packet {
+		Player player;
+		
+		UserInputPacket(Player player) {
+			assert player == GameScreen.getPlayerEntity() && Common.isClientSide();
+			
+			this.player = player;
+		}
+		
+		@Override
+		public void fill(ByteBuffer output) {
+			//desired velocity
+			//isJumpPressed
+			//lookDirection
+		}
+
+		@Override
+		public int getPayloadSize() {
+			assert false : "not implemented";
+			return 0;
+		}
+		
+	}
+	
+	public void sendUserInputs() {
+		//TODO assert false : "not implemented";
+		
 	}
 }

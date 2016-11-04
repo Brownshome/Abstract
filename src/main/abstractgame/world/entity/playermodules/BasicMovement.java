@@ -11,6 +11,7 @@ import abstractgame.*;
 import abstractgame.io.user.PerfIO;
 import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.render.Camera;
+import abstractgame.ui.GameScreen;
 import abstractgame.ui.elements.ModuleElement.State;
 import abstractgame.util.*;
 import abstractgame.world.entity.Player;
@@ -34,7 +35,7 @@ public class BasicMovement extends UpgradeModule {
 	public BasicMovement(Player owner) {
 		super(owner);
 		
-		if(Common.isClientSide() && Client.getIdentity() == owner.getController()) {
+		if(Common.isClientSide() && GameScreen.getPlayerEntity() == owner) {
 			BindGroup group = owner.getKeybinds();
 			group.add(() -> forward = true, Keyboard.KEY_W, PerfIO.BUTTON_DOWN, "forward");
 			group.add(() -> backward = true, Keyboard.KEY_S, PerfIO.BUTTON_DOWN, "backward");

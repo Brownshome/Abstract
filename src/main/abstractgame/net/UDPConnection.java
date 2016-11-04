@@ -201,6 +201,24 @@ public class UDPConnection implements Connection {
 			}
 		}
 		
+		public Ack sendPacket(Class<? extends Packet> type, ByteBuffer data) {
+			return sendPacket(Packet.IDS.get(type), data);
+		}
+		
+		public synchronized Ack sendPacket(int type, ByteBuffer data) {
+			sequenceNumber++;
+			
+			ReliablePacket wrappedPacket = new ReliablePacket(sequenceNumber, type, data);
+			
+			lastSend[sequenceNumber] = Common.getClock().getTime();
+			ackArray[sequenceNumber] = new Ack();
+			packetArray[sequenceNumber] = wrappedPacket;
+			
+			send(wrappedPacket);
+			
+			return ackArray[sequenceNumber];
+		}
+		
 		public synchronized Ack sendPacket(Packet packet) {
 			sequenceNumber++;
 			
@@ -358,8 +376,7 @@ public class UDPConnection implements Connection {
 
 	@Override
 	public Ack sendReliably(Class<? extends Packet> type, ByteBuffer data) {
-		assert false : "not implemented";
-		return null;
+		return getAckHandler().sendPacket(type, data);
 	}
 
 	/** This starts a UDP listen thread on a particular port */

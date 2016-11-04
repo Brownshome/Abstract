@@ -195,7 +195,7 @@ public class World extends TickableImpl {
 		if(Common.isServerSide()) {
 			ServerNetHandler.syncEntities();
 		} else {
-			ClientNetHandler.syncEntities();
+			ClientNetHandler.sendUserInput();
 		}
 	}
 	

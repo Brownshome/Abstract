@@ -36,9 +36,7 @@ public class NetEntityUpdatePacket extends Packet {
 		if(entity == null)
 			return;
 		
-		if(id == null || id == entity.getController()) {
 			entity.updateState(buffer);
-		}
 	}
 	
 	@Override

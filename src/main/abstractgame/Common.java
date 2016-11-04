@@ -42,8 +42,7 @@ public class Common {
 		Packet.regesterPacket(JoinPacket.class);
 		Packet.regesterPacket(SpawnTimerPacket.class);
 		Packet.regesterPacket(NetEntityCreatePacket.class);
-		Packet.regesterPacket(NetEntityCreateAck.class);
-		Packet.regesterPacket(NetEntityCreateClientRequest.class);
+		Packet.regesterPacket(AckPacket.class);
 		Packet.regesterPacket(NetEntityUpdatePacket.class);
 		Packet.regesterPacket(FragmentPacket.class);
 		
@@ -83,6 +82,7 @@ public class Common {
 		return !isServerSide();
 	}
 
+	/** Returns either the client ID or null on the server side */
 	public static Identity getIdentity() {
 		return isServerSide() ? null : Client.getIdentity();
 	}
