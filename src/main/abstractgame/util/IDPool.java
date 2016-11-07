@@ -4,6 +4,9 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Stack;
 
+/** This class represents a pool of reusable IDs that can be used and freed back to the pool.
+ * 
+ *  This class is used by the network system for entity IDs */
 public class IDPool {
 	public class OutOfIDsException extends ApplicationException {
 		public OutOfIDsException() {
