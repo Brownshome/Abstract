@@ -1,8 +1,6 @@
 package abstractgame.util;
 
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+import java.nio.*;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
@@ -243,5 +241,12 @@ public class Util {
 		Transform t = new Transform();
 		t.setIdentity();
 		return t;
+	}
+
+	public static IntBuffer toIntBuffer(int... data) {
+		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+		buffer.put(data);
+		buffer.flip();
+		return buffer;
 	}
 }

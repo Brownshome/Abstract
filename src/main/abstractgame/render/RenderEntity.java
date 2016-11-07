@@ -43,7 +43,7 @@ public class RenderEntity extends BasicEntity {
 		
 		Matrix3f modelRot = new Matrix3f();
 		modelRot.set(getOrientation());
-		GL20.glUniformMatrix3(1, true, Util.toFloatBuffer(modelRot));
+		//GL20.glUniformMatrix3(1, true, Util.toFloatBuffer(modelRot));
 		
 		Matrix4f mvp = new Matrix4f();
 		mvp.set(modelRot, getPosition(), 1);

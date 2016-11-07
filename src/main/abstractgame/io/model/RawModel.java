@@ -24,16 +24,16 @@ public class RawModel {
 	GPUModel gpuModel = null;
 	PhysicsModel physModel = null;
 	
-	Vector3f[] vertexs;
-	Vector3f[] normals;
-	Face[] faces;
+	public Vector3f[] vertexs;
+	public Vector3f[] normals;
+	public Face[] faces;
 
 	public RawModel(Vector3f[] vertexs, Vector3f[] normals, Face[] faces) {
 		this.vertexs = vertexs;
 		this.normals = normals;
 		this.faces = faces;
 	}
-
+	
 	public GPUModel getGPUModel() {
 		return gpuModel != null ? gpuModel : (gpuModel = new GPUModel(this));
 	}

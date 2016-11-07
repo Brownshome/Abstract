@@ -1,14 +1,15 @@
-/**
- * 
- */
 package abstractgame.io.model;
 
 import java.nio.*;
 import java.util.*;
 import java.util.Map.Entry;
 
+import javax.vecmath.Vector3f;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
+
+import abstractgame.render.ModelRenderer;
 
 /** A lightweight class representing a handle to a model already uploaded
  * to the GPU */
@@ -18,12 +19,102 @@ public class GPUModel {
 	int IBO;
 	int length;
 
+	List<Collection<Patch>> layers = new ArrayList<>();
+	
 	public GPUModel(RawModel inputModel) {
 		buildOpenGLBuffers(inputModel);
 	}
 	
 	/** This method does nothing if the opengl buffers have already been populated */
 	void buildOpenGLBuffers(RawModel inputModel) {
+		buildGeometry(inputModel);
+		createPatchTopograhpy(inputModel);
+	}
+
+	private void createPatchTopograhpy(RawModel model) {
+		Collection<Patch> patchLayer = new ArrayList<>();
+		
+		for(Face face : model.faces) {
+			Patch p = createPatch(face, model);
+			patchLayer.add(p);
+		}
+
+		//group surrounding patches into a parent patch, ensure there are 3 sepperate patches of the desired level surrounding the vertex
+		
+		for(int level = 0; layers.size() == 0 || patchLayer.size() != layers.get(layers.size() - 1).size(); level++) {
+			layers.add(new ArrayList<>(patchLayer));
+			
+			Map<Integer, Collection<Patch>> vertexConnectivity = new HashMap<>();
+			
+			//populate the vertex map
+			for(Patch patch : patchLayer)
+				for(int vertex : patch.vertexs)
+					vertexConnectivity.computeIfAbsent(vertex, v -> new ArrayList<>()).add(patch);
+			
+			Iterator<Entry<Integer, Collection<Patch>>> iterator = vertexConnectivity.entrySet().iterator();
+			while(iterator.hasNext()) {
+				Entry<Integer, Collection<Patch>> entry = iterator.next();
+				Collection<Patch> touchingPatches = entry.getValue();
+				
+				//only bother shrinking vertexs greater than 2 patches
+				if(touchingPatches.size() <= 2) continue;
+				
+				//remove the patches that are being merged from the connectivity map
+				for(Patch patch : touchingPatches)
+					for(int vertex : patch.vertexs)
+						if(vertex != entry.getKey())
+							vertexConnectivity.get(vertex).remove(patch);
+				
+				patchLayer.removeAll(touchingPatches);
+				patchLayer.add(new Patch(touchingPatches));
+			}
+		}
+		
+		layers.add(patchLayer);
+		
+		//add elements starting from the top down.
+		ArrayList<Patch> elements = new ArrayList<>();
+		for(Patch p : patchLayer) {
+			p.addPatches(elements);
+		}
+		
+		ModelRenderer.addPatchData(elements);
+	}
+
+	Patch createPatch(Face face, RawModel model) {
+		Vector3f a = model.vertexs[face.v1 - 1];
+		Vector3f b = model.vertexs[face.v2 - 1];
+		Vector3f c = model.vertexs[face.v3 - 1];
+		
+		Vector3f normal = new Vector3f();
+		normal.add(model.normals[face.n1 - 1]);
+		normal.add(model.normals[face.n2 - 1]);
+		normal.add(model.normals[face.n3 - 1]);
+		normal.scale(1f / 3);
+		
+		Vector3f position = new Vector3f();
+		position.add(a);
+		position.add(b);
+		position.add(c);
+		position.scale(1f / 3);
+		
+		Vector3f tmp = new Vector3f();
+		tmp.sub(a, b);
+		float ab = tmp.length();
+		tmp.sub(b, c);
+		float bc = tmp.length();
+		tmp.sub(c, a);
+		float ac = tmp.length();
+		
+		float s = ab + bc + ac;
+		s /= 2;
+		
+		float area = (float) Math.sqrt(s * (s - ab) * (s - bc) * (s - ac));
+		
+		return new Patch(normal, position, area, Arrays.asList(face.v1 - 1, face.v2 - 1, face.v3 - 1));
+	}
+	
+	private void buildGeometry(RawModel inputModel) {
 		class WrappedIntArray {
 			int[] array;
 
