@@ -6,10 +6,14 @@ import java.util.function.Supplier;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector2f;
 
+import abstractgame.Client;
 import abstractgame.render.UIRenderer;
+import abstractgame.time.Clock;
 import abstractgame.util.FloatSupplier;
 
 public class ProgressBar extends UIElement {
+	static final float BAR_WIDTH = 0.5f;
+	
 	public final Color4f colour;
 	
 	Line line;
@@ -20,7 +24,7 @@ public class ProgressBar extends UIElement {
 	FloatSupplier value;
 	int ID;
 	
-	/** if initialValue is -1 to -2 the bar will show an indeterminate level, the bar will -1 to -2 (TODO) */
+	/** if initialValue is negative the bar will show an indeterminate level. The bar will cycle every -value seconds. */
 	public ProgressBar(Vector2f position, Vector2f dim, Color4f colour, FloatSupplier value, int ID) {
 		this.value = value;
 		xStart = position.x;
@@ -49,7 +53,16 @@ public class ProgressBar extends UIElement {
 	
 	@Override
 	public void tick() {
-		quad.to.x = xStart + length * value.supply();
+		float suppliedValue = value.supply();
+		
+		if(suppliedValue < 0) {
+			double sec = Client.GAME_CLOCK.getTime() / 1000.0f;
+			float cycle = (float) (sec / -suppliedValue - Math.floor(sec / -suppliedValue));
+			quad.to.x = xStart + length * Math.min(cycle * (1 + BAR_WIDTH), 1);
+			quad.from.x = xStart + length * Math.max((cycle * (1 + BAR_WIDTH)) - BAR_WIDTH, 0);
+		} else {
+			quad.to.x = xStart + length * suppliedValue;
+		}
 	}
 	
 	@Override
