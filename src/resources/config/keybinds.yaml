@@ -2,6 +2,11 @@ format on next load: false
 debug:
   toggle physics display: F4
   toggle debug display: F3
+  toggle patches: F5
+  patches:
+    toggle: F5
+    next layer: ADD
+    previous layer: SUBTRACT
 graphics:
   vsync: V
 global:

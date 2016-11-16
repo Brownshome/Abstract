@@ -7,11 +7,14 @@ import javax.vecmath.Matrix3f;
 import javax.vecmath.Matrix4f;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.*;
 
 import com.bulletphysics.linearmath.MatrixUtil;
 
+import abstractgame.Client;
 import abstractgame.io.model.Patch;
+import abstractgame.io.user.PerfIO;
 import abstractgame.util.Util;
 
 public class ModelRenderer implements Renderer {
@@ -38,14 +41,28 @@ public class ModelRenderer implements Renderer {
 	}
 	
 	/** Variables dictating the layout of the patches in GPU memory */
-	static VariableData positionData, areaData, normalData, 
+	static VariableData positionData, areaData, normalData, layerData, 
 		brightnessData, illuminationDirectionData, nextElementData;
 	
 	static int staticMeshVAO;
 	static int staticMeshVBO;
 	static int staticIndexBuffer;
 	static int staticMeshSize;
+
+	private static boolean drawPatches = false;
+	private static int layerToRender = 0;
 	
+	public static boolean shouldDrawPatches() {
+		return drawPatches;
+	}
+	
+	/**
+	 * @return the layerToRender
+	 */
+	public static int getLayerToRender() {
+		return layerToRender;
+	}
+
 	/** This will cause a rebuild of the static mesh next frame, try to keep all calls to this
 	 * within one frame. NB this model will be fixed in the position it is now, it will not respect
 	 * updates. Updating the entity and then invalidating the static mesh will move the model.
@@ -76,6 +93,10 @@ public class ModelRenderer implements Renderer {
 	
 	@Override
 	public void initialize() {
+		Client.DEBUG_BINDS.add(() -> drawPatches = !drawPatches, Keyboard.KEY_F5, PerfIO.BUTTON_PRESSED, "patches.toggle");
+		Client.DEBUG_BINDS.add(() -> layerToRender++, Keyboard.KEY_ADD, PerfIO.BUTTON_PRESSED, "patches.next layer");
+		Client.DEBUG_BINDS.add(() -> layerToRender--, Keyboard.KEY_SUBTRACT, PerfIO.BUTTON_PRESSED, "patches.previous layer");
+		
 		int vertexShader = GLHandler.createShader("model-vertex", GL20.GL_VERTEX_SHADER);
 		int fragmentShader = GLHandler.createShader("model-fragment", GL20.GL_FRAGMENT_SHADER);
 		modelProgram = GLHandler.createProgram(vertexShader, fragmentShader);
@@ -105,6 +126,7 @@ public class ModelRenderer implements Renderer {
 		brightnessData = getVariableData("patches[0].brightness");
 		illuminationDirectionData = getVariableData("patches[0].illuminationDirection");
 		nextElementData = getVariableData("patches[0].nextElement");
+		layerData = getVariableData("patches[0].layer");
 	}
 	
 	private VariableData getVariableData(String name) {
@@ -151,6 +173,9 @@ public class ModelRenderer implements Renderer {
 			
 			compiledPatches.position(start + nextElementData.offset);
 			compiledPatches.putInt(patch.getNumberOfChildren() == 0 ? -1 : patch.getNumberOfChildren() + index + 1);
+			
+			compiledPatches.position(start + layerData.offset);
+			compiledPatches.putInt(patch.getLayer());
 		}
 		
 		compiledPatches.rewind();
@@ -197,10 +222,13 @@ public class ModelRenderer implements Renderer {
 		GL20.glUniformMatrix3(1, true, Util.toFloatBuffer(id));*/
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glFrontFace(GL11.GL_CW);
 		
 		renderStaticMesh();
 		dynamicModels.forEach(RenderEntity::render);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 
 	@Override

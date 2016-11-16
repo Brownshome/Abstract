@@ -39,6 +39,9 @@ public class RenderEntity extends BasicEntity {
 	}
 	
 	void render() {
+		if(ModelRenderer.shouldDrawPatches())
+			model.drawPatches();
+		
 		GL30.glBindVertexArray(model.getVAO());
 		
 		Matrix3f modelRot = new Matrix3f();

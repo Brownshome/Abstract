@@ -1,8 +1,6 @@
 package abstractgame.render;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
+import javax.vecmath.*;
 
 import org.lwjgl.opengl.Display;
 
@@ -106,14 +104,17 @@ public class Camera implements Entity {
 	
 	/** moves a point from world space to view space
 	 * 
-	 *  @param v The point to transform */
-	public static void transform(Vector3f v) {	
-		v.sub(position);
+	 *  @param v The point to transform 
+	 * @return the w value returned by the transformation, this is the scale of the object as view by the camera. */
+	public static float transform(Point3f p) {
+		Vector4f v = new Vector4f(p.x, p.y, p.z, 1);
+		viewMatrix.transform(v);
+		projectionMatrix.transform(v);
+		p.x = v.x / v.w;
+		p.y = v.y / v.w;
+		p.z = v.z / v.w;
 		
-		Quat4f q = new Quat4f(host.getOrientation());
-		q.inverse();
-		
-		QuaternionUtil.quatRotate(q, v, v);
+		return v.w;
 	}
 	
 	/** To be used for changes in fov and initial creation */

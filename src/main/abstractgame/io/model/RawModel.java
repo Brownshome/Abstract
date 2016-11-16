@@ -26,12 +26,14 @@ public class RawModel {
 	
 	public Vector3f[] vertexs;
 	public Vector3f[] normals;
+	public Vector2f[] textureCoordinates;
 	public Face[] faces;
 
-	public RawModel(Vector3f[] vertexs, Vector3f[] normals, Face[] faces) {
+	public RawModel(Vector3f[] vertexs, Vector3f[] normals, Vector2f[] UVs, Face[] faces) {
 		this.vertexs = vertexs;
 		this.normals = normals;
 		this.faces = faces;
+		this.textureCoordinates = UVs;
 	}
 	
 	public GPUModel getGPUModel() {

@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3f;
+import javax.vecmath.*;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
@@ -146,12 +144,15 @@ public class PhysicsRenderer extends IDebugDraw implements Renderer {
 	
 	@Override
 	public void draw3dText(Vector3f location, String textString) {
-		location = new Vector3f(location); //just for safety
+		Point3f point = new Point3f(location); //just for safety
 		
-		Camera.transform(location);
-		Vector2f pos = new Vector2f(location.x, location.y);
+		float w = Camera.transform(point);
 		
-		TextRenderer.addString(textString, pos, 0.5f, UIRenderer.BASE_STRONG, 0);
+		if(w > 0) {
+			Vector2f pos = new Vector2f(point.x, point.y);
+		
+			TextRenderer.addString(textString, pos, 0.02f / w, UIRenderer.HIGHLIGHT_STRONG, 0);
+		}
 	}
 
 	@Override

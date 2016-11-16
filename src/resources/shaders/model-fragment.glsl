@@ -13,16 +13,29 @@ struct Patch {
 	float brightness;
 	vec3 illuminationDirection;
 	int nextElement; //this is the next element if not going down a level. This value will equal -1 for the base patches.
+	int layer; //max of MAX_LAYERS - 1. 0 is the coarsest patch.
 };
 
 layout(binding = 0) buffer PatchData {
 	Patch patches[];
 };
 
+const int MAX_LAYERS = 16; //increase this if needed.
+const float tooClose = 3;
+const float band = 0.6;
+
 //taken from http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter14.html
 void main() {
 	int next = 0;
 	float shadow = 0;
+	
+	int currentLayer = 0;
+	
+	//patchWeights[N] is the weight that should be multiplied by layer N.
+	float[MAX_LAYERS] patchWeights = float[MAX_LAYERS](1, 0, 0, 0,
+														0, 0, 0, 0,
+														0, 0, 0, 0,
+														0, 0, 0, 0);
 	
 	while(next < patches.length()) {
 		//calculate ray
@@ -30,17 +43,21 @@ void main() {
 		
 		//check if traversal is needed
 		float rSquared = dot(ray, ray) + 1e-16;
+		ray *= inversesqrt(rSquared);
 		
-		if(patches[next].nextElement != -1 && rSquared < 4 * patches[next].area) {
+		float contribution = (1 - inversesqrt(patches[next].area / rSquared + 1)) *
+				clamp(dot(patches[next].normal, ray), 0, 1) *
+				clamp(4 * dot(in_normal, ray), 0, 1);
+		
+		if(patches[next].nextElement != -1 && rSquared < tooClose * patches[next].area) {
 			//traverse one step lower in the tree
+			//A value of 1 means that the parent is not considered at all.
+			float childWeighting = clamp((tooClose * patches[next].area - rSquared) / (tooClose * band * patches[next].area), 0, 1);
+			shadow += contribution * patchWeights[patches[next].layer] * (1 - childWeighting);
+			patchWeights[patches[next].layer + 1] = patchWeights[patches[next].layer] * childWeighting;
 			next++;
 		} else {
 			//calculate shadow if traversal is not needed
-			ray *= inversesqrt(rSquared);
-			shadow += (1 - inversesqrt(patches[next].area / rSquared + 1)) *
-				clamp(dot(patches[next].normal, ray), 0, 1) *
-				clamp(4 * dot(in_normal, ray), 0, 1);
-				
 			next = max(next + 1, patches[next].nextElement);
 		}
 	}

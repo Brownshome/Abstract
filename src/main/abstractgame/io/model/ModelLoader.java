@@ -60,6 +60,7 @@ public class ModelLoader {
 		List<Vector3f> vs = new ArrayList<>();
 		List<Vector3f> ns = new ArrayList<>();
 		List<Face> fs = new ArrayList<>();
+		List<Vector2f> ts = new ArrayList<>();
 		
 		for(String s : lines) {
 			String[] elements = s.split(" ");
@@ -76,6 +77,9 @@ public class ModelLoader {
 				case "f":
 					fs.add(new Face(elements, vs.size(), ns.size()));
 					break;
+				case "vt":
+					ts.add(decodeVec2(elements));
+					break;
 				case "#":
 				case "":
 					break;
@@ -84,7 +88,7 @@ public class ModelLoader {
 			}
 		}
 		
-		return new RawModel(vs.toArray(new Vector3f[vs.size()]), ns.toArray(new Vector3f[ns.size()]), fs.toArray(new Face[fs.size()]));
+		return new RawModel(vs.toArray(new Vector3f[vs.size()]), ns.toArray(new Vector3f[ns.size()]), ts.toArray(new Vector2f[ts.size()]), fs.toArray(new Face[fs.size()]));
 	}
 
 	private static Vector2f decodeVec2(String[] elements) {
