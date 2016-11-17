@@ -29,8 +29,6 @@ void main() {
 	int next = 0;
 	float shadow = 0;
 	
-	int currentLayer = 0;
-	
 	//patchWeights[N] is the weight that should be multiplied by layer N.
 	float[MAX_LAYERS] patchWeights = float[MAX_LAYERS](1, 0, 0, 0,
 														0, 0, 0, 0,
@@ -58,6 +56,7 @@ void main() {
 			next++;
 		} else {
 			//calculate shadow if traversal is not needed
+			shadow += contribution * patchWeights[patches[next].layer];
 			next = max(next + 1, patches[next].nextElement);
 		}
 	}
