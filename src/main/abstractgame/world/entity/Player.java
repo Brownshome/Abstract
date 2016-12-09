@@ -87,7 +87,7 @@ public class Player extends NetworkPhysicsEntity implements CameraHost, Tickable
 	
 	@Override
 	public void initializeClient() {
-		renderEntity = new RenderEntity(ModelLoader.loadModel("Monkey"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
+		renderEntity = new RenderEntity(ModelLoader.getModel("box"), this, new Vector3f(), new Quat4f(0, 0, 0, 1));
 			
 		if(Client.getIdentity().equals(id)) {
 			GameScreen.setPlayerEntity(this);

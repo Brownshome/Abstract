@@ -49,7 +49,7 @@ public class PhysicsModel extends StridingMeshInterface {
 	ArrayVertexData data;
 	
 	public PhysicsModel(RawModel model) {
-		data = new ArrayVertexData(model.vertexs, Arrays.stream(model.faces).flatMapToInt(f -> IntStream.of(f.v1, f.v2, f.v3)).map(i -> i - 1).toArray()); //IDK why I used streams here, slow but cool :D
+		data = new ArrayVertexData(model.vertexs, Arrays.stream(model.faces).flatMapToInt(f -> IntStream.of(f.position)).map(i -> i - 1).toArray()); //IDK why I used streams here, slow but cool :D
 	}
 	
 	@Override

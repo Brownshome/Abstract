@@ -38,7 +38,7 @@ public class PhysicsMeshLoader {
 	}
 
 	public static BvhTriangleMeshShape decodeStaticMesh(Map<String, Object> data) {
-		PhysicsModel model = ModelLoader.loadModel((String) data.get("model")).getPhysicsModel();
+		PhysicsModel model = ModelLoader.getModel((String) data.get("model")).getPhysicsModel();
 		
 		return new BvhTriangleMeshShape(model, true /* TODO IDK what this does yet */);
 	}

@@ -7,10 +7,16 @@ opengl:
 display:
   fullscreen: false
   size:
-    width: 1600
-    height: 900
+    width: 3200
+    height: 1800
 font:
   list:
   - Courier-New
   size: 1024
 language: ENG_UK
+pre-load:
+  pys: []
+  gpu:
+    gen patch: []
+    load patch:
+    - box

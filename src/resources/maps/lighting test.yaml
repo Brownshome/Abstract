@@ -6,17 +6,11 @@ script:
     type: default
 
 global:
-    gravity: 10
+    gravity: 0
 
 objects:
   - type: spawn
     ID: playerSpawn
     checkCollision: ALL
     spawnInt: 0
-    position: [-.5, .6, -.5]
-  
-  - type: static
-    physics:
-        file: plane
     position: [0, 0, 0]
-    orientation: [0, 0, 0, 1]

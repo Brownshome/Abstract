@@ -1,8 +1,12 @@
 package abstractgame;
 
 import java.security.Policy;
+import java.util.*;
 
-import abstractgame.io.model.PhysicsMeshLoader;
+import abstractgame.io.config.ConfigFile;
+import abstractgame.io.model.*;
+import abstractgame.io.model.ModelLoader.LoadType;
+import abstractgame.io.user.Console;
 import abstractgame.mod.ModManager;
 import abstractgame.net.Identity;
 import abstractgame.net.packet.*;
@@ -17,6 +21,8 @@ import abstractgame.world.map.StaticMapObjectClient;
 
 /** Holds methods called on both the server and client */
 public class Common {
+	public static final ConfigFile GLOBAL_CONFIG = ConfigFile.getFile("globalConfig");
+	
 	public static void loadHooks() {
 		World.DECODERS.put("static", StaticMapObjectClient::creator);
 		World.DECODERS.put("spawn", PlayerSpawn::creator);
@@ -85,5 +91,16 @@ public class Common {
 	/** Returns either the client ID or null on the server side */
 	public static Identity getIdentity() {
 		return isServerSide() ? null : Client.getIdentity();
+	}
+
+	public static void preLoadPhysicsModels() {
+		for(String name : GLOBAL_CONFIG.getProperty("pre-load.pys", (List<String>) Collections.EMPTY_LIST))
+			ModelLoader.preLoadModel(name, LoadType.LOAD_OBJ, LoadType.CREATE_PHYS);
+	}
+
+	static void setupErrorHandlingAndLogging() {
+		Thread.setDefaultUncaughtExceptionHandler(Console::error);
+		Console.setLevel(GLOBAL_CONFIG.getProperty("logging.level", 0));
+		Console.setFormat(GLOBAL_CONFIG.getProperty("logging.format", "HH:mm:ss"));
 	}
 }

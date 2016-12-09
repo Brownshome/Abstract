@@ -3,8 +3,7 @@ package abstractgame.render;
 import java.nio.*;
 import java.util.*;
 
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Matrix4f;
+import javax.vecmath.*;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
@@ -13,8 +12,8 @@ import org.lwjgl.opengl.*;
 import com.bulletphysics.linearmath.MatrixUtil;
 
 import abstractgame.Client;
-import abstractgame.io.model.Patch;
-import abstractgame.io.user.PerfIO;
+import abstractgame.io.patch.Patch;
+import abstractgame.io.user.*;
 import abstractgame.util.Util;
 
 public class ModelRenderer implements Renderer {
@@ -27,6 +26,9 @@ public class ModelRenderer implements Renderer {
 	
 	static int patchBuffer = -1;
 	static int patchBufferSize = 0; //The size in patches
+	
+	static int triangleBuffer = -1;
+	static int triangleBufferSize = 0;
 	
 	static class VariableData {
 		static final VariableData INVALID_DATA = new VariableData(-1, -1);
@@ -43,6 +45,8 @@ public class ModelRenderer implements Renderer {
 	/** Variables dictating the layout of the patches in GPU memory */
 	static VariableData positionData, areaData, normalData, layerData, 
 		brightnessData, illuminationDirectionData, nextElementData;
+	
+	static VariableData firstVertexData, secondVertexData, thirdVertexData;
 	
 	static int staticMeshVAO;
 	static int staticMeshVBO;
@@ -102,6 +106,7 @@ public class ModelRenderer implements Renderer {
 		modelProgram = GLHandler.createProgram(vertexShader, fragmentShader);
 		
 		createPatchBuffer();
+		createTriangleBuffer();
 		
 		/*staticMeshVAO = GL30.glGenVertexArrays();
 		staticMeshVBO = GL15.glGenBuffers();
@@ -129,6 +134,12 @@ public class ModelRenderer implements Renderer {
 		layerData = getVariableData("patches[0].layer");
 	}
 	
+	private void createTriangleBuffer() {
+		firstVertexData = getVariableData("triangles[0].a");
+		secondVertexData = getVariableData("triangles[0].b");
+		thirdVertexData = getVariableData("triangles[0].c");
+	}
+	
 	private VariableData getVariableData(String name) {
 		IntBuffer returnData = BufferUtils.createIntBuffer(2);
 		
@@ -137,9 +148,49 @@ public class ModelRenderer implements Renderer {
 		if(index != GL31.GL_INVALID_INDEX) {
 			GL43.glGetProgramResource(modelProgram, GL43.GL_BUFFER_VARIABLE, index, Util.toIntBuffer(GL43.GL_TOP_LEVEL_ARRAY_STRIDE, GL43.GL_OFFSET), null, returnData);
 			return new VariableData(returnData.get(), returnData.get());
+		} else {
+			Console.warn("Shader variable \'" + name + "\' was not found in the program.", "RENDERER");
 		}
 		
 		return VariableData.INVALID_DATA;
+	}
+	
+	public static void addTriangleData(List<Vector3f[]> triangles) {
+		ByteBuffer compiledTriangles = BufferUtils.createByteBuffer(triangles.size() * firstVertexData.stride);
+		
+		for(ListIterator<Vector3f[]> it = triangles.listIterator(); it.hasNext(); ) {
+			Vector3f[] triangle = it.next();
+			int index = it.previousIndex();
+			int start = index * firstVertexData.stride;
+			
+			compiledTriangles.position(start + firstVertexData.offset);
+			compiledTriangles.putFloat(triangle[0].x).putFloat(triangle[0].y).putFloat(triangle[0].z);
+			
+			compiledTriangles.position(start + secondVertexData.offset);
+			compiledTriangles.putFloat(triangle[1].x).putFloat(triangle[1].y).putFloat(triangle[1].z);
+			
+			compiledTriangles.position(start + thirdVertexData.offset);
+			compiledTriangles.putFloat(triangle[2].x).putFloat(triangle[2].y).putFloat(triangle[2].z);
+		}
+		
+		compiledTriangles.rewind();
+		
+		if(triangleBuffer != -1) {
+			int oldTriangleBuffer = triangleBuffer;
+			GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, oldTriangleBuffer);
+		
+			triangleBuffer = GL15.glGenBuffers();
+			GL30.glBindBufferBase(GL43.GL_SHADER_STORAGE_BUFFER, 1, triangleBuffer);
+			GL15.glBufferData(GL43.GL_SHADER_STORAGE_BUFFER, (triangleBufferSize + triangles.size()) * firstVertexData.stride, GL15.GL_STATIC_DRAW);
+			GL31.glCopyBufferSubData(GL31.GL_COPY_READ_BUFFER, GL43.GL_SHADER_STORAGE_BUFFER, 0, 0, triangleBufferSize * firstVertexData.stride); //All strides are the same
+			GL15.glDeleteBuffers(oldTriangleBuffer);
+			GL15.glBufferSubData(GL43.GL_SHADER_STORAGE_BUFFER, triangleBufferSize * firstVertexData.stride, compiledTriangles);
+		} else {
+			//create new buffer, no need to copy data from the old one
+			triangleBuffer = GL15.glGenBuffers();
+			GL30.glBindBufferBase(GL43.GL_SHADER_STORAGE_BUFFER, 1, triangleBuffer);
+			GL15.glBufferData(GL43.GL_SHADER_STORAGE_BUFFER, compiledTriangles, GL15.GL_STATIC_DRAW);
+		}
 	}
 	
 	public static void addPatchData(List<Patch> patches) {		
@@ -172,7 +223,7 @@ public class ModelRenderer implements Renderer {
 			compiledPatches.putFloat(0);
 			
 			compiledPatches.position(start + nextElementData.offset);
-			compiledPatches.putInt(patch.getNumberOfChildren() == 0 ? -1 : patch.getNumberOfChildren() + index + 1);
+			compiledPatches.putInt(patch.getTriangle() != -1 ? -patch.getTriangle() : patch.getNumberOfChildren() + index + 1);
 			
 			compiledPatches.position(start + layerData.offset);
 			compiledPatches.putInt(patch.getLayer());
@@ -192,6 +243,7 @@ public class ModelRenderer implements Renderer {
 			GL15.glBufferSubData(GL43.GL_SHADER_STORAGE_BUFFER, patchBufferSize * positionData.stride, compiledPatches);
 		} else {
 			//create new buffer, no need to copy data from the old one
+			patchBuffer = GL15.glGenBuffers();
 			GL30.glBindBufferBase(GL43.GL_SHADER_STORAGE_BUFFER, 0, patchBuffer);
 			GL15.glBufferData(GL43.GL_SHADER_STORAGE_BUFFER, compiledPatches, GL15.GL_STATIC_DRAW);
 		}
@@ -222,13 +274,13 @@ public class ModelRenderer implements Renderer {
 		GL20.glUniformMatrix3(1, true, Util.toFloatBuffer(id));*/
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_CULL_FACE);
+		//GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glFrontFace(GL11.GL_CW);
 		
 		renderStaticMesh();
 		dynamicModels.forEach(RenderEntity::render);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL11.GL_CULL_FACE);
+		//GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 
 	@Override

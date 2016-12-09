@@ -57,7 +57,7 @@ public class StaticMapObjectClient extends RenderEntity implements MapObject {
 	String ID;
 	
 	public StaticMapObjectClient(String modelName, CollisionShape shape, Vector3f position, Quat4f orientation, Vector3f offset) {
-		super(ModelLoader.loadModel(modelName), position, orientation);
+		super(ModelLoader.getModel(modelName), position, orientation);
 		
 		body = new RigidBody(0, new MotionState() {
 			@Override

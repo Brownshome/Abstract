@@ -8,6 +8,8 @@ import org.lwjgl.opengl.Display;
 
 import abstractgame.io.FileIO;
 import abstractgame.io.config.ConfigFile;
+import abstractgame.io.model.ModelLoader;
+import abstractgame.io.model.ModelLoader.LoadType;
 import abstractgame.io.user.*;
 import abstractgame.io.user.keybinds.BindGroup;
 import abstractgame.net.*;
@@ -25,14 +27,11 @@ public class Client {
 	
 	static {
 		THREAD = Thread.currentThread();
-		GLOBAL_CONFIG = ConfigFile.getFile("globalConfig");
-		setupErrorHandlingAndLogging();
+		Common.setupErrorHandlingAndLogging();
 		Common.setupSecurity();
 	}
 	
 	public static boolean close = false;
-	
-	public static ConfigFile GLOBAL_CONFIG;
 	
 	public static final Clock GAME_CLOCK = new Clock();
 	
@@ -108,10 +107,32 @@ public class Client {
 		Common.loadHooks();
 	}
 	
+	static void preLoadModels() {
+		for(String name : Common.GLOBAL_CONFIG.getProperty("pre-load.gpu.gen patch", (List<String>) Collections.EMPTY_LIST))
+			ModelLoader.preLoadModel(name, LoadType.LOAD_OBJ, LoadType.CREATE_GPU_MODEL, LoadType.GEN_PATCH_DATA);
+		
+		for(String name : Common.GLOBAL_CONFIG.getProperty("pre-load.gpu.load patch", (List<String>) Collections.EMPTY_LIST))
+			ModelLoader.preLoadModel(name, LoadType.LOAD_OBJ, LoadType.CREATE_GPU_MODEL, LoadType.LOAD_PATCH_DATA);
+		
+		Common.preLoadPhysicsModels();
+	}
+	
+	static void uploadModels() {
+		for(String name : Common.GLOBAL_CONFIG.getProperty("pre-load.gpu.gen patch", (List<String>) Collections.EMPTY_LIST))
+			ModelLoader.getModel(name).uploadToGPU();
+		
+		for(String name : Common.GLOBAL_CONFIG.getProperty("pre-load.gpu.load patch", (List<String>) Collections.EMPTY_LIST))
+			ModelLoader.getModel(name).uploadToGPU();
+	}
+	
 	static void initialize() {
+		preLoadModels();
+		
 		GLHandler.createDisplay();
 		loadHooks();
 		GLHandler.initializeRenderer();
+		
+		uploadModels();
 		
 		GLOBAL_BINDS.add(FreeCamera::toggle, Keyboard.KEY_F2, PerfIO.BUTTON_PRESSED, "toggle freecam");
 		GLOBAL_BINDS.add(Client::close, Keyboard.KEY_ESCAPE, PerfIO.BUTTON_PRESSED, "exit");
@@ -120,12 +141,6 @@ public class Client {
 		
 		Client.startClientNetThread();
 		Screen.setScreen(TitleScreen.INSTANCE);
-	}
-	
-	static void setupErrorHandlingAndLogging() {
-		Thread.setDefaultUncaughtExceptionHandler(Console::error);
-		Console.setLevel(GLOBAL_CONFIG.getProperty("logging.level", 0));
-		Console.setFormat(GLOBAL_CONFIG.getProperty("logging.format", "HH:mm:ss"));
 	}
 
 	static int random = (int) (Math.random() * 20000);

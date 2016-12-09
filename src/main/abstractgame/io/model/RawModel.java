@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import abstractgame.io.patch.PatchTree;
 import abstractgame.render.Renderer;
 
 /** This represents a models that contains the data from a read in .obj file
@@ -23,24 +24,58 @@ import abstractgame.render.Renderer;
 public class RawModel {
 	GPUModel gpuModel = null;
 	PhysicsModel physModel = null;
+	PatchTree patchTree = null;
 	
 	public Vector3f[] vertexs;
 	public Vector3f[] normals;
 	public Vector2f[] textureCoordinates;
-	public Face[] faces;
+	public IndexedFace[] faces;
 
-	public RawModel(Vector3f[] vertexs, Vector3f[] normals, Vector2f[] UVs, Face[] faces) {
+	public RawModel(Vector3f[] vertexs, Vector3f[] normals, Vector2f[] UVs, IndexedFace[] faces) {
 		this.vertexs = vertexs;
 		this.normals = normals;
 		this.faces = faces;
 		this.textureCoordinates = UVs;
+		
+		for(IndexedFace face : faces)
+			face.model = this;
 	}
-	
+
 	public GPUModel getGPUModel() {
-		return gpuModel != null ? gpuModel : (gpuModel = new GPUModel(this));
+		if(gpuModel == null)
+			genGPUModel();
+		
+		return gpuModel;
 	}
 	
+	void genGPUModel() {
+		gpuModel = new GPUModel(this);
+		if(patchTree != null)
+			gpuModel.patches = patchTree;
+	}
+
 	public PhysicsModel getPhysicsModel() {
-		return physModel != null ? physModel : (physModel = new PhysicsModel(this));
+		if(physModel == null)
+			genPhysicsModel();
+		
+		return physModel;
+	}
+
+	void genPhysicsModel() {
+		physModel = new PhysicsModel(this);
+	}
+
+	void setPatchTree(PatchTree tree) {
+		patchTree = tree;
+		if(gpuModel != null)
+			gpuModel.patches = tree;
+	}
+
+	public void uploadToGPU() {
+		if(gpuModel != null)
+			gpuModel.uploadToGPU();
+		
+		if(patchTree != null)
+			patchTree.uploadToGPU();
 	}
 }

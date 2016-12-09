@@ -14,24 +14,15 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 import abstractgame.io.FileIO;
 import abstractgame.io.user.Console;
-import abstractgame.util.ApplicationException;
-import abstractgame.util.ProcessFuture;
+import abstractgame.util.*;
 
 public class ConfigFile {
 	public static final String CONFIG_PATH = "resources/config/";
 	static final String CONFIG_EXT = ".yaml";
 	static final Map<String, ConfigFile> OPEN_FILES = new HashMap<>();
-	static final Yaml PARSER;
-	
 	public static enum Policy {
 		WRITE,
 		NO_WRITE
-	}
-	
-	static {
-		DumperOptions dumper = new DumperOptions();
-		dumper.setDefaultFlowStyle(FlowStyle.BLOCK);
-		PARSER = new Yaml(dumper);
 	}
 
 	LinkedHashMap<String, Object> map = new LinkedHashMap<>();
@@ -80,7 +71,7 @@ public class ConfigFile {
 	
 	ConfigFile(String file, String name) {
 		try {
-			map = (LinkedHashMap<String, Object>) PARSER.load(file);
+			map = (LinkedHashMap<String, Object>) Util.YAML_PARSER.load(file);
 		} catch(ScannerException se) {
 			throw new ApplicationException("Unable to read " + name, se, "IO");
 		}
@@ -136,14 +127,11 @@ public class ConfigFile {
 			value = defaultValue;
 		}
 
-		if(!clazz.isAssignableFrom(value.getClass()))
-			throw new ApplicationException("Item " + location + " already exists but is not " + defaultValue.getClass().getSimpleName(), "CONFIG");
-
 		return (V) value;
 	}
 
 	void writeToFileSystem() {
-		FileIO.writeAsync(Paths.get(CONFIG_PATH + name + CONFIG_EXT), PARSER.dump(map));
+		FileIO.writeAsync(Paths.get(CONFIG_PATH + name + CONFIG_EXT), Util.YAML_PARSER.dump(map));
 	}
 
 	public Map<String, Object> getTree() {

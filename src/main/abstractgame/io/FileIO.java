@@ -26,6 +26,7 @@ import abstractgame.util.ProcessFuture;
 import abstractgame.util.Util;
 
 public class FileIO {
+	//This must be ordered, see ModelLoader#preLoadModel(String, ModelTask...)
 	public static final ExecutorService IO_THREAD = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, 
 			new LinkedBlockingQueue<Runnable>(), runnable -> new Thread(runnable, "IO-THREAD")) {
 				@Override

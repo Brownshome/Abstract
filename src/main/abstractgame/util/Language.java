@@ -1,12 +1,12 @@
 package abstractgame.util;
 
-import abstractgame.Client;
+import abstractgame.*;
 import abstractgame.io.config.ConfigFile;
 import abstractgame.io.config.ConfigFile.Policy;
 
 public class Language {
 	public final static String LANG_FOLDER = "lang/";
-	public static Language LANG = new Language(Client.GLOBAL_CONFIG.getProperty("language", "ENG_UK"));
+	public static Language LANG = new Language(Common.GLOBAL_CONFIG.getProperty("language", "ENG_UK"));
 	
 	final ConfigFile languageFile;
 	

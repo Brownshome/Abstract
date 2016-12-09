@@ -15,6 +15,8 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import org.lwjgl.BufferUtils;
+import org.yaml.snakeyaml.*;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 
 import com.bulletphysics.linearmath.Transform;
 
@@ -26,6 +28,15 @@ public class Util {
 	private static final FloatBuffer MAT_BUFFER = BufferUtils.createFloatBuffer(16);
 	
 	public static final Vector3f ZERO_VEC3 = new Vector3f(0, 0, 0);
+	
+	/** A shared parser to be used for all yaml reading tasks */
+	public static final Yaml YAML_PARSER;
+	
+	static {
+		DumperOptions dumper = new DumperOptions();
+		dumper.setDefaultFlowStyle(FlowStyle.BLOCK);
+		YAML_PARSER = new Yaml(dumper);
+	}
 	
 	/** This reads UTF-8 strings terminated by 0xFF, this allows NUL to occur in
 	 * the string without weirdness happening. This will throw {@link ApplicationException}
